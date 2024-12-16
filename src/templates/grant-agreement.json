@@ -1,0 +1,644 @@
+[
+  {
+    "id": "52850c4f-cf7b-45e8-8388-785d4d3e12be",
+    "type": "heading",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left",
+      "level": 1
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "Grant Agreement",
+        "styles": {
+          "bold": true
+        }
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "54902094-a11b-4959-991d-b041513be90d",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [],
+    "children": []
+  },
+  {
+    "id": "ba45e56e-d089-4739-ac44-072b16918b6b",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "This Grant Agreement (",
+        "styles": {}
+      },
+      {
+        "type": "text",
+        "text": "“Agreement”",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "text",
+        "text": ") is entered into on <Select Date> , (the ",
+        "styles": {}
+      },
+      {
+        "type": "text",
+        "text": "“Effective Date”",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "text",
+        "text": "), between Ecosystem Name Foundation, a Jurisdiction foundation company (the ",
+        "styles": {}
+      },
+      {
+        "type": "text",
+        "text": "“Foundation”",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "text",
+        "text": ")with D3 address <Select D3 ID> , and <Grant Recipient Name> , an individual with address <Select D3 ID> (",
+        "styles": {}
+      },
+      {
+        "type": "text",
+        "text": "“Grant Recipient”",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "text",
+        "text": ").",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "b01cc3bd-c4ee-4c40-a8b5-fb587b9ff9f6",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [],
+    "children": []
+  },
+  {
+    "id": "d9d592a4-ae47-439a-8220-d16153b2cfc5",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "The Foundation has been established, in part, to help promote growth of the <Ecosystem Name> ecosystem and seeks to award grants to promote development consistent with the collective decision making of the <WORK> token (",
+        "styles": {}
+      },
+      {
+        "type": "text",
+        "text": "“WORK”",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "text",
+        "text": ") holder community (the ",
+        "styles": {}
+      },
+      {
+        "type": "text",
+        "text": "“WORK Community”",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "text",
+        "text": ").\n",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "e99a2820-e5ae-4ea5-900d-7dfa7cc48666",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "The Grant Recipient has been selected by the Foundation Designated Token Allocator <DWAT Name> (",
+        "styles": {}
+      },
+      {
+        "type": "text",
+        "text": "“Token Allocator”",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "text",
+        "text": ") with address <Select D3 ID> to receive a grant subject and in accordance with the terms and conditions of this Agreement.\n",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "dd0f441a-90f6-4d54-83ba-776d800cabb8",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "THEREFORE, the parties agree as follows:\n",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "a9e9801e-f052-4467-99b5-420f5ab0e07a",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "1. GRANT RECIPIENT ACTIVITIES\n",
+        "styles": {
+          "bold": true
+        }
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "3cb0a18c-0e6b-4a23-b219-54857c0888d2",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "1.1 ",
+        "styles": {}
+      },
+      {
+        "type": "text",
+        "text": "Grants",
+        "styles": {
+          "underline": true
+        }
+      },
+      {
+        "type": "text",
+        "text": ". Foundation and Grant Recipient are entering into this Agreement in connection with RFP#: <WRFP Number> , as set forth at <Select D3 Link> , which describes the specific activities to be performed by Grant Recipient (the",
+        "styles": {}
+      },
+      {
+        "type": "text",
+        "text": " “Grant”",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "text",
+        "text": ").\n",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "1d0ab12d-e440-4098-84ec-f195186f0fe7",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "1.2 ",
+        "styles": {}
+      },
+      {
+        "type": "text",
+        "text": "Performance of Grant Recipient Activities.",
+        "styles": {
+          "underline": true
+        }
+      },
+      {
+        "type": "text",
+        "text": " Grant Recipient will perform the activities described in the Grant (the ",
+        "styles": {}
+      },
+      {
+        "type": "text",
+        "text": "“Grant Recipient Activities”",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "text",
+        "text": ") in accordance with the terms and conditions set forth in each such Grant and this Agreement and with any applicable laws. Grant Recipient will not participate in or encourage any attacks on the WorkToken Community, including but not limited to:",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "7a2ac51f-ec8c-4d55-acc4-78b6fce998d7",
+    "type": "bulletListItem",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "Technical attacks, hacking, theft of the WORK Community funds, or fraud,",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "0350e910-dfc4-47cd-bb71-41bfc9ada9f0",
+    "type": "bulletListItem",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "Any conduct reasonably anticipated to cause harm to the WORK Community or the Foundation, or",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "cd6706f1-a068-483e-bb2c-1dc1250dcf96",
+    "type": "bulletListItem",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "Any other activity that Foundation considers to be malicious or unlawful activity, in its sole discretion.",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "c56e90fa-b36f-4026-936c-6532db1f24f1",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [],
+    "children": []
+  },
+  {
+    "id": "a7b4668b-d465-4e7f-90fe-d0b07aa62eb7",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "2. GRANT DISTRIBUTION\n",
+        "styles": {
+          "bold": true
+        }
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "d12c46d9-503c-4dea-9c24-032303bd335b",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "The Token Allocator will pay Grant Recipient on behalf of the Foundation the amounts specified in each Grant in accordance with the terms set forth in ",
+        "styles": {}
+      },
+      {
+        "type": "text",
+        "text": "SCHEDULE A",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "text",
+        "text": " (the ",
+        "styles": {}
+      },
+      {
+        "type": "text",
+        "text": "“Payment Schedule”",
+        "styles": {
+          "bold": true
+        }
+      },
+      {
+        "type": "text",
+        "text": ") therein using:",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "7ca313e2-472d-49e6-99a2-b22f656081c8",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [],
+    "children": []
+  },
+  {
+    "id": "1fe15875-0840-4228-96aa-3e4c6cb69986",
+    "type": "sablier",
+    "props": {
+      "textColor": "default",
+      "textAlignment": "left",
+      "type": "warning"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "Test",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "6e3447c3-29df-4f5f-a7e3-9cc005843612",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [],
+    "children": []
+  },
+  {
+    "id": "b22cbf0e-f688-4807-81f4-3fe834fc835f",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "All other amounts set forth in the Grant, if any, are stated in and are payable in WORK. The parties will use their respective commercially reasonable efforts to promptly resolve any payment disputes. Grant Recipient understands and acknowledges that:",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "868cfb58-a314-48d2-8608-a27196561ea8",
+    "type": "bulletListItem",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "Foundation will not be involved in the operation of any Grant Recipient Activities;",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "890d0a5c-ff5f-4a5d-95c8-6f37bda36eee",
+    "type": "bulletListItem",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "By providing the Grant, Foundation is only granting WORK to Grant Recipient and is not conducting any Grant Recipient Activities;",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "30831ab7-3f57-4f03-bf26-c788da90e5be",
+    "type": "bulletListItem",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "Foundation is not, and will not be, registered as a virtual asset service provider under the Virtual Assets Services Providers Act of the [Jurisdiction] and the WORK tokens have not been, and will not be, registered with the [Jurisdiction] Monetary Authority; and",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "a9978bd3-a6c0-4836-ad52-392fcafd30ce",
+    "type": "bulletListItem",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "This Agreement does not constitute a sale of virtual assets to the public.",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "4e02152d-b36a-48dc-a407-8bc653ddb04f",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [],
+    "children": []
+  },
+  {
+    "id": "7f38fdc3-63be-4b5e-99de-ad216cc6e2ff",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "IN WITNESS WHEREOF, the Grant Recipient has executed this Agreement on the date first written above.\n",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "4e2a7f2c-acfb-455d-b550-c4db0bfdd482",
+    "type": "signature",
+    "props": {
+      "textColor": "default",
+      "textAlignment": "left",
+      "type": "warning"
+    },
+    "content": [],
+    "children": []
+  },
+  {
+    "id": "151339e3-248f-4ca6-a8ff-c4baa7da0e93",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "Name: SupC0D3R",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "70e089da-badf-47d0-a2c7-0df8177efad6",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "Title: Tech Lead",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "4806fdbe-a2ac-415d-abd9-c469e5396c79",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "\n",
+        "styles": {}
+      }
+    ],
+    "children": []
+  },
+  {
+    "id": "f6dfcd8d-9b6b-4082-96aa-dcbe814245d8",
+    "type": "paragraph",
+    "props": {
+      "textColor": "default",
+      "backgroundColor": "default",
+      "textAlignment": "left"
+    },
+    "content": [],
+    "children": []
+  }
+]

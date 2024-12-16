@@ -1,0 +1,91 @@
+import "@blocknote/core/fonts/inter.css";
+import { BlockNoteView } from "@blocknote/mantine";
+import "@blocknote/mantine/style.css";
+import {
+  useCreateBlockNote,
+  SuggestionMenuController,
+  getDefaultReactSlashMenuItems
+} from "@blocknote/react";
+import {
+  Block,
+  BlockNoteSchema,
+  defaultBlockSpecs,
+  insertOrUpdateBlock,
+  filterSuggestionItems,
+} from '@blocknote/core';
+import grantAgreement from '../templates/grant-agreement.json';
+import { Sablier } from '../blocks/Sablier'
+import { Signature } from "../blocks/Signature";
+import { Icons } from '@ds3/react';
+import SablierIcon from "../assets/sablier.svg?react";
+import {useEffect, useState} from 'react';
+
+const schema = BlockNoteSchema.create({
+  blockSpecs: {
+    ...defaultBlockSpecs,
+    sablier: Sablier,
+    signature: Signature
+  },
+});
+
+// Slash menu item to insert an Alert block
+const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
+  title: "Sablier",
+  onItemClick: () => {
+    insertOrUpdateBlock(editor, {
+      type: "sablier",
+    });
+  },
+  aliases: [
+    "sablier",
+  ],
+  group: "Contract Blocks",
+  icon: <SablierIcon className="w-5 h-5" />,
+});
+
+const insertSignature = (editor: typeof schema.BlockNoteEditor) => ({
+  title: "Signature",
+  onItemClick: () => {
+    insertOrUpdateBlock(editor, {
+      type: "signature",
+    });
+  },
+  aliases: [
+    "signature",
+  ],
+  group: "Signature Blocks",
+  icon: <Icons.Signature className="w-5 h-5" />,
+});
+
+export default function BlockNote(props) {
+  const [blocks, setBlocks] = useState<Block[]>([]);
+
+  useEffect(() => {
+    console.log(blocks);
+  }, [blocks]);
+
+  const editor = useCreateBlockNote({
+    schema,
+    initialContent: grantAgreement,
+  });
+
+  return <BlockNoteView
+    onChange={() => {
+      // Saves the document JSON to state.
+      setBlocks(editor.document);
+    }}
+    editor={editor}
+    slashMenu={false}
+    {...props}
+  >
+    <SuggestionMenuController
+      triggerCharacter={"/"}
+      getItems={async (query) =>
+        filterSuggestionItems(
+          [...getDefaultReactSlashMenuItems(editor), insertSablier(editor), insertSignature(editor)],
+          query
+        )
+      }
+    />
+  </BlockNoteView>;
+}
