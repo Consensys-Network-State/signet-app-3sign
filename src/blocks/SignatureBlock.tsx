@@ -12,12 +12,19 @@ export const SignatureBlock = createReactBlockSpec(
         default: "warning",
         values: ["warning", "error", "info", "success"],
       },
+      name: {
+        default: "",
+      },
+      address: {
+        default: "",
+      }
+
     },
     content: "inline",
   },
   {
-    render: () => {
-      return (<Signature />);
+    render: (props) => {
+      return (<Signature {...props} />);
     },
   }
 );

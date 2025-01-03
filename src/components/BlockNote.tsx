@@ -19,6 +19,8 @@ import { SignatureBlock } from "../blocks/SignatureBlock";
 import { Icons } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
 // import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
+import { BlockEditorMode } from '../routes/Home';
 
 const schema = BlockNoteSchema.create({
   blockSpecs: {
@@ -59,8 +61,14 @@ const insertSignature = (editor: typeof schema.BlockNoteEditor) => ({
   icon: <Icons.Signature className="w-5 h-5" />,
 });
 
-export default function BlockNote(props) {
-  // const [blocks, setBlocks] = useState<Block[]>([]);
+interface BlockNoteProps {
+  editorMode: BlockEditorMode;
+  // Add other properties of `props` if necessary
+  [key: string]: unknown; // Optional: For additional props
+}
+
+export default function BlockNote({ editorMode, ...props }: BlockNoteProps) {
+  const [blocks, setBlocks] = useState<Block[]>([]);
 
   // useEffect(() => {
   //   console.log(blocks);
@@ -77,6 +85,7 @@ export default function BlockNote(props) {
     //   setBlocks(editor.document);
     // }}
     editor={editor}
+    editable={editorMode === BlockEditorMode.EDITOR}
     slashMenu={false}
     {...props}
   >
