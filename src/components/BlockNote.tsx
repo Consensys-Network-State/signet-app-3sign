@@ -13,14 +13,13 @@ import {
   insertOrUpdateBlock,
   filterSuggestionItems,
 } from '@blocknote/core';
-import grantAgreement from '../templates/grant-agreement.json';
 import { SablierBlock } from '../blocks/SablierBlock'
 import { SignatureBlock } from "../blocks/SignatureBlock";
 import { Icons } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
-// import {useEffect, useState} from 'react';
-import {useEffect, useState} from 'react';
+import {useEffect} from 'react';
 import { BlockEditorMode } from '../routes/Home';
+import useStore from '../store/index';
 
 const schema = BlockNoteSchema.create({
   blockSpecs: {
@@ -68,22 +67,26 @@ interface BlockNoteProps {
 }
 
 export default function BlockNote({ editorMode, ...props }: BlockNoteProps) {
-  const [blocks, setBlocks] = useState<Block[]>([]);
-
-  // useEffect(() => {
-  //   console.log(blocks);
-  // }, [blocks]);
+  const { editDocumentState, updateEditDocumentState } = useStore();
 
   const editor = useCreateBlockNote({
     schema,
-    initialContent: grantAgreement,
+    initialContent: editDocumentState,
   });
 
+  useEffect(() => {
+    if (editorMode === BlockEditorMode.EDITOR) {
+      editor.replaceBlocks(editor.topLevelBlocks, editDocumentState);
+    }
+  }, [editorMode]);
+
   return <BlockNoteView
-    // onChange={() => {
-    //   // Saves the document JSON to state.
-    //   setBlocks(editor.document);
-    // }}
+    onChange={() => {
+      // Saves the document JSON to state.
+      if (editorMode === BlockEditorMode.EDITOR) {
+        updateEditDocumentState(editor.document);
+      }
+    }}
     editor={editor}
     editable={editorMode === BlockEditorMode.EDITOR}
     slashMenu={false}

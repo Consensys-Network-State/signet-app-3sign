@@ -8,9 +8,11 @@ const Signature = (props) => {
         <>
           <Button
             onPress={() => {
-              props.editor.updateBlock(props.block, {
-                props: { name: 'SupCOD3r', address: '0xA8fa580C55BDC32e678f27EE9EAf608f2cE7fF'},
-              })
+              if (!props.editor.isEditable) {
+                props.editor.updateBlock(props.block, {
+                  props: { name: 'SupCOD3r', address: '0xA8fa580C55BDC32e678f27EE9EAf608f2cE7fF'},
+                })
+              }
             }}
           >
             <div className="flex"><Icons.Signature className="w-5 h-5" /><Text>SIGN HERE</Text></div>
