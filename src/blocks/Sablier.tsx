@@ -1,23 +1,39 @@
 import { defaultProps } from "@blocknote/core";
 import { createReactBlockSpec } from "@blocknote/react";
 import { Icons, Card, CardContent, CardTitle, CardHeader, Text } from "@ds3/react";
-import { View } from 'react-native';
 import SablierIcon from "../assets/sablier.svg?react";
 import MonthlyIcon from "../assets/monthly.svg?react";
 import LineaIcon from "../assets/linea.svg?react";
 import TokenIcon from "../assets/token.svg?react";
+import SablierDialog from "./SablierDialog.tsx";
+import SablierForm from "./SablierForm.tsx";
 
-// The Alert block.
 export const Sablier = createReactBlockSpec(
   {
     type: "sablier",
     propSchema: {
       textAlignment: defaultProps.textAlignment,
       textColor: defaultProps.textColor,
-      type: {
-        default: "warning",
-        values: ["warning", "error", "info", "success"],
+      shape: {
+        default: "monthly",
+        values: ["monthly"]
       },
+      chain: {
+        default: 'Linea',
+        values: ['Linea']
+      },
+      token: {
+        default: "WORK",
+      },
+      amount: {
+        default: 0,
+      },
+      duration: {
+        default: 3,
+      },
+      firstUnlock: {
+        default: 'default',
+      }
     },
     content: "inline",
   },
@@ -45,6 +61,7 @@ export const Sablier = createReactBlockSpec(
               <div className="col-span-1 color-neutral-10">First Unlock</div>
               <div className="col-span-2">Oct 1, 2024</div>
             </div>
+            <SablierDialog bnProps={props} />
           </CardContent>
         </Card>
       );

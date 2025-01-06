@@ -7,7 +7,7 @@ import {
   getDefaultReactSlashMenuItems
 } from "@blocknote/react";
 import {
-  Block,
+  // Block,
   BlockNoteSchema,
   defaultBlockSpecs,
   insertOrUpdateBlock,
@@ -18,7 +18,7 @@ import { Sablier } from '../blocks/Sablier'
 import { Signature } from "../blocks/Signature";
 import { Icons } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
-import {useEffect, useState} from 'react';
+// import {useEffect, useState} from 'react';
 
 const schema = BlockNoteSchema.create({
   blockSpecs: {
@@ -31,6 +31,7 @@ const schema = BlockNoteSchema.create({
 // Slash menu item to insert an Alert block
 const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
   title: "Sablier",
+  subtext: "Unlock assets on the same day each month",
   onItemClick: () => {
     insertOrUpdateBlock(editor, {
       type: "sablier",
@@ -45,6 +46,7 @@ const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
 
 const insertSignature = (editor: typeof schema.BlockNoteEditor) => ({
   title: "Signature",
+  subtext: "Collects user signature",
   onItemClick: () => {
     insertOrUpdateBlock(editor, {
       type: "signature",
@@ -58,11 +60,11 @@ const insertSignature = (editor: typeof schema.BlockNoteEditor) => ({
 });
 
 export default function BlockNote(props) {
-  const [blocks, setBlocks] = useState<Block[]>([]);
+  // const [blocks, setBlocks] = useState<Block[]>([]);
 
-  useEffect(() => {
-    console.log(blocks);
-  }, [blocks]);
+  // useEffect(() => {
+  //   console.log(blocks);
+  // }, [blocks]);
 
   const editor = useCreateBlockNote({
     schema,
@@ -70,10 +72,10 @@ export default function BlockNote(props) {
   });
 
   return <BlockNoteView
-    onChange={() => {
-      // Saves the document JSON to state.
-      setBlocks(editor.document);
-    }}
+    // onChange={() => {
+    //   // Saves the document JSON to state.
+    //   setBlocks(editor.document);
+    // }}
     editor={editor}
     slashMenu={false}
     {...props}

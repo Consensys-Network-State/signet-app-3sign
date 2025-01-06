@@ -6,7 +6,10 @@ const Login: React.FC = () => {
   return (
     <div className="h-screen">
       <div className="flex items-center justify-center h-full w-full">
-        <div className="flex items-center justify-center bg-no-repeat w-full max-w-[612px] min-w-[300px] h-full" style={{backgroundImage: 'url("./tie.png")'}}>
+        <div
+          className="flex items-center justify-center bg-no-repeat w-full max-w-[612px] min-w-[300px] h-full"
+          // style={{backgroundImage: 'url("./tie.png")'}}
+        >
           <div className="bg-neutral-1 p-6 rounded shadow-md text-center">
             <div>
               <h1 className="color-neutral-12 text-heading-12">APOC</h1>
