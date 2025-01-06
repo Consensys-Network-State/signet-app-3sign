@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import BlockNote from "../components/BlockNote.tsx";
-import { Button, ModeToggle, Text, useTheme } from "@ds3/react";
+import { Button, ModeToggle, Text, useTheme, Alert } from "@ds3/react";
 import Account from "../web3/Account.tsx";
 
 export enum BlockEditorMode {
@@ -48,6 +48,11 @@ const Home: React.FC = () => {
 
         </div>
         <div className="flex-grow overflow-y-auto">
+          { editorMode === BlockEditorMode.SIMULATOR && 
+            <div className="mx-auto p-4">
+              <Alert className="bg-primary-9">Review the document, fill in all details required, and sign all signature blocks</Alert>
+            </div>
+          }
           <div className="mx-auto w-full max-w-[1200px] p-4">
             <BlockNote theme={mode} editorMode={editorMode}/>
           </div>
