@@ -9,7 +9,6 @@ import {
   RadioGroupFieldItem,
   SelectField,
   SelectContent,
-  SelectGroup,
   SelectTrigger,
   SelectValue,
   SelectItem,
@@ -17,6 +16,7 @@ import {
   SwitchField,
 } from '@ds3/react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DatePickerField } from "../components/DatePickerField.tsx";
 
 const chains = [mainnet, sepolia, polygon, optimism, arbitrum, linea];
 
@@ -51,7 +51,7 @@ const SablierForm = () => {
           }}
           render={({ field: { onChange, value, ...otherProps } }) => (
             <SelectField
-              error={errors?.contact?.message as string}
+              error={errors?.chain?.message as string}
               value={value ? { label: value?.label ?? '', value: value?.label ?? '' } : undefined}
               onValueChange={onChange}
               className='flex-col gap-3'
@@ -68,14 +68,12 @@ const SablierForm = () => {
                 />
               </SelectTrigger>
 
-              <SelectContent insets={contentInsets}>
-                <SelectGroup>
-                  {chains.map((chain) => (
-                    <SelectItem key={chain.id} label={chain.name} value={chain.id}>
-                      <Text>{chain.name}</Text>
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
+              <SelectContent insets={contentInsets} className="p-0">
+                {chains.map((chain) => (
+                  <SelectItem key={chain.id} label={chain.name} value={chain.id}>
+                    <Text>{chain.name}</Text>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </SelectField>
           )}
@@ -139,7 +137,7 @@ const SablierForm = () => {
             required: 'Start date is required',
           }}
           render={({field}) => (
-            <InputField
+            <DatePickerField
               label="Start Date"
               placeholder="Select date"
               error={errors?.startDate?.message as string}

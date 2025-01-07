@@ -6,7 +6,6 @@ import MonthlyIcon from "../assets/monthly.svg?react";
 import LineaIcon from "../assets/linea.svg?react";
 import TokenIcon from "../assets/token.svg?react";
 import SablierDialog from "./SablierDialog.tsx";
-import SablierForm from "./SablierForm.tsx";
 
 export const Sablier = createReactBlockSpec(
   {
