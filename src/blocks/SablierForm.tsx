@@ -80,6 +80,7 @@ const SablierForm: FC<FormProps> = ({ form }) => {
 
               <SelectContent insets={contentInsets} className="p-0">
                 {chains.map((chain) => (
+                  // @ts-expect-error SelectItem value should also support numbers not only strings
                   <SelectItem key={chain.id} label={chain.name} value={chain.id}>
                     <Text>{chain.name}</Text>
                   </SelectItem>

@@ -6,8 +6,10 @@ import MonthlyIcon from "../assets/monthly.svg?react";
 import LineaIcon from "../assets/linea.svg?react";
 import TokenIcon from "../assets/token.svg?react";
 import SablierDialog from "./SablierDialog.tsx";
+import SignatureDialog from "./SignatureDialog.tsx";
+import EthSignDialog from "./EthSignDialog.tsx";
 
-export const Sablier = createReactBlockSpec(
+export const SablierBlock = createReactBlockSpec(
   {
     type: "sablier",
     propSchema: {
@@ -37,7 +39,7 @@ export const Sablier = createReactBlockSpec(
     content: "inline",
   },
   {
-    render: (props) => {
+    render: () => {
       return (
         <Card className='w-full max-w-md'>
           <CardHeader>
@@ -60,7 +62,9 @@ export const Sablier = createReactBlockSpec(
               <div className="col-span-1 color-neutral-10">First Unlock</div>
               <div className="col-span-2">Oct 1, 2024</div>
             </div>
-            <SablierDialog bnProps={props} />
+            <SablierDialog />
+            <SignatureDialog />
+            <EthSignDialog />
           </CardContent>
         </Card>
       );

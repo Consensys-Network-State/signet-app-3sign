@@ -14,8 +14,8 @@ import {
   filterSuggestionItems,
 } from '@blocknote/core';
 import grantAgreement from '../templates/grant-agreement.json';
-import { Sablier } from '../blocks/Sablier'
-import { Signature } from "../blocks/Signature";
+import { SablierBlock } from '../blocks/SablierBlock'
+import { SignatureBlock } from "../blocks/SignatureBlock";
 import { Icons } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
 // import {useEffect, useState} from 'react';
@@ -23,8 +23,8 @@ import SablierIcon from "../assets/sablier.svg?react";
 const schema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
-    sablier: Sablier,
-    signature: Signature
+    sablier: SablierBlock,
+    signature: SignatureBlock
   },
 });
 
