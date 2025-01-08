@@ -1,6 +1,6 @@
 import { defaultProps } from "@blocknote/core";
 import { createReactBlockSpec } from "@blocknote/react";
-import { Icons, Card, CardContent, CardTitle, CardHeader, Text } from "@ds3/react";
+import { Icons, Card, CardContent, CardTitle, CardHeader, Text, Button } from "@ds3/react";
 import SablierIcon from "../assets/sablier.svg?react";
 import MonthlyIcon from "../assets/monthly.svg?react";
 import LineaIcon from "../assets/linea.svg?react";
@@ -44,7 +44,15 @@ export const SablierBlock = createReactBlockSpec(
         <Card className='w-full max-w-md'>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <SablierIcon className="w-8 h-8" /> Sablier Stream
+              <Text className="flex items-center mr-auto">
+                <SablierIcon className="w-8 h-8" /> Sablier Stream
+              </Text>
+
+              <SablierDialog>
+                <Button variant="ghost" size="sm">
+                  <Icons.Pencil className="w-5 h-5 text-muted-foreground" />
+                </Button>
+              </SablierDialog>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -62,7 +70,6 @@ export const SablierBlock = createReactBlockSpec(
               <div className="col-span-1 color-neutral-10">First Unlock</div>
               <div className="col-span-2">Oct 1, 2024</div>
             </div>
-            <SablierDialog />
             <SignatureDialog />
             <EthSignDialog />
           </CardContent>

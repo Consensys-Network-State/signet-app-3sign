@@ -1,4 +1,4 @@
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import {
   Text,
   Button,
@@ -16,8 +16,14 @@ import {
 import SablierForm, { FormData } from "./SablierForm.tsx";
 import { useForm } from 'react-hook-form';
 import SablierIcon from "../assets/sablier.svg?react";
+import { ReactNode } from "react";
 
-const SablierDialog = () => {
+interface SablierDialogProps {
+  children?: ReactNode;
+}
+
+const SablierDialog: React.FC<SablierDialogProps> = (props) => {
+  const { children } = props;
   const form = useForm<FormData>();
 
   const {
@@ -32,14 +38,12 @@ const SablierDialog = () => {
   };
 
   return (
-    <ScrollView contentContainerClassName='flex-1 justify-center items-center p-6'>
+
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant='outline'>
-            <Text>Sablier Dialog</Text>
-          </Button>
+          {children}
         </DialogTrigger>
-        <DialogContent className='w-[800px]'>
+        <DialogContent className='w-[800px] max-w-[800px]'>
           <DialogHeader>
             <DialogTitle>Configure Contract</DialogTitle>
             <DialogDescription>
@@ -78,7 +82,7 @@ const SablierDialog = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </ScrollView>
+
   )
 };
 
