@@ -1,8 +1,6 @@
-import { Alert } from 'react-native';
-import { useForm, Controller } from 'react-hook-form';
-import { mainnet, sepolia, polygon, optimism, arbitrum, linea } from 'viem/chains';
+import { FC } from 'react';
+import { Controller, UseFormReturn } from 'react-hook-form';
 import {
-  Button,
   Text,
   InputField,
   RadioGroupField,
@@ -16,16 +14,32 @@ import {
   SwitchField,
 } from '@ds3/react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DatePickerField } from "../components/DatePickerField.tsx";
+import { DatePickerField } from '../components/DatePickerField';
+import { mainnet, sepolia, polygon, optimism, arbitrum, linea } from 'viem/chains';
+import { Dayjs } from 'dayjs';
 
 const chains = [mainnet, sepolia, polygon, optimism, arbitrum, linea];
 
-const SablierForm = () => {
+export type FormData = {
+  chain: { value: string; label: string } | null;
+  token: string;
+  amount: string;
+  recipient: string;
+  startDate: Dayjs | undefined;
+  numMonths: string;
+  firstPayment: 'atStart' | 'endFirstMonth';
+  transferability: boolean;
+};
+
+interface FormProps {
+  form: UseFormReturn<FormData>; // React Hook Form's `useForm` return type
+}
+
+const SablierForm: FC<FormProps> = ({ form }) => {
   const {
     control,
-    handleSubmit,
-    formState: { errors }
-  } = useForm();
+    formState: { errors },
+  } = form;
 
   // select stuff
   const insets = useSafeAreaInsets();
@@ -34,10 +48,6 @@ const SablierForm = () => {
     bottom: insets.bottom,
     left: 12,
     right: 12,
-  };
-
-  const onSubmit = (data) => {
-    Alert.alert("Form Data", JSON.stringify(data));
   };
 
   return (
@@ -52,7 +62,7 @@ const SablierForm = () => {
           render={({ field: { onChange, value, ...otherProps } }) => (
             <SelectField
               error={errors?.chain?.message as string}
-              value={value ? { label: value?.label ?? '', value: value?.label ?? '' } : undefined}
+              value={value ? { label: value?.label ?? '', value: value?.value ?? '' } : undefined}
               onValueChange={onChange}
               className='flex-col gap-3'
               label="Chain"
@@ -163,7 +173,7 @@ const SablierForm = () => {
 
         <Controller
           control={control}
-          name="firstPaymnet"
+          name="firstPayment"
           defaultValue="atStart"
           rules={{
             required: 'Mode is required',
@@ -186,6 +196,7 @@ const SablierForm = () => {
         <Controller
           control={control}
           name="transferability"
+          defaultValue={false}
           render={({field: {onChange, value, ...otherProps}}) => (
             <SwitchField
               error={errors?.transferability?.message as string}
@@ -197,9 +208,6 @@ const SablierForm = () => {
           )}
         />
       </div>
-      <Button onPress={handleSubmit(onSubmit)}>
-        <Text>Submit</Text>
-      </Button>
     </div>
   );
 };
