@@ -17,7 +17,7 @@ import { SablierBlock } from '../blocks/SablierBlock'
 import { SignatureBlock } from "../blocks/SignatureBlock";
 import { Icons } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import { BlockEditorMode } from '../routes/Home';
 import useStore from '../store/index';
 
@@ -66,26 +66,32 @@ interface BlockNoteProps {
   [key: string]: unknown; // Optional: For additional props
 }
 
-export default function BlockNote({ editorMode, ...props }: BlockNoteProps) {
-  const { editDocumentState, updateEditDocumentState } = useStore();
+export default function BlockNote({ editorMode: currentEditorMode, ...props }: BlockNoteProps) {
+  const { editDocumentState, updateEditDocumentState, backupEditDocumentState, tempStateStore } = useStore();
 
   const editor = useCreateBlockNote({
     schema,
     initialContent: editDocumentState,
   });
 
+  const [editorMode, setEditorMode] = useState<BlockEditorMode | null>(null);
+
+  // TODO: Handle Signing Log
   useEffect(() => {
-    if (editorMode === BlockEditorMode.EDITOR) {
-      editor.replaceBlocks(editor.topLevelBlocks, editDocumentState);
+    if (!editorMode) setEditorMode(currentEditorMode);
+    else if (editorMode === BlockEditorMode.EDITOR && currentEditorMode === BlockEditorMode.SIMULATOR) {
+      backupEditDocumentState();
+      setEditorMode(currentEditorMode);
+    } else if (editorMode === BlockEditorMode.SIMULATOR && currentEditorMode === BlockEditorMode.EDITOR) {
+      editor.replaceBlocks(editor.topLevelBlocks, tempStateStore);
+      setEditorMode(currentEditorMode);
     }
-  }, [editorMode]);
+  }, [currentEditorMode]);
 
   return <BlockNoteView
     onChange={() => {
       // Saves the document JSON to state.
-      if (editorMode === BlockEditorMode.EDITOR) {
-        updateEditDocumentState(editor.document);
-      }
+      updateEditDocumentState(editor.document);
     }}
     editor={editor}
     editable={editorMode === BlockEditorMode.EDITOR}

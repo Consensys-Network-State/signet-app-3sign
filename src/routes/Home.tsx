@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import BlockNote from "../components/BlockNote.tsx";
-import { Button, ModeToggle, Text, useTheme, Alert } from "@ds3/react";
+import { Button, ModeToggle, Text, useTheme } from "@ds3/react";
 import Account from "../web3/Account.tsx";
+import useStore from '../store/index';
+import {
+  Block,
+} from '@blocknote/core';
+import _ from 'lodash';
 
 export enum BlockEditorMode {
   EDITOR = "EDITOR",
@@ -14,6 +19,12 @@ const Home: React.FC = () => {
   const [editorMode, setEditorMode] = useState(BlockEditorMode.EDITOR);
 
   const getButtonVariant = (buttonType: BlockEditorMode) => buttonType === editorMode ? "outline" : "default";
+
+  const { editDocumentState, signaturesState: {numOfSignedSignatureBlocks, numOfSignatureBlocks} } = useStore();
+
+  const handleSignDocument = async () => {
+    console.log('signing')
+  }
 
   return (
     <div className="h-screen">
@@ -47,12 +58,19 @@ const Home: React.FC = () => {
           </div>
 
         </div>
-        <div className="flex-grow overflow-y-auto">
-          { editorMode === BlockEditorMode.SIMULATOR && 
-            <div className="mx-auto p-4">
-              <Alert className="bg-primary-9">Review the document, fill in all details required, and sign all signature blocks</Alert>
+        { editorMode === BlockEditorMode.SIMULATOR && 
+            <div className="bg-primary-9 p-2 flex items-center justify-between m-3 rounded-3">
+                <Text>Review the document, fill in all details required, and sign all signature blocks {numOfSignedSignatureBlocks}/{numOfSignatureBlocks}</Text>
+                <div className="flex space-x-4">
+                  <Button
+                    onPress={handleSignDocument}
+                  >
+                    <Text>Sign</Text>
+                  </Button>
+                </div>
             </div>
-          }
+        }
+        <div className="flex-grow overflow-y-auto">
           <div className="mx-auto w-full max-w-[1200px] p-4">
             <BlockNote theme={mode} editorMode={editorMode}/>
           </div>
