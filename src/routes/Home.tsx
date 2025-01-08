@@ -7,11 +7,20 @@ import {
   Block,
 } from '@blocknote/core';
 import _ from 'lodash';
+import EthSignDialog from "../blocks/EthSignDialog";
 
 export enum BlockEditorMode {
   EDITOR = "EDITOR",
   SIMULATOR = "SIMULATOR",
   LOG = "LOG"
+}
+
+
+// TODO: Change Later as needed
+interface Signature {
+  blockId: string,
+  name: string,
+  address: string,
 }
 
 const Home: React.FC = () => {
@@ -62,11 +71,7 @@ const Home: React.FC = () => {
             <div className="bg-primary-9 p-2 flex items-center justify-between m-3 rounded-3">
                 <Text>Review the document, fill in all details required, and sign all signature blocks {numOfSignedSignatureBlocks}/{numOfSignatureBlocks}</Text>
                 <div className="flex space-x-4">
-                  <Button
-                    onPress={handleSignDocument}
-                  >
-                    <Text>Sign</Text>
-                  </Button>
+                  <EthSignDialog onPressSign={handleSignDocument} disabled={numOfSignedSignatureBlocks !== numOfSignatureBlocks}/>
                 </div>
             </div>
         }

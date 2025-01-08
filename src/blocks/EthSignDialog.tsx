@@ -12,11 +12,11 @@ import {
   DialogTrigger,
 } from '@ds3/react';
 
-const EthSignDialog = () => {
+const EthSignDialog = ({ onPressSign, disabled = false }) => {
   return (
     <ScrollView contentContainerClassName='flex-1 justify-center items-center p-6'>
       <Dialog>
-        <DialogTrigger asChild>
+        <DialogTrigger asChild disabled={disabled}>
           <Button variant='outline'>
             <Text>Signing Dialog</Text>
           </Button>
@@ -37,7 +37,7 @@ const EthSignDialog = () => {
             </DialogClose>
 
             <DialogClose asChild>
-              <Button>
+              <Button onPress={onPressSign}>
                 <Text>Sign &amp; Finish</Text>
               </Button>
             </DialogClose>

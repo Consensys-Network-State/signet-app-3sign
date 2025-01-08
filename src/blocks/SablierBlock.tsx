@@ -6,8 +6,6 @@ import MonthlyIcon from "../assets/monthly.svg?react";
 import LineaIcon from "../assets/linea.svg?react";
 import TokenIcon from "../assets/token.svg?react";
 import SablierDialog from "./SablierDialog.tsx";
-import SignatureDialog from "./SignatureDialog.tsx";
-import EthSignDialog from "./EthSignDialog.tsx";
 
 export const SablierBlock = createReactBlockSpec(
   {
@@ -70,8 +68,6 @@ export const SablierBlock = createReactBlockSpec(
               <div className="col-span-1 color-neutral-10">First Unlock</div>
               <div className="col-span-2">Oct 1, 2024</div>
             </div>
-            <SignatureDialog />
-            <EthSignDialog />
           </CardContent>
         </Card>
       );

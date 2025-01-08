@@ -23,7 +23,7 @@ export type FormData = {
   address: string,
 };
 
-const SignatureDialog = () => {
+const SignatureDialog = (props) => {
   const form = useForm<FormData>();
 
   const {
@@ -36,6 +36,9 @@ const SignatureDialog = () => {
 
   const onSubmit = (data: FormData) => {
     console.log("Signature Form Data", JSON.stringify(data, null, 2));
+    props.editor.updateBlock(props.block, {
+      props: { name: data.name, address: data.address},
+    })
     reset();
   };
 
