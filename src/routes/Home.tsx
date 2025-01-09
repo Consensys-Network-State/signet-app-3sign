@@ -3,7 +3,15 @@ import BlockNote from "../components/BlockNote.tsx";
 import { Button, ModeToggle, Text, useTheme } from "@ds3/react";
 import Account from "../web3/Account.tsx";
 import useStore from '../store/index';
+import {
+  Block,
+} from '@blocknote/core';
+import _ from 'lodash';
+import { setupAgent } from '../veramo/index';
 import EthSignDialog from "../blocks/EthSignDialog";
+import { v4 as uuidv4 } from 'uuid';
+import { useAccount } from "wagmi";
+import { ethers } from 'ethers';
 
 export enum BlockEditorMode {
   EDITOR = "EDITOR",
@@ -26,8 +34,53 @@ const Home: React.FC = () => {
 
   const { editDocumentState, signaturesState: {numOfSignedSignatureBlocks, numOfSignatureBlocks} } = useStore();
 
+  const { address } = useAccount();
+
   const handleSignDocument = async () => {
-    console.log('signing')
+    // Validation
+    if (numOfSignedSignatureBlocks !== numOfSignatureBlocks) {
+      throw new Error('No signatures');
+    }
+
+    // Split Signatures From Document
+    // TODO: Need to do a deep search for signature blocks
+    //       In later phase add signatures to the VC
+    const document = _.cloneDeep(editDocumentState);
+    const signatures: Signature[] = [];
+    _.filter(document, (block: Block) => block.type === 'signature').forEach((sigBlock: Block) => {
+      signatures.push({ blockId: sigBlock.id, name: sigBlock.props.name, address: sigBlock.props.address });
+      delete sigBlock.props.name;
+      delete sigBlock.props.address;
+    });
+
+    const agent = await setupAgent();
+    
+    // Sign Base Document with Metamask
+
+    const did = await agent.didManagerGet({ did: `did:pkh:eip155:1:${address}` });
+
+    // Construct VC from this
+    const vc = await agent.createVerifiableCredential({
+      credential: {
+        id: uuidv4(),
+        issuer: { id: did.did },
+        '@context': ['https://www.w3.org/2018/credentials/v1'],
+        type: [
+          'VerifiableCredential',
+          'SignedAgreement',
+        ],
+        issuanceDate: new Date().toISOString(),
+        credentialSubject: {
+          id: did.did,
+          documentHash: ethers.keccak256(new TextEncoder().encode(document)),
+          timeStamp: new Date().toISOString(),
+        },
+      },
+      proofFormat: 'jwt',
+    });
+
+    // TODO: Display VC somewhere for user to copy
+    console.log(JSON.stringify(vc));
   }
 
   return (
