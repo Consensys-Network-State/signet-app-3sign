@@ -13,12 +13,13 @@ import {
   insertOrUpdateBlock,
   filterSuggestionItems,
 } from '@blocknote/core';
-import grantAgreement from '../templates/grant-agreement.json';
 import { SablierBlock } from '../blocks/SablierBlock'
 import { SignatureBlock } from "../blocks/SignatureBlock";
 import { Icons } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
-// import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
+import { BlockEditorMode } from '../routes/Home';
+import useStore from '../store/index';
 
 const schema = BlockNoteSchema.create({
   blockSpecs: {
@@ -59,24 +60,41 @@ const insertSignature = (editor: typeof schema.BlockNoteEditor) => ({
   icon: <Icons.Signature className="w-5 h-5" />,
 });
 
-export default function BlockNote(props) {
-  // const [blocks, setBlocks] = useState<Block[]>([]);
+interface BlockNoteProps {
+  editorMode: BlockEditorMode;
+  // Add other properties of `props` if necessary
+  [key: string]: unknown; // Optional: For additional props
+}
 
-  // useEffect(() => {
-  //   console.log(blocks);
-  // }, [blocks]);
+export default function BlockNote({ editorMode: currentEditorMode, ...props }: BlockNoteProps) {
+  const { editDocumentState, updateEditDocumentState, backupEditDocumentState, tempStateStore } = useStore();
 
   const editor = useCreateBlockNote({
     schema,
-    initialContent: grantAgreement,
+    initialContent: editDocumentState,
   });
 
+  const [editorMode, setEditorMode] = useState<BlockEditorMode | null>(null);
+
+  // TODO: Handle Signing Log
+  useEffect(() => {
+    if (!editorMode) setEditorMode(currentEditorMode);
+    else if (editorMode === BlockEditorMode.EDITOR && currentEditorMode === BlockEditorMode.SIMULATOR) {
+      backupEditDocumentState();
+      setEditorMode(currentEditorMode);
+    } else if (editorMode === BlockEditorMode.SIMULATOR && currentEditorMode === BlockEditorMode.EDITOR) {
+      editor.replaceBlocks(editor.topLevelBlocks, tempStateStore);
+      setEditorMode(currentEditorMode);
+    }
+  }, [currentEditorMode]);
+
   return <BlockNoteView
-    // onChange={() => {
-    //   // Saves the document JSON to state.
-    //   setBlocks(editor.document);
-    // }}
+    onChange={() => {
+      // Saves the document JSON to state.
+      updateEditDocumentState(editor.document);
+    }}
     editor={editor}
+    editable={editorMode === BlockEditorMode.EDITOR}
     slashMenu={false}
     {...props}
   >

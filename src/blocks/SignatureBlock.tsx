@@ -1,6 +1,7 @@
 import { defaultProps } from "@blocknote/core";
 import { createReactBlockSpec } from "@blocknote/react";
 import Signature from "./Signature.tsx";
+import SignatureDialog from "./SignatureDialog";
 
 export const SignatureBlock = createReactBlockSpec(
   {
@@ -8,16 +9,26 @@ export const SignatureBlock = createReactBlockSpec(
     propSchema: {
       textAlignment: defaultProps.textAlignment,
       textColor: defaultProps.textColor,
-      type: {
-        default: "warning",
-        values: ["warning", "error", "info", "success"],
+      name: {
+        default: "",
       },
+      address: {
+        default: "",
+      }
+
     },
     content: "inline",
   },
   {
-    render: () => {
-      return (<Signature />);
+    render: (props) => {
+      return (
+        <div className="mb-4">
+          { !props.block.props.name || !props.block.props.address ?
+            <SignatureDialog {...props} /> :
+            <Signature name={props.block.props.name} address={props.block.props.address}/>
+          }
+        </div>
+      );
     },
   }
 );
