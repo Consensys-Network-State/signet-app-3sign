@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import BlockNote from "../components/BlockNote.tsx";
 import { Button, ModeToggle, Text, useTheme } from "@ds3/react";
 import Account from "../web3/Account.tsx";
-import useStore from '../store/index';
+import { useDocumentStore } from '../store/documentStore';
 import {
   Block,
 } from '@blocknote/core';
@@ -12,6 +12,7 @@ import EthSignDialog from "../blocks/EthSignDialog";
 import { v4 as uuidv4 } from 'uuid';
 import { useAccount } from "wagmi";
 import { ethers } from 'ethers';
+import { useEditorStore } from '../store/editorStore';
 
 export enum BlockEditorMode {
   EDITOR = "EDITOR",
@@ -28,11 +29,11 @@ interface Signature {
 
 const Home: React.FC = () => {
   const { mode } = useTheme();
-  const [editorMode, setEditorMode] = useState(BlockEditorMode.EDITOR);
+  const { editorMode, setEditorMode} = useEditorStore();
 
   const getButtonVariant = (buttonType: BlockEditorMode) => buttonType === editorMode ? "outline" : "default";
 
-  const { editDocumentState, signaturesState: {numOfSignedSignatureBlocks, numOfSignatureBlocks} } = useStore();
+  const { editDocumentState, signaturesState: {numOfSignedSignatureBlocks, numOfSignatureBlocks} } = useDocumentStore();
 
   const { address } = useAccount();
 
@@ -72,7 +73,7 @@ const Home: React.FC = () => {
         issuanceDate: new Date().toISOString(),
         credentialSubject: {
           id: did.did,
-          documentHash: ethers.keccak256(new TextEncoder().encode(document)),
+          documentHash: ethers.keccak256(new TextEncoder().encode(JSON.stringify(document))),
           timeStamp: new Date().toISOString(),
         },
       },

@@ -6,6 +6,7 @@ import MonthlyIcon from "../assets/monthly.svg?react";
 import LineaIcon from "../assets/linea.svg?react";
 import TokenIcon from "../assets/token.svg?react";
 import SablierDialog from "./SablierDialog.tsx";
+import { supportedChains, getChainById } from "../utils/chainUtils";
 
 export const SablierBlock = createReactBlockSpec(
   {
@@ -18,17 +19,17 @@ export const SablierBlock = createReactBlockSpec(
         values: ["monthly"]
       },
       chain: {
-        default: 'Linea',
-        values: ['Linea']
+        default: 1,
+        values: supportedChains.map((c) => { console.log(supportedChains); return c.id } )
       },
       token: {
-        default: "WORK",
+        default: "",
       },
       amount: {
         default: 0,
       },
       duration: {
-        default: 3,
+        default: 1,
       },
       firstUnlock: {
         default: 'default',
@@ -37,7 +38,7 @@ export const SablierBlock = createReactBlockSpec(
     content: "inline",
   },
   {
-    render: () => {
+    render: (props) => {
       return (
         <Card className='w-full max-w-md'>
           <CardHeader>
@@ -46,7 +47,7 @@ export const SablierBlock = createReactBlockSpec(
                 <SablierIcon className="w-8 h-8" /> Sablier Stream
               </Text>
 
-              <SablierDialog>
+              <SablierDialog {...props}>
                 <Button variant="ghost" size="sm">
                   <Icons.Pencil className="w-5 h-5 text-muted-foreground" />
                 </Button>
@@ -58,15 +59,15 @@ export const SablierBlock = createReactBlockSpec(
               <div className="col-span-1 color-neutral-10">Shape</div>
               <div className="col-span-2 flex items-center gap-2"><MonthlyIcon /> Monthly unlocks</div>
               <div className="col-span-1 color-neutral-10">Chain</div>
-              <div className="col-span-2 flex items-center gap-2"><LineaIcon /> Linea <Icons.SquareArrowOutUpRight size={18} /></div>
+              <div className="col-span-2 flex items-center gap-2">{props.block.props.chain && <><LineaIcon />{getChainById(props.block.props.chain)?.name}<Icons.SquareArrowOutUpRight size={18} /></>}</div>
               <div className="col-span-1 color-neutral-10">Token</div>
-              <div className="col-span-2 flex items-center gap-2"><TokenIcon /> WORK <Icons.SquareArrowOutUpRight size={18} /></div>
+              <div className="col-span-2 flex items-center gap-2">{props.block.props.token && <><TokenIcon /> {props.block.props.token} <Icons.SquareArrowOutUpRight size={18} /></>}</div>
               <div className="col-span-1 color-neutral-10">Amount</div>
-              <div className="col-span-2">200,000</div>
+              <div className="col-span-2">{props.block.props.amount}</div>
               <div className="col-span-1 color-neutral-10">Duration</div>
-              <div className="col-span-2">3 months <Text className="color-neutral-10 text-3">(Sept 1, 2024 - Jan 1, 2024)</Text></div>
+              <div className="col-span-2"> {props.block.props.duration}{/** 3 months <Text className="color-neutral-10 text-3">(Sept 1, 2024 - Jan 1, 2024)</Text> */} </div>
               <div className="col-span-1 color-neutral-10">First Unlock</div>
-              <div className="col-span-2">Oct 1, 2024</div>
+              <div className="col-span-2">{props.block.props.firstUnlock}{/** Oct 1, 2024 */}</div>
             </div>
           </CardContent>
         </Card>

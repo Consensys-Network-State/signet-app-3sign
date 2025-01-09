@@ -17,28 +17,46 @@ import SablierForm, { FormData } from "./SablierForm.tsx";
 import { useForm } from 'react-hook-form';
 import SablierIcon from "../assets/sablier.svg?react";
 import { ReactNode } from "react";
+import {
+  Block,
+  BlockNoteEditor,
+} from '@blocknote/core';
 
 interface SablierDialogProps {
   children?: ReactNode;
+  editor: BlockNoteEditor;
+  block: Block;
 }
 
 const SablierDialog: React.FC<SablierDialogProps> = (props) => {
   const { children } = props;
-  const form = useForm<FormData>();
+  const form = useForm<FormData>({
+    defaultValues: {
+      chain: { value: props.block.props.chain, label: props.block.props.chain },
+      token: props.block.props.token,
+      amount: props.block.props.amount,
+      numMonths: props.block.props.duration,
+    }
+  });
 
   const {
-    reset,
     handleSubmit,
     formState: { isValid },
   } = form;
 
   const onSubmit = (data: FormData) => {
     console.log("Sablier Form Data", JSON.stringify(data, null, 2));
-    reset();
+    props.editor.updateBlock(props.block, {
+      props: { 
+        chain: data.chain.value,
+        token: data.token,
+        amount: data.amount,
+        duration: data.numMonths,
+      },
+    })
   };
 
   return (
-
       <Dialog>
         <DialogTrigger asChild>
           {children}

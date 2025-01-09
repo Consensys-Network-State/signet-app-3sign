@@ -16,6 +16,7 @@ import {
   CardContent,
 } from '@ds3/react';
 import Signature from "./Signature.tsx";
+import { useEditorStore, BlockEditorMode } from '../store/editorStore';
 
 export type FormData = {
   name: string,
@@ -33,6 +34,10 @@ const SignatureDialog = (props) => {
     formState: { errors, isValid },
   } = form;
 
+  const editorMode = useEditorStore((state) => state.editorMode);
+
+  const isSigningDisabled = !(editorMode === BlockEditorMode.SIMULATOR)
+
   const onSubmit = (data: FormData) => {
     console.log("Signature Form Data", JSON.stringify(data, null, 2));
     props.editor.updateBlock(props.block, {
@@ -48,7 +53,7 @@ const SignatureDialog = (props) => {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild disabled={isSigningDisabled}>
         <Button variant='outline'>
           <Text>Signature Dialog</Text>
         </Button>

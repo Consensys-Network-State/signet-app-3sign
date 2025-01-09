@@ -15,10 +15,8 @@ import {
 } from '@ds3/react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DatePickerField } from '../components/DatePickerField';
-import { mainnet, sepolia, polygon, optimism, arbitrum, linea } from 'viem/chains';
 import { Dayjs } from 'dayjs';
-
-const chains = [mainnet, sepolia, polygon, optimism, arbitrum, linea];
+import { supportedChains as chains } from '../utils/chainUtils';
 
 export type FormData = {
   chain: { value: string; label: string } | null;
@@ -74,7 +72,7 @@ const SablierForm: FC<FormProps> = ({ form }) => {
                     'text-sm native:text-lg',
                     value ? 'text-foreground' : 'text-muted-foreground'
                   )}
-                  placeholder='Select a verified email'
+                  placeholder='Select a chain'
                 />
               </SelectTrigger>
 
