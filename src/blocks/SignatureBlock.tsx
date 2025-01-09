@@ -9,10 +9,6 @@ export const SignatureBlock = createReactBlockSpec(
     propSchema: {
       textAlignment: defaultProps.textAlignment,
       textColor: defaultProps.textColor,
-      type: {
-        default: "warning",
-        values: ["warning", "error", "info", "success"],
-      },
       name: {
         default: "",
       },

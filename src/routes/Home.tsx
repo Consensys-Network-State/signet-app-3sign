@@ -3,10 +3,6 @@ import BlockNote from "../components/BlockNote.tsx";
 import { Button, ModeToggle, Text, useTheme } from "@ds3/react";
 import Account from "../web3/Account.tsx";
 import useStore from '../store/index';
-import {
-  Block,
-} from '@blocknote/core';
-import _ from 'lodash';
 import EthSignDialog from "../blocks/EthSignDialog";
 
 export enum BlockEditorMode {
@@ -14,7 +10,6 @@ export enum BlockEditorMode {
   SIMULATOR = "SIMULATOR",
   LOG = "LOG"
 }
-
 
 // TODO: Change Later as needed
 interface Signature {
@@ -67,16 +62,16 @@ const Home: React.FC = () => {
           </div>
 
         </div>
-        { editorMode === BlockEditorMode.SIMULATOR && 
-            <div className="bg-primary-9 p-2 flex items-center justify-between m-3 rounded-3">
+        <div className="flex-grow overflow-y-auto">
+          <div className="mx-auto w-full max-w-[1200px] p-4">
+            { editorMode === BlockEditorMode.SIMULATOR &&
+              <div className="bg-primary-4 p-2 flex items-center justify-between rounded-t-3 sticky top-0 z-20">
                 <Text>Review the document, fill in all details required, and sign all signature blocks {numOfSignedSignatureBlocks}/{numOfSignatureBlocks}</Text>
                 <div className="flex space-x-4">
                   <EthSignDialog onPressSign={handleSignDocument} disabled={numOfSignedSignatureBlocks !== numOfSignatureBlocks}/>
                 </div>
-            </div>
-        }
-        <div className="flex-grow overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1200px] p-4">
+              </div>
+            }
             <BlockNote theme={mode} editorMode={editorMode}/>
           </div>
         </div>
