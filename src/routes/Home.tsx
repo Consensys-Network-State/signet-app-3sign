@@ -55,7 +55,7 @@ const Home: React.FC = () => {
     });
 
     const agent = await setupAgent();
-    
+
     // Sign Base Document with Metamask
 
     const did = await agent.didManagerGet({ did: `did:pkh:eip155:1:${address}` });
@@ -79,6 +79,9 @@ const Home: React.FC = () => {
       },
       proofFormat: 'jwt',
     });
+
+    const test = await agent.verifyCredential({ credential: vc });
+    console.log(test);
 
     // TODO: Display VC somewhere for user to copy
     console.log(JSON.stringify(vc));

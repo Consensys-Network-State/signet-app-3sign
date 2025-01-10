@@ -1,7 +1,7 @@
 import { JsonRpcSigner, BrowserProvider, toUtf8String } from 'ethers'
 import { TKeyType, IKey, ManagedKeyInfo, MinimalImportableKey } from '@veramo/core-types'
 import { AbstractKeyManagementSystem, Eip712Payload } from '@veramo/key-manager'
-
+import { ethers } from 'ethers';
 /**
  * This is a {@link @veramo/key-manager#AbstractKeyManagementSystem | KMS} implementation that uses the addresses of a
  * web3 wallet as key identifiers, and calls the respective wallet for signing operations.
@@ -82,7 +82,7 @@ export class Web3KeyManagementSystem extends AbstractKeyManagementSystem {
     data: Uint8Array
   }): Promise<string> {
     if (algorithm) {
-      if (algorithm === 'eth_signMessage' || algorithm === 'ES256K') { 
+      if (algorithm === 'eth_signMessage' || algorithm === 'ES256K') {
         return await this.eth_signMessage(keyRef, data)
       } else if (['eth_signTypedData', 'EthereumEip712Signature2021'].includes(algorithm)) { // This comes from the @veramo/kms-web3 library
         return await this.eth_signTypedData(keyRef, data)
@@ -125,13 +125,29 @@ export class Web3KeyManagementSystem extends AbstractKeyManagementSystem {
     return signature
   }
 
+  private hexToBase64Url(hexString: string) {
+      // Step 1: Convert hex string to bytes
+      const bytes = new Uint8Array(
+        (hexString.match(/.{1,2}/g) || []).map(byte => parseInt(byte, 16))
+      );
+
+      // Step 2: Convert bytes to Base64
+      const base64 = btoa(String.fromCharCode(...bytes));
+
+      // Step 3: Convert Base64 to Base64 URL format
+      return base64
+        .replace(/\+/g, '-') // Replace '+' with '-'
+        .replace(/\//g, '_') // Replace '/' with '_'
+        .replace(/=+$/, ''); // Remove padding '='
+  }
+
   /**
    * @returns a `0x` prefixed hex string representing the signed message
    */
   private async eth_signMessage(keyRef: Pick<IKey, 'kid'>, rawMessageBytes: Uint8Array) {
     const { signer } = await this.getAccountAndSignerByKeyRef(keyRef)
     const signature = await signer.signMessage(rawMessageBytes)
-    // HEX encoded string, 0x prefixed
-    return signature
+
+    return this.hexToBase64Url(signature.slice(2, -2));
   }
 }

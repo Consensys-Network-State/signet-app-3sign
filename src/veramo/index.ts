@@ -1,12 +1,15 @@
 import { DIDManager } from '@veramo/did-manager';
 import { KeyManager } from '@veramo/key-manager';
-import { CredentialIssuer } from '@veramo/credential-w3c';
+import { CredentialPlugin } from '@veramo/credential-w3c';
 import { PkhDIDProvider } from '@veramo/did-provider-pkh';
 import { KeyStore } from './plugins/KeyStore';
 import { createAgent } from '@veramo/core';
 import { ethers } from 'ethers';
 import { Web3KeyManagementSystem } from './plugins/KMS';
 import { DIDStore } from './plugins/DIDStore';
+import { DIDResolverPlugin } from '@veramo/did-resolver';
+import { Resolver } from 'did-resolver';
+import { getResolver as pkhDidResolver } from 'pkh-did-resolver';
 
 // Configure Veramo agent
 export async function setupAgent() {
@@ -34,7 +37,12 @@ export async function setupAgent() {
         },
         defaultProvider: 'did:pkh',
       }),
-      new CredentialIssuer(),
+      new DIDResolverPlugin({
+        resolver: new Resolver({
+          ...pkhDidResolver(),
+        }),
+      }),
+      new CredentialPlugin(),
     ],
   });
 
