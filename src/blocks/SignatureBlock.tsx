@@ -9,13 +9,8 @@ export const SignatureBlock = createReactBlockSpec(
     propSchema: {
       textAlignment: defaultProps.textAlignment,
       textColor: defaultProps.textColor,
-      name: {
-        default: "",
-      },
-      address: {
-        default: "",
-      }
-
+      name: { default: undefined },
+      address: { default: undefined }
     },
     content: "inline",
   },

@@ -19,7 +19,7 @@ import { Icons } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
 import {useEffect, useState} from 'react';
 import { BlockEditorMode } from '../routes/Home';
-import useStore from '../store/index';
+import { useDocumentStore } from '../store/documentStore';
 
 const schema = BlockNoteSchema.create({
   blockSpecs: {
@@ -67,7 +67,7 @@ interface BlockNoteProps {
 }
 
 export default function BlockNote({ editorMode: currentEditorMode, ...props }: BlockNoteProps) {
-  const { editDocumentState, updateEditDocumentState, backupEditDocumentState, tempStateStore } = useStore();
+  const { editDocumentState, updateEditDocumentState, backupEditDocumentState, tempStateStore } = useDocumentStore();
 
   const editor = useCreateBlockNote({
     schema,

@@ -15,7 +15,7 @@ const countNumberOfSignatures = (state: Block[]) => {
     }
 }
 
-const useStore = create(
+export const useDocumentStore = create(
     devtools(
         combine(
             {
@@ -27,12 +27,10 @@ const useStore = create(
             }, // Initial state
             (set) => ({
                 updateEditDocumentState: (updatedDoc: Block[]) =>
-                    set((state) => ({ editDocumentState: updatedDoc, signaturesState: { ...state.signaturesState, ...countNumberOfSignatures(updatedDoc) }}), undefined, 'store/updateEditDocumentState'),
+                    set((state) => ({ editDocumentState: updatedDoc, signaturesState: { ...state.signaturesState, ...countNumberOfSignatures(updatedDoc) }}), undefined, 'documentStore/updateEditDocumentState'),
                 backupEditDocumentState: () => 
-                    set((state) => ({ tempStateStore: _.cloneDeep(state.editDocumentState) }), undefined, 'store/backupEditDocumentState'),
+                    set((state) => ({ tempStateStore: _.cloneDeep(state.editDocumentState) }), undefined, 'documentStore/backupEditDocumentState'),
             })
         ),
     )
 );
-
-export default useStore;
