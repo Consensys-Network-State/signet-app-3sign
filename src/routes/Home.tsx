@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import BlockNote from "../components/BlockNote.tsx";
 import { Button, ModeToggle, Text, useTheme } from "@ds3/react";
 import Account from "../web3/Account.tsx";
@@ -7,7 +7,7 @@ import {
   Block,
 } from '@blocknote/core';
 import _ from 'lodash';
-import { setupAgent } from '../veramo/index';
+import { setupAgent } from '../veramo';
 import EthSignDialog from "../blocks/EthSignDialog";
 import { v4 as uuidv4 } from 'uuid';
 import { useAccount } from "wagmi";
