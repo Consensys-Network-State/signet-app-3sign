@@ -10,6 +10,7 @@ import { DIDStore } from './plugins/DIDStore';
 import { DIDResolverPlugin } from '@veramo/did-resolver';
 import { Resolver } from 'did-resolver';
 import { getResolver as pkhDidResolver } from 'pkh-did-resolver';
+import { CredentialIssuerEIP712 } from '@veramo/credential-eip712';
 
 // Configure Veramo agent
 export async function setupAgent() {
@@ -43,6 +44,7 @@ export async function setupAgent() {
         }),
       }),
       new CredentialPlugin(),
+      new CredentialIssuerEIP712(),
     ],
   });
 

@@ -77,14 +77,13 @@ const Home: React.FC = () => {
           timeStamp: new Date().toISOString(),
         },
       },
-      proofFormat: 'jwt',
+      proofFormat: 'EthereumEip712Signature2021',
     });
 
-    const test = await agent.verifyCredential({ credential: vc });
-    console.log(test);
+    // Verification doesn't work on FE because the code relies on the Buffer object not available in browser environment
+    // const test = await agent.verifyCredential({ credential: vc });
 
     // TODO: Display VC somewhere for user to copy
-    console.log(JSON.stringify(vc));
   }
 
   return (

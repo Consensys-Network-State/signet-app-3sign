@@ -12,7 +12,6 @@ export class KeyStore implements AbstractKeyStore {
   public async getKey(args: { kid: string }): Promise<IKey> {
     const provider = new ethers.BrowserProvider(window.ethereum);
     const accounts = (await provider.send("eth_requestAccounts", [])).map(toChecksumAddress);
-    console.log(args.kid, accounts);
     if (!accounts.includes(args.kid)) {
       throw Error("Key not found");
     }
