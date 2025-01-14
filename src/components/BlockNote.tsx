@@ -8,26 +8,15 @@ import {
 } from "@blocknote/react";
 import {
   // Block,
-  BlockNoteSchema,
-  defaultBlockSpecs,
   insertOrUpdateBlock,
   filterSuggestionItems,
 } from '@blocknote/core';
-import { SablierBlock } from '../blocks/SablierBlock'
-import { SignatureBlock } from "../blocks/SignatureBlock";
 import { Icons } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
 import {useEffect, useState} from 'react';
 import { BlockEditorMode } from '../routes/Home';
 import { useDocumentStore } from '../store/documentStore';
-
-const schema = BlockNoteSchema.create({
-  blockSpecs: {
-    ...defaultBlockSpecs,
-    sablier: SablierBlock,
-    signature: SignatureBlock
-  },
-});
+import { schema } from '../blocks/BlockNoteSchema';
 
 // Slash menu item to insert an Alert block
 const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
@@ -71,8 +60,8 @@ export default function BlockNote({ editorMode: currentEditorMode, ...props }: B
 
   const editor = useCreateBlockNote({
     schema,
-    initialContent: editDocumentState,
-  });
+    initialContent: editDocumentState
+  })
 
   const [editorMode, setEditorMode] = useState<BlockEditorMode | null>(null);
 

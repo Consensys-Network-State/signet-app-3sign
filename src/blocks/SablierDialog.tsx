@@ -16,19 +16,16 @@ import {
 import SablierForm, { FormData } from "./SablierForm.tsx";
 import { useForm } from 'react-hook-form';
 import SablierIcon from "../assets/sablier.svg?react";
-import { ReactNode } from "react";
-import {
-  Block,
-  BlockNoteEditor,
-} from '@blocknote/core';
+import { FC, ReactNode } from "react";
+import type { SablierBlock } from './BlockNoteSchema';
 
 interface SablierDialogProps {
   children?: ReactNode;
-  editor: BlockNoteEditor;
-  block: Block;
+  block: SablierBlock;
+  editor: any;
 }
 
-const SablierDialog: React.FC<SablierDialogProps> = (props) => {
+const SablierDialog: FC<SablierDialogProps> = (props) => {
   const { children } = props;
   const form = useForm<FormData>({
     defaultValues: {
@@ -47,8 +44,8 @@ const SablierDialog: React.FC<SablierDialogProps> = (props) => {
   const onSubmit = (data: FormData) => {
     console.log("Sablier Form Data", JSON.stringify(data, null, 2));
     props.editor.updateBlock(props.block, {
-      props: { 
-        chain: data.chain.value,
+      props: {
+        chain: (data.chain!).value,
         token: data.token,
         amount: data.amount,
         duration: data.numMonths,

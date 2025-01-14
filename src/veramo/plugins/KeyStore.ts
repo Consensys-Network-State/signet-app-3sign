@@ -24,11 +24,15 @@ export class KeyStore implements AbstractKeyStore {
     } as IKey;
   }
 
-  public async importKey(args: IKey): Promise<boolean> {
+  public async importKey(_args: IKey): Promise<boolean> {
     return false;
   }
 
-  public async deleteKey(args: { kid: string }): Promise<boolean> {
+  public async deleteKey(_args: { kid: string }): Promise<boolean> {
     return false;
+  }
+
+  public async listKeys(_args: {}){
+      return [];
   }
 }

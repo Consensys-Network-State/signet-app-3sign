@@ -1,7 +1,6 @@
 import { JsonRpcSigner, BrowserProvider, toUtf8String } from 'ethers'
 import { TKeyType, IKey, ManagedKeyInfo, MinimalImportableKey } from '@veramo/core-types'
 import { AbstractKeyManagementSystem, Eip712Payload } from '@veramo/key-manager'
-import { ethers } from 'ethers';
 /**
  * This is a {@link @veramo/key-manager#AbstractKeyManagementSystem | KMS} implementation that uses the addresses of a
  * web3 wallet as key identifiers, and calls the respective wallet for signing operations.
@@ -17,7 +16,7 @@ export class Web3KeyManagementSystem extends AbstractKeyManagementSystem {
     super()
   }
 
-  createKey({ type }: { type: TKeyType }): Promise<ManagedKeyInfo> {
+  createKey(_args: { type: TKeyType }): Promise<ManagedKeyInfo> {
     throw Error('not_supported: Web3KeyManagementSystem cannot create new keys')
   }
 
@@ -48,14 +47,14 @@ export class Web3KeyManagementSystem extends AbstractKeyManagementSystem {
     return keys
   }
 
-  async sharedSecret(args: {
+  async sharedSecret(_args: {
     myKeyRef: Pick<IKey, 'kid'>
     theirKey: Pick<IKey, 'type' | 'publicKeyHex'>
   }): Promise<string> {
     throw Error('not_implemented: Web3KeyManagementSystem sharedSecret')
   }
 
-  async deleteKey(args: { kid: string }) {
+  async deleteKey(_args: { kid: string }) {
     // this kms doesn't need to delete keys
     return true
   }
@@ -96,16 +95,15 @@ export class Web3KeyManagementSystem extends AbstractKeyManagementSystem {
    * @returns a `0x` prefixed hex string representing the signed EIP712 data
    */
   private async eth_signTypedData(keyRef: Pick<IKey, 'kid'>, data: Uint8Array) {
-    let msg, msgDomain, msgTypes, msgPrimaryType
+    let msg, msgDomain, msgTypes;
     const serializedData = toUtf8String(data)
     try {
       const jsonData = JSON.parse(serializedData) as Eip712Payload
       if (typeof jsonData.domain === 'object' && typeof jsonData.types === 'object') {
-        const { domain, types, message, primaryType } = jsonData
+        const { domain, types, message } = jsonData
         msg = message
         msgDomain = domain
         msgTypes = types
-        msgPrimaryType = primaryType
       } else {
         // next check will throw since the data couldn't be parsed
       }

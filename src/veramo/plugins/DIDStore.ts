@@ -9,12 +9,15 @@ export class DIDStore implements AbstractDIDStore {
   }
 
   public async getDID({
-    did
+    did,
+    alias
   }: {
     did: string;
+    alias: string;
   }): Promise<IIdentifier> {
     return {
       did,
+      alias,
       provider: "did:pkh",
       services: [],
       keys: [
@@ -34,17 +37,16 @@ export class DIDStore implements AbstractDIDStore {
   public async listDIDs(): Promise<IIdentifier[]> {
     return await Promise.all(
       this.addresses.map(async address => {
-        return this.getDID({ did: `did:pkh:eip155:1:${address}`});
+        return this.getDID({ did: `did:pkh:eip155:1:${address}`, alias: ""});
       }),
     );
-    return [];
   }
 
-  public async importDID(args: IIdentifier): Promise<boolean> {
+  public async importDID(_args: IIdentifier): Promise<boolean> {
     return false;
   }
 
-  public async deleteDID(args: { did: string }): Promise<boolean> {
+  public async deleteDID(_args: { did: string }): Promise<boolean> {
     return false;
   }
 }

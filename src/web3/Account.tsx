@@ -25,7 +25,7 @@ const Account: React.FC = () => {
   const { address } = useAccount()
   const { disconnect } = useDisconnect()
   const { data: ensName } = useEnsName({ address })
-  const { data: ensAvatar } = useEnsAvatar({ name: normalize(ensName)! })
+  const { data: ensAvatar } = useEnsAvatar({ name: ensName ? normalize(ensName as string) : "" })
 
   const insets = useSafeAreaInsets();
   const contentInsets = {
@@ -40,14 +40,14 @@ const Account: React.FC = () => {
       <DropdownMenuTrigger asChild>
         <Button className="flex flex-row">
           <Avatar alt="Zach Nugent's Avatar" className="mr-3 w-9 h-9">
-            <AvatarImage source={{ uri: ensAvatar }} />
+            <AvatarImage source={{ uri: ensAvatar ? ensAvatar as string : "" }} />
             <AvatarFallback>
               <Text>ZN</Text>
             </AvatarFallback>
           </Avatar>
           <View>
             <Text>{ensName}</Text>
-            <Text>{truncateEthAddress(address)}</Text>
+            { address && <Text>{truncateEthAddress(address as string)}</Text> }
           </View>
         </Button>
       </DropdownMenuTrigger>
