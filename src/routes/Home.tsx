@@ -4,7 +4,7 @@ import { Button, ModeToggle, Text, useTheme } from "@ds3/react";
 import Account from "../web3/Account.tsx";
 import { useDocumentStore } from '../store/documentStore';
 import _ from 'lodash';
-import { setupAgent } from '../veramo/index';
+import { setupAgent } from '../veramo';
 import EthSignDialog from "../blocks/EthSignDialog";
 import { v4 as uuidv4 } from 'uuid';
 import { useAccount } from "wagmi";

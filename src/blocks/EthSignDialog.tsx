@@ -1,3 +1,4 @@
+import { FC } from 'react';
 import {
   Text,
   Button,
@@ -11,12 +12,12 @@ import {
   DialogTrigger,
 } from '@ds3/react';
 
-interface EthSignDialog {
+interface EthSignDialogProps {
   onPressSign: () => void;
-  disabled: boolean;
+  disabled?: boolean;
 }
 
-const EthSignDialog = ({ onPressSign, disabled = false }: EthSignDialog) => {
+const EthSignDialog: FC<EthSignDialogProps> =({ onPressSign, disabled = false }) => {
   return (
     <Dialog>
       <DialogTrigger asChild disabled={disabled}>
