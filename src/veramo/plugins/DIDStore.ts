@@ -22,6 +22,9 @@ export class DIDStore implements AbstractDIDStore {
           kid: did.replace("did:pkh:eip155:1:", ""),
           type: "Secp256k1",
           kms: "metamask",
+          meta: {
+            algorithms: ['eth_signTypedData']
+          },
           publicKeyHex: "",
         } as IKey,
       ],

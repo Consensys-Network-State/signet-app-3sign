@@ -55,7 +55,7 @@ const Home: React.FC = () => {
     });
 
     const agent = await setupAgent();
-    
+
     // Sign Base Document with Metamask
 
     const did = await agent.didManagerGet({ did: `did:pkh:eip155:1:${address}` });
@@ -77,11 +77,13 @@ const Home: React.FC = () => {
           timeStamp: new Date().toISOString(),
         },
       },
-      proofFormat: 'jwt',
+      proofFormat: 'EthereumEip712Signature2021',
     });
 
+    // Verification doesn't work on FE because the code relies on the Buffer object not available in browser environment
+    // const test = await agent.verifyCredential({ credential: vc });
+
     // TODO: Display VC somewhere for user to copy
-    console.log(JSON.stringify(vc));
   }
 
   return (

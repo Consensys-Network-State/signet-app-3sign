@@ -1,7 +1,7 @@
 import { JsonRpcSigner, BrowserProvider, toUtf8String } from 'ethers'
 import { TKeyType, IKey, ManagedKeyInfo, MinimalImportableKey } from '@veramo/core-types'
 import { AbstractKeyManagementSystem, Eip712Payload } from '@veramo/key-manager'
-
+import { ethers } from 'ethers';
 /**
  * This is a {@link @veramo/key-manager#AbstractKeyManagementSystem | KMS} implementation that uses the addresses of a
  * web3 wallet as key identifiers, and calls the respective wallet for signing operations.
@@ -82,7 +82,7 @@ export class Web3KeyManagementSystem extends AbstractKeyManagementSystem {
     data: Uint8Array
   }): Promise<string> {
     if (algorithm) {
-      if (algorithm === 'eth_signMessage' || algorithm === 'ES256K') { 
+      if (algorithm === 'eth_signMessage') {
         return await this.eth_signMessage(keyRef, data)
       } else if (['eth_signTypedData', 'EthereumEip712Signature2021'].includes(algorithm)) { // This comes from the @veramo/kms-web3 library
         return await this.eth_signTypedData(keyRef, data)
