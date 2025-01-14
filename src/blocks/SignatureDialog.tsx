@@ -17,13 +17,21 @@ import {
 } from '@ds3/react';
 import Signature from "./Signature.tsx";
 import { useEditorStore, BlockEditorMode } from '../store/editorStore';
+import type { SignatureBlock } from './BlockNoteSchema';
+import {ReactNode} from "react";
+
+interface SignatureDialogProps {
+  children?: ReactNode;
+  block: SignatureBlock;
+  editor: any; //typeof schema.BlockNoteEditor;
+}
 
 export type FormData = {
   name: string,
   address: string,
 };
 
-const SignatureDialog = (props) => {
+const SignatureDialog = (props: SignatureDialogProps) => {
   const form = useForm<FormData>();
 
   const {

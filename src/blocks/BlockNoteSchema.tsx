@@ -1,0 +1,126 @@
+import {
+    // Block,
+    BlockNoteSchema,
+    defaultBlockSpecs,
+    defaultProps,
+    CustomBlockConfig,
+} from '@blocknote/core';
+import { createReactBlockSpec } from "@blocknote/react";
+import { Icons, Card, CardContent, CardTitle, CardHeader, Text, Button } from "@ds3/react";
+import SablierIcon from "../assets/sablier.svg?react";
+import MonthlyIcon from "../assets/monthly.svg?react";
+import LineaIcon from "../assets/linea.svg?react";
+import TokenIcon from "../assets/token.svg?react";
+import SablierDialog from "./SablierDialog.tsx";
+import { supportedChains, getChainById } from "../utils/chainUtils";
+import Signature from "./Signature.tsx";
+import SignatureDialog from "./SignatureDialog";
+
+export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof schema.inlineContentSchema, typeof schema.styleSchema>(
+    {
+        type: "sablier",
+        propSchema: {
+            textAlignment: defaultProps.textAlignment,
+            textColor: defaultProps.textColor,
+            shape: {
+                default: "monthly",
+                values: ["monthly"]
+            },
+            chain: {
+                default: 1,
+                values: supportedChains.map((c) => { return c.id } )
+            },
+            token: {
+                default: "",
+            },
+            amount: {
+                default: 0,
+            },
+            duration: {
+                default: 1,
+            },
+            firstUnlock: {
+                default: 'default',
+            }
+        },
+        content: "inline",
+    },
+    {
+        render: (props) => {
+            return (
+                <Card className='w-full max-w-md'>
+                    <CardHeader>
+                        <CardTitle className="flex items-center">
+                            <Text className="flex items-center mr-auto">
+                                <SablierIcon className="w-8 h-8" /> Sablier Stream
+                            </Text>
+
+                            <SablierDialog block={props.block} editor={props.editor}>
+                                <Button variant="ghost" size="sm">
+                                    <Icons.Pencil className="w-5 h-5 text-muted-foreground" />
+                                </Button>
+                            </SablierDialog>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-3 gap-1">
+                        <div className="col-span-1 color-neutral-10">Shape</div>
+                            <div className="col-span-2 flex items-center gap-2"><MonthlyIcon /> Monthly unlocks</div>
+                        <div className="col-span-1 color-neutral-10">Chain</div>
+                            <div className="col-span-2 flex items-center gap-2">{props.block.props.chain && <><LineaIcon />{getChainById(props.block.props.chain)?.name}<Icons.SquareArrowOutUpRight size={18} /></>}</div>
+                        <div className="col-span-1 color-neutral-10">Token</div>
+                            <div className="col-span-2 flex items-center gap-2">{props.block.props.token && <><TokenIcon /> {props.block.props.token} <Icons.SquareArrowOutUpRight size={18} /></>}</div>
+                        <div className="col-span-1 color-neutral-10">Amount</div>
+                            <div className="col-span-2">{props.block.props.amount}</div>
+                            <div className="col-span-1 color-neutral-10">Duration</div>
+                            <div className="col-span-2"> {props.block.props.duration}{/** 3 months <Text className="color-neutral-10 text-3">(Sept 1, 2024 - Jan 1, 2024)</Text> */} </div>
+                        <div className="col-span-1 color-neutral-10">First Unlock</div>
+                        <div className="col-span-2">{props.block.props.firstUnlock}{/** Oct 1, 2024 */}</div>
+                        </div>
+                    </CardContent>
+                </Card>
+            );
+        },
+    }
+);
+
+const SignatureBlock: any = createReactBlockSpec<CustomBlockConfig, typeof schema.inlineContentSchema, typeof schema.styleSchema>(
+    {
+        type: "signature",
+        propSchema: {
+            textAlignment: defaultProps.textAlignment,
+            textColor: defaultProps.textColor,
+            name: { default: '' },
+            address: { default: '' }
+        },
+        content: "inline",
+    },
+    {
+        render: (props) => {
+            return (
+                <div className="mb-4">
+                    { !props.block.props.name || !props.block.props.address ?
+                        <SignatureDialog {...props} /> :
+                        <Signature name={props.block.props.name} address={props.block.props.address}/>
+                    }
+                </div>
+            );
+        },
+    }
+);
+
+
+
+export const schema = BlockNoteSchema.create({
+    blockSpecs: {
+        ...defaultBlockSpecs,
+        sablier: SablierBlock,
+        signature: SignatureBlock
+    },
+});
+
+export type Block = typeof schema.Block;
+export type SablierBlock = typeof schema.blockSchema.sablier;
+export type SignatureBlock = typeof schema.blockSchema.signature;
+
+console.log(schema, typeof schema.blockSchema);

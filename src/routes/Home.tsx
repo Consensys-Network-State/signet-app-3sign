@@ -3,9 +3,6 @@ import BlockNote from "../components/BlockNote.tsx";
 import { Button, ModeToggle, Text, useTheme } from "@ds3/react";
 import Account from "../web3/Account.tsx";
 import { useDocumentStore } from '../store/documentStore';
-import {
-  Block,
-} from '@blocknote/core';
 import _ from 'lodash';
 import { setupAgent } from '../veramo';
 import EthSignDialog from "../blocks/EthSignDialog";
@@ -13,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useAccount } from "wagmi";
 import { ethers } from 'ethers';
 import { useEditorStore } from '../store/editorStore';
+import { schema } from '../blocks/BlockNoteSchema';
 
 export enum BlockEditorMode {
   EDITOR = "EDITOR",
@@ -48,7 +46,7 @@ const Home: React.FC = () => {
     //       In later phase add signatures to the VC
     const document = _.cloneDeep(editDocumentState);
     const signatures: Signature[] = [];
-    _.filter(document, (block: Block) => block.type === 'signature').forEach((sigBlock: Block) => {
+    _.filter(document, (block: typeof schema.Block) => block.type === 'signature').forEach((sigBlock: typeof schema.blockSchema.signature) => {
       signatures.push({ blockId: sigBlock.id, name: sigBlock.props.name, address: sigBlock.props.address });
       delete sigBlock.props.name;
       delete sigBlock.props.address;
@@ -84,6 +82,7 @@ const Home: React.FC = () => {
     // const test = await agent.verifyCredential({ credential: vc });
 
     // TODO: Display VC somewhere for user to copy
+    console.log(vc);
   }
 
   return (
