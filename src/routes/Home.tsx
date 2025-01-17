@@ -13,6 +13,7 @@ import {
   useCreateBlockNote,
 } from "@blocknote/react";
 import ExportDialog from "../components/ExportDialog.tsx";
+import ImportSignatureDialog from "../components/ImportSignatureDialog.tsx";
 
 export enum BlockEditorMode {
   EDITOR = "EDITOR",
@@ -28,7 +29,7 @@ const Home: React.FC = () => {
 
   const getButtonVariant = (buttonType: BlockEditorMode) => buttonType === editorMode ? "outline" : "default";
 
-  const { editDocumentState, signaturesState: {numOfSignedSignatureBlocks, numOfSignatureBlocks} } = useDocumentStore();
+  const { editDocumentState, signaturesState: {numOfSignedSignatureBlocks, numOfSignatureBlocks}, setSignatories } = useDocumentStore();
 
   const { address } = useAccount();
 
@@ -36,6 +37,14 @@ const Home: React.FC = () => {
     schema,
     initialContent: editDocumentState
   })
+
+  const handleExport = (document) => {
+    setDocVC(document);
+    const signatories = JSON.parse(document)?.credentialSubject?.signatories;
+    if (signatories) {
+      setSignatories(signatories);
+    }
+  }
 
   const handleSignDocument = async () => {
     // Validation
@@ -79,9 +88,10 @@ const Home: React.FC = () => {
           }
           { editorMode === BlockEditorMode.EDITOR &&
             <>
-              <ExportDialog onPressExport={setDocVC} />
+              <ExportDialog onPressExport={handleExport} />
               <Button disabled={!docVC} onPress={() => {navigator.clipboard.writeText(docVC)}}><Text>Copy Doc VC</Text></Button>
               <ImportDialog editor={editor} />
+              <ImportSignatureDialog />
             </>
           }
           <div className="flex space-x-4">

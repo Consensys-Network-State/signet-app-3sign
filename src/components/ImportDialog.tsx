@@ -14,6 +14,7 @@ import {
 import { useForm, Controller } from 'react-hook-form';
 import {validateAndProcessDocumentVC} from "../utils/veramoUtils.ts";
 import {Block} from "../blocks/BlockNoteSchema.tsx";
+import {useDocumentStore} from "../store/documentStore.ts";
 
 interface ImportDialogProps {
     editor: any;
@@ -30,11 +31,13 @@ const ImportDialog: FC<ImportDialogProps> =(props) => {
         }
     });
 
+    const { setSignatories } = useDocumentStore();
+
     const onSubmit = async (data: ImportFormData) => {
         try {
-            console.log(data.documentVC);
-            const document = await validateAndProcessDocumentVC(JSON.parse(data.documentVC));
+            const { document, signatories } = await validateAndProcessDocumentVC(JSON.parse(data.documentVC));
             props.editor.replaceBlocks(props.editor.document.map((block: Block) => block.id), document);
+            if (signatories) setSignatories(signatories);
         } catch (error: any) {
             console.log('Failed to Import', error);
         }

@@ -14,6 +14,5 @@ export const separateSignaturesFromDocument = (documentState: Block[]) => {
         delete sigBlock.props.name;
         delete sigBlock.props.address;
     });
-    console.log(document);
     return { document, signatures };
 }

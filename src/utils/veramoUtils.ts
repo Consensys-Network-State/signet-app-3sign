@@ -4,7 +4,7 @@ import {ethers} from 'ethers';
 import {Block} from "../blocks/BlockNoteSchema.tsx";
 import {separateSignaturesFromDocument} from "./documentUtils.ts";
 
-const encodeObjectToBase64 = (obj: any) => {
+export const encodeObjectToBase64 = (obj: any) => {
     try {
         const jsonString = JSON.stringify(obj); // Convert object to JSON string
         const utf8String = new TextEncoder().encode(jsonString); // Convert to UTF-8 encoded Uint8Array
@@ -15,7 +15,7 @@ const encodeObjectToBase64 = (obj: any) => {
     }
 };
 
-const decodeBase64ToObject = (base64String: string) => {
+export const decodeBase64ToObject = (base64String: string) => {
     try {
         const utf8String = atob(base64String); // Decode Base64 to string
         const jsonString = new TextDecoder().decode(new Uint8Array([...utf8String].map((c) => c.charCodeAt(0))));
@@ -102,8 +102,10 @@ export async function createSignatureVC(address: `0x${string}`, documentState: B
 export async function validateAndProcessDocumentVC(vc: any) {
     const agent = await setupAgent();
     const verificationResult = await agent.verifyCredential({ credential: vc });
-    console.log(verificationResult);
     if (!verificationResult.verified) throw new Error('Failed to sign document');
     // How do we check if the issuer of the VC is the correct person
-    return decodeBase64ToObject(vc.credentialSubject.document) as Block[]
+    return {
+        document: decodeBase64ToObject(vc.credentialSubject.document) as Block[],
+        signatories: vc.credentialSubject.signatories,
+    }
 }

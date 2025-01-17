@@ -22,10 +22,14 @@ export const useDocumentStore = create(
                     ...countNumberOfSignatures(grantAgreement as Block[])
                 },
                 tempStateStore: grantAgreement as Block[],
+                signatories: [] as `0x${string}`[],
+                signatures: [] as any, // Hold VCs?
             }, // Initial state
             (set) => ({
                 updateEditDocumentState: (updatedDoc: Block[]) =>
                     set((state) => ({ editDocumentState: updatedDoc, signaturesState: { ...state.signaturesState, ...countNumberOfSignatures(updatedDoc) }}), undefined, 'documentStore/updateEditDocumentState'),
+                setSignatories: (signatories: `0x${string}`[]) =>
+                    set(() => ({ signatories: signatories }), undefined, 'documentStore/setSignatories'),
                 backupEditDocumentState: () =>
                     set((state) => ({ tempStateStore: _.cloneDeep(state.editDocumentState) }), undefined, 'documentStore/backupEditDocumentState'),
             })
