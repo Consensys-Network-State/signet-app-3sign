@@ -71,7 +71,7 @@ export async function createDocumentVC(address: `0x${string}`, signatories: `0x$
     return stringVC;
 }
 
-export async function createSignatureVC(address: `0x${string}`, documentState: Block[], documentVC: string) {
+export async function createSignatureVC(address: `0x${string}`, _documentState: Block[], documentVC: string) {
     // TODO: Do something with signatures
     // const { document, signatures } = separateSignaturesFromDocument(documentState);
 

@@ -14,7 +14,6 @@ import {
 import { useForm, Controller } from 'react-hook-form';
 import {setupAgent} from "../veramo";
 import {useDocumentStore} from "../store/documentStore.ts";
-import {separateSignaturesFromDocument} from "../utils/documentUtils.ts";
 import {ethers} from 'ethers';
 import {encodeObjectToBase64} from "../utils/veramoUtils.ts";
 
