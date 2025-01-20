@@ -29,7 +29,7 @@ const ImportSignatureDialog: FC = () => {
         }
     });
 
-    const { editDocumentState, signatories } = useDocumentStore();
+    const { signatories, documentVC } = useDocumentStore();
     const onSubmit = async (data: ImportSignatureFormData) => {
         try {
             // TEMPORARY: For now just check that this signature is valid and print in console that it was successful
@@ -37,8 +37,7 @@ const ImportSignatureDialog: FC = () => {
             const credential = JSON.parse(data.signatureVC);
             const verificationResult = await agent.verifyCredential({ credential });
             if (!verificationResult.verified) throw new Error('Failed to sign document');
-            const { document } = separateSignaturesFromDocument(editDocumentState);
-            if (credential.credentialSubject.documentHash !== ethers.keccak256(new TextEncoder().encode(encodeObjectToBase64(document)!))) {
+            if (credential.credentialSubject.documentHash !== ethers.keccak256(new TextEncoder().encode(encodeObjectToBase64(JSON.parse(documentVC))!))) {
                 throw new Error('Document Hash Doesn\'t Match');
             }
             if (signatories.find((addr) => addr === credential.issuer.id.replace("did:pkh:eip155:1:", ""))) {

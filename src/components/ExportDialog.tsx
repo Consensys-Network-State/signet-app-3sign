@@ -16,22 +16,18 @@ import {createDocumentVC} from "../utils/veramoUtils.ts";
 import {useDocumentStore} from "../store/documentStore.ts";
 import { useAccount } from "wagmi";
 
-interface ExportDialogProps {
-    onPressExport?: (res: string) => void;
-}
-
 interface ExportFormData {
     signatories: string;
 }
 
-const ExportDialog: FC<ExportDialogProps> =(props) => {
+const ExportDialog: FC = () => {
     const {handleSubmit, formState: { errors }, control} = useForm<ExportFormData>({
         defaultValues: {
             signatories: ""
         }
     });
 
-    const { editDocumentState } = useDocumentStore();
+    const { editDocumentState, setSignatories, setDocumentVC } = useDocumentStore();
 
     const { address } = useAccount();
 
@@ -39,7 +35,11 @@ const ExportDialog: FC<ExportDialogProps> =(props) => {
         try {
             if (!address) throw new Error('Not signed in');
             const document = await createDocumentVC(address, data.signatories.split(',') as `0x${string}`[], editDocumentState);
-            if (props.onPressExport) props.onPressExport(document)
+            setDocumentVC(document);
+            const signatories = JSON.parse(document)?.credentialSubject?.signatories;
+            if (signatories) {
+                setSignatories(signatories);
+            }
         } catch (error: any) {
             console.log('Failed to Export', error);
         }

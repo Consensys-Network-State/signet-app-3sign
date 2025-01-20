@@ -31,12 +31,13 @@ const ImportDialog: FC<ImportDialogProps> =(props) => {
         }
     });
 
-    const { setSignatories } = useDocumentStore();
+    const { setSignatories, setDocumentVC } = useDocumentStore();
 
     const onSubmit = async (data: ImportFormData) => {
         try {
             const { document, signatories } = await validateAndProcessDocumentVC(JSON.parse(data.documentVC));
             props.editor.replaceBlocks(props.editor.document.map((block: Block) => block.id), document);
+            setDocumentVC(data.documentVC);
             if (signatories) setSignatories(signatories);
         } catch (error: any) {
             console.log('Failed to Import', error);

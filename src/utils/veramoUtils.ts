@@ -71,8 +71,9 @@ export async function createDocumentVC(address: `0x${string}`, signatories: `0x$
     return stringVC;
 }
 
-export async function createSignatureVC(address: `0x${string}`, documentState: Block[]) {
-    const { document } = separateSignaturesFromDocument(documentState);
+export async function createSignatureVC(address: `0x${string}`, documentState: Block[], documentVC: string) {
+    // TODO: Do something with signatures
+    // const { document, signatures } = separateSignaturesFromDocument(documentState);
 
     const did = await getDIDFromAddress(address);
 
@@ -89,7 +90,7 @@ export async function createSignatureVC(address: `0x${string}`, documentState: B
             issuanceDate: new Date().toISOString(),
             credentialSubject: {
                 id: did.did,
-                documentHash: ethers.keccak256(new TextEncoder().encode(encodeObjectToBase64(document)!)),
+                documentHash: ethers.keccak256(new TextEncoder().encode(encodeObjectToBase64(JSON.parse(documentVC))!)),
                 timeStamp: new Date().toISOString(),
             },
         }

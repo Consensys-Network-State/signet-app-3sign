@@ -24,12 +24,11 @@ export enum BlockEditorMode {
 const Home: React.FC = () => {
   const { mode } = useTheme();
   const [sigVC, setSigVC] = useState<string>('');
-  const [docVC, setDocVC] = useState<string>('');
   const { editorMode, setEditorMode} = useEditorStore();
 
   const getButtonVariant = (buttonType: BlockEditorMode) => buttonType === editorMode ? "outline" : "default";
 
-  const { editDocumentState, signaturesState: {numOfSignedSignatureBlocks, numOfSignatureBlocks}, setSignatories } = useDocumentStore();
+  const { editDocumentState, signaturesState: {numOfSignedSignatureBlocks, numOfSignatureBlocks}, signatories, documentVC } = useDocumentStore();
 
   const { address } = useAccount();
 
@@ -38,23 +37,17 @@ const Home: React.FC = () => {
     initialContent: editDocumentState
   })
 
-  const handleExport = (document) => {
-    setDocVC(document);
-    const signatories = JSON.parse(document)?.credentialSubject?.signatories;
-    if (signatories) {
-      setSignatories(signatories);
-    }
-  }
-
   const handleSignDocument = async () => {
     // Validation
     if (!address) throw new Error('Not signed in');
+
+    if (!signatories.find((a) => a === address)) throw new Error('You are not a signer for this document');
 
     if (numOfSignedSignatureBlocks !== numOfSignatureBlocks) {
       throw new Error('No signatures');
     }
 
-    const signatureVC = await createSignatureVC(address, editDocumentState);
+    const signatureVC = await createSignatureVC(address, editDocumentState, documentVC);
     setSigVC(signatureVC);
   }
 
@@ -88,8 +81,8 @@ const Home: React.FC = () => {
           }
           { editorMode === BlockEditorMode.EDITOR &&
             <>
-              <ExportDialog onPressExport={handleExport} />
-              <Button disabled={!docVC} onPress={() => {navigator.clipboard.writeText(docVC)}}><Text>Copy Doc VC</Text></Button>
+              <ExportDialog />
+              <Button disabled={!documentVC} onPress={() => {navigator.clipboard.writeText(documentVC)}}><Text>Copy Doc VC</Text></Button>
               <ImportDialog editor={editor} />
               <ImportSignatureDialog />
             </>
