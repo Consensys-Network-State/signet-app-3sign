@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import {FC, useEffect} from 'react';
 import {
     Text,
     Button,
@@ -15,6 +15,9 @@ import { useForm, Controller } from 'react-hook-form';
 import {createDocumentVC} from "../utils/veramoUtils.ts";
 import {useDocumentStore} from "../store/documentStore.ts";
 import { useAccount } from "wagmi";
+import { useMutation } from "@tanstack/react-query";
+import {postDocument} from "../api";
+import { useNavigate } from "react-router";
 
 interface ExportFormData {
     signatories: string;
@@ -26,6 +29,19 @@ const ExportDialog: FC = () => {
             signatories: ""
         }
     });
+
+    const mutation = useMutation({
+        mutationFn: postDocument
+    })
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (mutation.isSuccess && mutation.data) {
+            const { processId } = mutation.data?.data || {};
+            navigate(`/${processId}`);
+        }
+    }, [mutation.isSuccess, mutation.data])
 
     const { editDocumentState, setSignatories, setDocumentVC } = useDocumentStore();
 
@@ -40,6 +56,7 @@ const ExportDialog: FC = () => {
             if (signatories) {
                 setSignatories(signatories);
             }
+            mutation.mutate(document);
         } catch (error: any) {
             console.log('Failed to Export', error);
         }

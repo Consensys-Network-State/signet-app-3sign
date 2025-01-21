@@ -16,7 +16,7 @@ import {
   CardContent,
 } from '@ds3/react';
 import Signature from "./Signature.tsx";
-import { useEditorStore, BlockEditorMode } from '../store/editorStore';
+import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import type { SignatureBlock } from './BlockNoteSchema';
 import {ReactNode} from "react";
 
@@ -42,9 +42,9 @@ const SignatureDialog = (props: SignatureDialogProps) => {
     formState: { errors, isValid },
   } = form;
 
-  const editorMode = useEditorStore((state) => state.editorMode);
+  const editorMode = useBlockNoteStore((state) => state.editorMode);
 
-  const isSigningDisabled = !(editorMode === BlockEditorMode.SIMULATOR)
+  const isSigningDisabled = !(editorMode === BlockNoteMode.SIGNATURE);
 
   const onSubmit = (data: FormData) => {
     console.log("Signature Form Data", JSON.stringify(data, null, 2));

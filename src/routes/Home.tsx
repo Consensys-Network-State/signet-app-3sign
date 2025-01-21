@@ -6,7 +6,7 @@ import { useDocumentStore } from '../store/documentStore';
 import { createSignatureVC } from '../utils/veramoUtils';
 import EthSignDialog from "../blocks/EthSignDialog";
 import { useAccount } from "wagmi";
-import { useEditorStore } from '../store/editorStore';
+import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import ImportDialog from "../components/ImportDialog.tsx";
 import {schema} from "../blocks/BlockNoteSchema.tsx";
 import {
@@ -15,18 +15,12 @@ import {
 import ExportDialog from "../components/ExportDialog.tsx";
 import ImportSignatureDialog from "../components/ImportSignatureDialog.tsx";
 
-export enum BlockEditorMode {
-  EDITOR = "EDITOR",
-  SIMULATOR = "SIMULATOR",
-  LOG = "LOG"
-}
-
 const Home: React.FC = () => {
   const { mode } = useTheme();
   const [sigVC, setSigVC] = useState<string>('');
-  const { editorMode, setEditorMode} = useEditorStore();
+  const { editorMode, setEditorMode } = useBlockNoteStore();
 
-  const getButtonVariant = (buttonType: BlockEditorMode) => buttonType === editorMode ? "outline" : "default";
+  const getButtonVariant = (buttonType: BlockNoteMode) => buttonType === editorMode ? "outline" : "default";
 
   const { editDocumentState, signaturesState: {numOfSignedSignatureBlocks, numOfSignatureBlocks}, signatories, documentVC } = useDocumentStore();
 
@@ -58,28 +52,28 @@ const Home: React.FC = () => {
           <h1 className="text-lg font-bold">APOC</h1>
           <div className="flex space-x-4">
             <Button
-              variant={getButtonVariant(BlockEditorMode.EDITOR)}
-              onPress={() => setEditorMode(BlockEditorMode.EDITOR)}
+              variant={getButtonVariant(BlockNoteMode.EDIT)}
+              onPress={() => setEditorMode(BlockNoteMode.EDIT)}
             >
               <Text>Agreement Editor</Text>
             </Button>
             <Button
-              variant={getButtonVariant(BlockEditorMode.SIMULATOR)}
-              onPress={() => setEditorMode(BlockEditorMode.SIMULATOR)}
+              variant={getButtonVariant(BlockNoteMode.SIGNATURE)}
+              onPress={() => setEditorMode(BlockNoteMode.SIGNATURE)}
             >
               <Text>Signing Simulation</Text>
             </Button>
             <Button
-              variant={getButtonVariant(BlockEditorMode.LOG)}
-              onPress={() => setEditorMode(BlockEditorMode.LOG)}
+              variant={getButtonVariant(BlockNoteMode.VIEW)}
+              onPress={() => setEditorMode(BlockNoteMode.VIEW)}
             >
               <Text>Signing Data Log</Text>
             </Button>
           </div>
-          { editorMode === BlockEditorMode.SIMULATOR &&
+          { editorMode === BlockNoteMode.SIGNATURE &&
             <Button disabled={!sigVC} onPress={() => {navigator.clipboard.writeText(sigVC)}}><Text>Copy Sig VC</Text></Button>
           }
-          { editorMode === BlockEditorMode.EDITOR &&
+          { editorMode === BlockNoteMode.EDIT &&
             <>
               <ExportDialog />
               <Button disabled={!documentVC} onPress={() => {navigator.clipboard.writeText(documentVC)}}><Text>Copy Doc VC</Text></Button>
@@ -95,7 +89,7 @@ const Home: React.FC = () => {
         </div>
         <div className="flex-grow overflow-y-auto">
           <div className="mx-auto w-full max-w-[1200px] p-4">
-            { editorMode === BlockEditorMode.SIMULATOR &&
+            { editorMode === BlockNoteMode.SIGNATURE &&
               <div className="bg-primary-4 p-2 flex items-center justify-between rounded-t-3 sticky top-0 z-20">
                 <Text>Review the document, fill in all details required, and sign all signature blocks {numOfSignedSignatureBlocks}/{numOfSignatureBlocks}</Text>
                 <div className="flex space-x-4">

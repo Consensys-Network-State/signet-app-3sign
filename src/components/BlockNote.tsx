@@ -12,7 +12,7 @@ import {
 import { Icons } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
 import {useEffect, useState} from 'react';
-import { BlockEditorMode } from '../routes/Home';
+import { BlockNoteMode } from '../store/blockNoteStore';
 import { useDocumentStore } from '../store/documentStore';
 import { schema } from '../blocks/BlockNoteSchema';
 
@@ -48,7 +48,7 @@ const insertSignature = (editor: typeof schema.BlockNoteEditor) => ({
 });
 
 interface BlockNoteProps {
-  editorMode: BlockEditorMode;
+  editorMode: BlockNoteMode;
   editor: any;
   // Add other properties of `props` if necessary
   [key: string]: unknown; // Optional: For additional props
@@ -57,15 +57,15 @@ interface BlockNoteProps {
 export default function BlockNote({ editor, editorMode: currentEditorMode, ...props }: BlockNoteProps) {
   const { updateEditDocumentState, backupEditDocumentState, tempStateStore } = useDocumentStore();
 
-  const [editorMode, setEditorMode] = useState<BlockEditorMode | null>(null);
+  const [editorMode, setEditorMode] = useState<BlockNoteMode | null>(null);
 
   // TODO: Handle Signing Log
   useEffect(() => {
     if (!editorMode) setEditorMode(currentEditorMode);
-    else if (editorMode === BlockEditorMode.EDITOR && currentEditorMode === BlockEditorMode.SIMULATOR) {
+    else if (editorMode === BlockNoteMode.EDIT && currentEditorMode === BlockNoteMode.SIGNATURE) {
       backupEditDocumentState();
       setEditorMode(currentEditorMode);
-    } else if (editorMode === BlockEditorMode.SIMULATOR && currentEditorMode === BlockEditorMode.EDITOR) {
+    } else if (editorMode === BlockNoteMode.SIGNATURE && currentEditorMode === BlockNoteMode.EDIT) {
       editor.replaceBlocks(editor.topLevelBlocks, tempStateStore);
       setEditorMode(currentEditorMode);
     }
@@ -77,7 +77,7 @@ export default function BlockNote({ editor, editorMode: currentEditorMode, ...pr
       updateEditDocumentState(editor.document);
     }}
     editor={editor}
-    editable={editorMode === BlockEditorMode.EDITOR}
+    editable={editorMode === BlockNoteMode.EDIT}
     slashMenu={false}
     {...props}
   >
