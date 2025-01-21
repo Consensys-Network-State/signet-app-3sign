@@ -15,7 +15,6 @@ import { useForm, Controller } from 'react-hook-form';
 import {setupAgent} from "../veramo";
 import {useDocumentStore} from "../store/documentStore.ts";
 import {ethers} from 'ethers';
-import {encodeObjectToBase64} from "../utils/veramoUtils.ts";
 
 interface ImportSignatureFormData {
     signatureVC: string;
@@ -36,7 +35,7 @@ const ImportSignatureDialog: FC = () => {
             const credential = JSON.parse(data.signatureVC);
             const verificationResult = await agent.verifyCredential({ credential });
             if (!verificationResult.verified) throw new Error('Failed to sign document');
-            if (credential.credentialSubject.documentHash !== ethers.keccak256(new TextEncoder().encode(encodeObjectToBase64(JSON.parse(documentVC))!))) {
+            if (credential.credentialSubject.documentHash !== ethers.keccak256(new TextEncoder().encode(documentVC))) {
                 throw new Error('Document Hash Doesn\'t Match');
             }
             if (signatories.find((addr) => addr === credential.issuer.id.replace("did:pkh:eip155:1:", ""))) {

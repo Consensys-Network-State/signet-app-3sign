@@ -90,7 +90,7 @@ export async function createSignatureVC(address: `0x${string}`, _documentState: 
             issuanceDate: new Date().toISOString(),
             credentialSubject: {
                 id: did.did,
-                documentHash: ethers.keccak256(new TextEncoder().encode(encodeObjectToBase64(JSON.parse(documentVC))!)),
+                documentHash: ethers.keccak256(new TextEncoder().encode(documentVC)),
                 timeStamp: new Date().toISOString(),
             },
         }
