@@ -1,16 +1,19 @@
-import React from "react";
+import React, {useState} from "react";
 import BlockNote from "../components/BlockNote.tsx";
 import { Button, ModeToggle, Text, useTheme } from "@ds3/react";
 import Account from "../web3/Account.tsx";
 import { useDocumentStore } from '../store/documentStore';
-import _ from 'lodash';
-import { setupAgent } from '../veramo';
+import { createSignatureVC } from '../utils/veramoUtils';
 import EthSignDialog from "../blocks/EthSignDialog";
-import { v4 as uuidv4 } from 'uuid';
 import { useAccount } from "wagmi";
-import { ethers } from 'ethers';
 import { useEditorStore } from '../store/editorStore';
-import { schema } from '../blocks/BlockNoteSchema';
+import ImportDialog from "../components/ImportDialog.tsx";
+import {schema} from "../blocks/BlockNoteSchema.tsx";
+import {
+  useCreateBlockNote,
+} from "@blocknote/react";
+import ExportDialog from "../components/ExportDialog.tsx";
+import ImportSignatureDialog from "../components/ImportSignatureDialog.tsx";
 
 export enum BlockEditorMode {
   EDITOR = "EDITOR",
@@ -18,71 +21,34 @@ export enum BlockEditorMode {
   LOG = "LOG"
 }
 
-// TODO: Change Later as needed
-interface Signature {
-  blockId: string,
-  name: string,
-  address: string,
-}
-
 const Home: React.FC = () => {
   const { mode } = useTheme();
+  const [sigVC, setSigVC] = useState<string>('');
   const { editorMode, setEditorMode} = useEditorStore();
 
   const getButtonVariant = (buttonType: BlockEditorMode) => buttonType === editorMode ? "outline" : "default";
 
-  const { editDocumentState, signaturesState: {numOfSignedSignatureBlocks, numOfSignatureBlocks} } = useDocumentStore();
+  const { editDocumentState, signaturesState: {numOfSignedSignatureBlocks, numOfSignatureBlocks}, signatories, documentVC } = useDocumentStore();
 
   const { address } = useAccount();
 
+  const editor = useCreateBlockNote({
+    schema,
+    initialContent: editDocumentState
+  })
+
   const handleSignDocument = async () => {
     // Validation
+    if (!address) throw new Error('Not signed in');
+
+    if (!signatories.find((a) => a === address)) throw new Error('You are not a signer for this document');
+
     if (numOfSignedSignatureBlocks !== numOfSignatureBlocks) {
       throw new Error('No signatures');
     }
 
-    // Split Signatures From Document
-    // TODO: Need to do a deep search for signature blocks
-    //       In later phase add signatures to the VC
-    const document = _.cloneDeep(editDocumentState);
-    const signatures: Signature[] = [];
-    _.filter(document, (block: typeof schema.Block) => block.type === 'signature').forEach((sigBlock: typeof schema.blockSchema.signature) => {
-      signatures.push({ blockId: sigBlock.id, name: sigBlock.props.name, address: sigBlock.props.address });
-      delete sigBlock.props.name;
-      delete sigBlock.props.address;
-    });
-
-    const agent = await setupAgent();
-
-    // Sign Base Document with Metamask
-
-    const did = await agent.didManagerGet({ did: `did:pkh:eip155:1:${address}` });
-
-    // Construct VC from this
-    const vc = await agent.createVerifiableCredential({
-      credential: {
-        id: uuidv4(),
-        issuer: { id: did.did },
-        '@context': ['https://www.w3.org/2018/credentials/v1'],
-        type: [
-          'VerifiableCredential',
-          'SignedAgreement',
-        ],
-        issuanceDate: new Date().toISOString(),
-        credentialSubject: {
-          id: did.did,
-          documentHash: ethers.keccak256(new TextEncoder().encode(JSON.stringify(document))),
-          timeStamp: new Date().toISOString(),
-        },
-      },
-      proofFormat: 'EthereumEip712Signature2021',
-    });
-
-    // Verification doesn't work on FE because the code relies on the Buffer object not available in browser environment
-    // const test = await agent.verifyCredential({ credential: vc });
-
-    // TODO: Display VC somewhere for user to copy
-    console.log(vc);
+    const signatureVC = await createSignatureVC(address, editDocumentState, documentVC);
+    setSigVC(signatureVC);
   }
 
   return (
@@ -110,7 +76,17 @@ const Home: React.FC = () => {
               <Text>Signing Data Log</Text>
             </Button>
           </div>
-
+          { editorMode === BlockEditorMode.SIMULATOR &&
+            <Button disabled={!sigVC} onPress={() => {navigator.clipboard.writeText(sigVC)}}><Text>Copy Sig VC</Text></Button>
+          }
+          { editorMode === BlockEditorMode.EDITOR &&
+            <>
+              <ExportDialog />
+              <Button disabled={!documentVC} onPress={() => {navigator.clipboard.writeText(documentVC)}}><Text>Copy Doc VC</Text></Button>
+              <ImportDialog editor={editor} />
+              <ImportSignatureDialog />
+            </>
+          }
           <div className="flex space-x-4">
             <Account />
             <ModeToggle />
@@ -127,7 +103,7 @@ const Home: React.FC = () => {
                 </div>
               </div>
             }
-            <BlockNote theme={mode} editorMode={editorMode}/>
+            <BlockNote editor={editor} theme={mode} editorMode={editorMode}/>
           </div>
         </div>
       </div>

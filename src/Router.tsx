@@ -1,6 +1,6 @@
 import React from "react";
 import Home from "./routes/Home.tsx";
-import Login2 from "./routes/Login.tsx";
+import Login from "./routes/Login.tsx";
 import { Routes, Route } from 'react-router';
 import { useAccount } from "wagmi";
 import { Navigate } from 'react-router';
@@ -20,7 +20,7 @@ const Router: React.FC = () => {
 
   return (
     <Routes>
-      <Route path="/login" element={isConnected ? <Navigate to="/" /> : <Login2 />} />
+      <Route path="/login" element={isConnected ? <Navigate to="/" /> : <Login />} />
       <Route path="/" element={
         <ProtectedRoute>
           <Home />

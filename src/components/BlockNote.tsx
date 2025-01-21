@@ -2,12 +2,10 @@ import "@blocknote/core/fonts/inter.css";
 import { BlockNoteView } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
 import {
-  useCreateBlockNote,
   SuggestionMenuController,
   getDefaultReactSlashMenuItems
 } from "@blocknote/react";
 import {
-  // Block,
   insertOrUpdateBlock,
   filterSuggestionItems,
 } from '@blocknote/core';
@@ -51,17 +49,13 @@ const insertSignature = (editor: typeof schema.BlockNoteEditor) => ({
 
 interface BlockNoteProps {
   editorMode: BlockEditorMode;
+  editor: any;
   // Add other properties of `props` if necessary
   [key: string]: unknown; // Optional: For additional props
 }
 
-export default function BlockNote({ editorMode: currentEditorMode, ...props }: BlockNoteProps) {
-  const { editDocumentState, updateEditDocumentState, backupEditDocumentState, tempStateStore } = useDocumentStore();
-
-  const editor = useCreateBlockNote({
-    schema,
-    initialContent: editDocumentState
-  })
+export default function BlockNote({ editor, editorMode: currentEditorMode, ...props }: BlockNoteProps) {
+  const { updateEditDocumentState, backupEditDocumentState, tempStateStore } = useDocumentStore();
 
   const [editorMode, setEditorMode] = useState<BlockEditorMode | null>(null);
 
