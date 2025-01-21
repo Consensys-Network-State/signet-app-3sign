@@ -122,5 +122,3 @@ export const schema = BlockNoteSchema.create({
 export type Block = typeof schema.Block;
 export type SablierBlock = typeof schema.blockSchema.sablier;
 export type SignatureBlock = typeof schema.blockSchema.signature;
-
-console.log(schema, typeof schema.blockSchema);

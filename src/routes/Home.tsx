@@ -1,5 +1,5 @@
-import React, {useState} from "react";
-import BlockNote from "../components/BlockNote.tsx";
+import React from "react";
+import DocumentEditor from "../components/DocumentEditor.tsx";
 import { Button, ModeToggle, Text, useTheme } from "@ds3/react";
 import Account from "../web3/Account.tsx";
 import { useDocumentStore } from '../store/documentStore';
@@ -7,17 +7,10 @@ import { createSignatureVC } from '../utils/veramoUtils';
 import EthSignDialog from "../blocks/EthSignDialog";
 import { useAccount } from "wagmi";
 import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
-import ImportDialog from "../components/ImportDialog.tsx";
-import {schema} from "../blocks/BlockNoteSchema.tsx";
-import {
-  useCreateBlockNote,
-} from "@blocknote/react";
 import ExportDialog from "../components/ExportDialog.tsx";
-import ImportSignatureDialog from "../components/ImportSignatureDialog.tsx";
 
 const Home: React.FC = () => {
   const { mode } = useTheme();
-  const [sigVC, setSigVC] = useState<string>('');
   const { editorMode, setEditorMode } = useBlockNoteStore();
 
   const getButtonVariant = (buttonType: BlockNoteMode) => buttonType === editorMode ? "outline" : "default";
@@ -25,11 +18,6 @@ const Home: React.FC = () => {
   const { editDocumentState, signaturesState: {numOfSignedSignatureBlocks, numOfSignatureBlocks}, signatories, documentVC } = useDocumentStore();
 
   const { address } = useAccount();
-
-  const editor = useCreateBlockNote({
-    schema,
-    initialContent: editDocumentState
-  })
 
   const handleSignDocument = async () => {
     // Validation
@@ -42,7 +30,8 @@ const Home: React.FC = () => {
     }
 
     const signatureVC = await createSignatureVC(address, editDocumentState, documentVC);
-    setSigVC(signatureVC);
+    console.log(signatureVC);
+    // TODO: What do we do with signature VC in signing simulator
   }
 
   return (
@@ -70,16 +59,8 @@ const Home: React.FC = () => {
               <Text>Signing Data Log</Text>
             </Button>
           </div>
-          { editorMode === BlockNoteMode.SIGNATURE &&
-            <Button disabled={!sigVC} onPress={() => {navigator.clipboard.writeText(sigVC)}}><Text>Copy Sig VC</Text></Button>
-          }
           { editorMode === BlockNoteMode.EDIT &&
-            <>
               <ExportDialog />
-              <Button disabled={!documentVC} onPress={() => {navigator.clipboard.writeText(documentVC)}}><Text>Copy Doc VC</Text></Button>
-              <ImportDialog editor={editor} />
-              <ImportSignatureDialog />
-            </>
           }
           <div className="flex space-x-4">
             <Account />
@@ -97,7 +78,7 @@ const Home: React.FC = () => {
                 </div>
               </div>
             }
-            <BlockNote editor={editor} theme={mode} editorMode={editorMode}/>
+            <DocumentEditor theme={mode} editorMode={editorMode}/>
           </div>
         </div>
       </div>

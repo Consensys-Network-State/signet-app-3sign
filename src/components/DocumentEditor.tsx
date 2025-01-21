@@ -12,9 +12,12 @@ import {
 import { Icons } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
 import {useEffect, useState} from 'react';
-import { BlockNoteMode } from '../store/blockNoteStore';
+import {BlockNoteMode, useBlockNoteStore} from '../store/blockNoteStore';
 import { useDocumentStore } from '../store/documentStore';
-import { schema } from '../blocks/BlockNoteSchema';
+import {schema} from "../blocks/BlockNoteSchema.tsx";
+import {
+  useCreateBlockNote,
+} from "@blocknote/react";
 
 // Slash menu item to insert an Alert block
 const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
@@ -47,17 +50,22 @@ const insertSignature = (editor: typeof schema.BlockNoteEditor) => ({
   icon: <Icons.Signature className="w-5 h-5" />,
 });
 
-interface BlockNoteProps {
-  editorMode: BlockNoteMode;
-  editor: any;
+interface DocumentEditorProps {
   // Add other properties of `props` if necessary
   [key: string]: unknown; // Optional: For additional props
 }
 
-export default function BlockNote({ editor, editorMode: currentEditorMode, ...props }: BlockNoteProps) {
-  const { updateEditDocumentState, backupEditDocumentState, tempStateStore } = useDocumentStore();
+export default function DocumentEditor({ ...props }: DocumentEditorProps) {
+  const { updateEditDocumentState, backupEditDocumentState, tempStateStore, editDocumentState } = useDocumentStore();
+
+  const { editorMode: currentEditorMode } = useBlockNoteStore();
 
   const [editorMode, setEditorMode] = useState<BlockNoteMode | null>(null);
+
+  const editor = useCreateBlockNote({
+    schema,
+    initialContent: editDocumentState
+  })
 
   // TODO: Handle Signing Log
   useEffect(() => {
@@ -79,6 +87,7 @@ export default function BlockNote({ editor, editorMode: currentEditorMode, ...pr
     editor={editor}
     editable={editorMode === BlockNoteMode.EDIT}
     slashMenu={false}
+    test={"something"}
     {...props}
   >
     <SuggestionMenuController
