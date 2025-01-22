@@ -1,77 +1,69 @@
-import React, {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import { useParams } from "react-router";
-import { ModeToggle, Text } from "@ds3/react";
+import { ModeToggle } from "@ds3/react";
 import Account from "../web3/Account.tsx";
-import EthSignDialog from "../blocks/EthSignDialog.tsx";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {getDocument, postSignature} from "../api";
-import DocumentView from "../components/DocumentView.tsx";
-import {createSignatureVC, validateAndProcessDocumentVC} from "../utils/veramoUtils.ts";
+import {validateAndProcessDocumentVC} from "../utils/veramoUtils.ts";
 import {Block} from "../blocks/BlockNoteSchema.tsx";
 import {BlockNoteMode, useBlockNoteStore} from "../store/blockNoteStore.ts";
 import { useAccount } from "wagmi";
-
+import BNDocumentView, {DocumentStatus} from "../components/BNDocumentView.tsx";
+import {DocumentPayload} from "../types";
 const Document = () => {
     const { documentId } = useParams(); // Extracts :username from the URL
-    const { isPending, isError, data, error } = useQuery({ queryKey: ['documents', documentId], queryFn: () => getDocument(documentId) });
+    const { isPending, isError, data, error } = useQuery({ queryKey: ['documents', documentId], queryFn: () => getDocument(documentId!) });
     const mutation = useMutation({
-        mutationFn: ({ documentId, signatureVC }) => postSignature(documentId, signatureVC)
+        mutationFn: ({ documentId, signatureVC }: { documentId: string, signatureVC: string }) => postSignature(documentId, signatureVC)
     })
 
-    const { editorMode, setEditorMode } = useBlockNoteStore();
+    const { setEditorMode } = useBlockNoteStore();
 
     const [document, setDocument] = useState<Block[] | null>(null);
-    const [isSigned, setIsSigned] = useState<boolean>(false);
+
+    const [documentStatus, setDocumentStatus] = useState<DocumentStatus>(DocumentStatus.UNDEFINED);
+    const [isInitialized, setIsInitialized] = useState<boolean>(false);
+    const { address } = useAccount();
+    const queryClient = useQueryClient()
 
     useEffect(() => {
         const queryHandler = async () => {
+            if (!address) return;
             if (!isPending && !isError && data) {
                 const processedDocument = await validateAndProcessDocumentVC(JSON.parse(data.data.Document));
                 setDocument(processedDocument.document);
 
-
-                if (address.toLowerCase() === data.data.DocumentOwner) {
+                if (address.toLowerCase() === data.data.DocumentOwner) { // If you are the owner
                     setEditorMode(BlockNoteMode.VIEW);
                     // TODO: Check if all signers have signed
-                    setIsSigned(!!data.data.Signatures[data.data.Signatories[0]])
-                } else if (data.data.Signatories.find((a) => a === address.toLowerCase())) {
-                    if (!!data.data.Signatures[address.toLowerCase()]) {
+                    setDocumentStatus(!!data.data.Signatures[data.data.Signatories[0]] ? DocumentStatus.SIGNED : DocumentStatus.UNSIGNED)
+                } else if (data.data.Signatories.find((a: string) => a === address.toLowerCase())) { // If you are a signer ...
+                    if (!!data.data.Signatures[address.toLowerCase()]) { // ... and you have signed
                         setEditorMode(BlockNoteMode.VIEW);
-                        setIsSigned(true);
-                    } else {
+                        setDocumentStatus(DocumentStatus.SIGNED);
+                    } else { // ... and you haven't signed
                         setEditorMode(BlockNoteMode.SIGNATURE);
-                        setIsSigned(false);
+                        setDocumentStatus(DocumentStatus.UNSIGNED);
                     }
                 }
+                setIsInitialized(true);
             }
         }
         queryHandler();
-    }, [isPending, isError, data])
-
-    const { address } = useAccount();
-
-    const queryClient = useQueryClient()
+    }, [isPending, isError, data, address])
 
     useEffect(() => {
         if (mutation.isSuccess) {
-            console.log('INVALIDATING QUERY')
             queryClient.invalidateQueries({ queryKey: ['documents', documentId] })
         }
     }, [mutation.isSuccess])
 
-    const handleSignDocument = async () => {
-        // Validation
-        // if (!address) throw new Error('Not signed in');
+    const isAuthorized = useMemo(() => {
+        if (!address) return false;
+        return !(address.toLowerCase() !== data?.data?.DocumentOwner && !(data?.data?.Signatories || []).find((a: string) => a === address.toLowerCase()));
+    }, [address, data]);
 
-        // if (!signatories.find((a) => a === address)) throw new Error('You are not a signer for this document');
-
-        // if (numOfSignedSignatureBlocks !== numOfSignatureBlocks) {
-        //   throw new Error('No signatures');
-        // }
-
-        const signatureVC = await createSignatureVC(address, [], data.data.Document);
-        mutation.mutate({ documentId, signatureVC });
-    }
+    const isLoading = isPending || !isInitialized;
 
     return (
         <div className="h-screen">
@@ -86,23 +78,20 @@ const Document = () => {
 
                 <div className="flex-grow overflow-y-auto">
                     <div className="mx-auto w-full max-w-[1200px] p-4">
-                        { editorMode === BlockNoteMode.SIGNATURE &&
-                            <div className="bg-primary-4 p-2 flex items-center justify-between rounded-t-3 sticky top-0 z-20">
-                                <Text>Review the document, fill in all details required, and sign all signature blocks</Text>
-                                <div className="flex space-x-4">
-                                    <EthSignDialog onPressSign={handleSignDocument} />
-                                </div>
-                            </div>
-                        }
-                        { editorMode === BlockNoteMode.VIEW &&
-                            <div className="bg-primary-4 p-2 flex items-center justify-between rounded-t-3 sticky top-0 z-20">
-                                <Text>{isSigned ? "Document Is Signed!!!" : "Document Is Not Signed"}</Text>
-                            </div>
-                        }
-                        { isPending && <span>Loading...</span> }
+                        {/*{ editorMode === BlockNoteMode.VIEW &&*/}
+                        {/*    <div className="bg-primary-4 p-2 flex items-center justify-between rounded-t-3 sticky top-0 z-20">*/}
+                        {/*        <Text>{isSigned ? "Document Is Signed!!!" : "Document Is Not Signed"}</Text>*/}
+                        {/*    </div>*/}
+                        {/*}*/}
+                        { isLoading && <span>Loading...</span> }
                         { isError && <span>Error: {error.message}</span> }
-                        { !isPending && !isError && document &&
-                            <DocumentView document={document} owner={data.data.DocumentOwner} signatories={data.data.Signatories} />
+                        { !isLoading && !isError &&
+                            (isAuthorized ?
+                                <BNDocumentView
+                                    documentPayload={{ documentId, documentVC: data.data.Document, document } as DocumentPayload}
+                                    documentStatus={documentStatus}
+                                /> :
+                                <span>You Don't Have Access To This Document</span>)
                         }
                     </div>
                 </div>

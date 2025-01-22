@@ -13,7 +13,6 @@ import {
 } from '@ds3/react';
 import { useForm, Controller } from 'react-hook-form';
 import {createDocumentVC} from "../utils/veramoUtils.ts";
-import {useDocumentStore} from "../store/documentStore.ts";
 import { useAccount } from "wagmi";
 import { useMutation } from "@tanstack/react-query";
 import {postDocument} from "../api";
@@ -23,7 +22,11 @@ interface ExportFormData {
     signatories: string;
 }
 
-const ExportDialog: FC = () => {
+interface ExportDialogProps {
+    editor: any;
+}
+
+const ExportDialog: FC<ExportDialogProps> = ({ editor }) => {
     const {handleSubmit, formState: { errors }, control} = useForm<ExportFormData>({
         defaultValues: {
             signatories: ""
@@ -43,19 +46,12 @@ const ExportDialog: FC = () => {
         }
     }, [mutation.isSuccess, mutation.data])
 
-    const { editDocumentState, setSignatories, setDocumentVC } = useDocumentStore();
-
     const { address } = useAccount();
 
     const onSubmit = async (data: ExportFormData) => {
         try {
             if (!address) throw new Error('Not signed in');
-            const document = await createDocumentVC(address, data.signatories.split(',') as `0x${string}`[], editDocumentState);
-            setDocumentVC(document);
-            const signatories = JSON.parse(document)?.credentialSubject?.signatories;
-            if (signatories) {
-                setSignatories(signatories);
-            }
+            const document = await createDocumentVC(address, data.signatories.split(',') as `0x${string}`[], editor.document);
             mutation.mutate(document);
         } catch (error: any) {
             console.log('Failed to Export', error);

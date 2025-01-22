@@ -7,6 +7,7 @@ import { combine, devtools } from 'zustand/middleware';
 export enum BlockNoteMode {
     EDIT = "EDIT",
     SIGNATURE = "SIGNATURE",
+    SIMULATION = "SIMULATION",
     VIEW = "VIEW",
 }
 

@@ -44,7 +44,7 @@ const SignatureDialog = (props: SignatureDialogProps) => {
 
   const editorMode = useBlockNoteStore((state) => state.editorMode);
 
-  const isSigningDisabled = !(editorMode === BlockNoteMode.SIGNATURE);
+  const isSigningDisabled = !(editorMode === BlockNoteMode.SIGNATURE || editorMode === BlockNoteMode.SIMULATION);
 
   const onSubmit = (data: FormData) => {
     console.log("Signature Form Data", JSON.stringify(data, null, 2));

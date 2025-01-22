@@ -1,5 +1,5 @@
 import _ from "lodash";
-import {schema} from "../blocks/BlockNoteSchema.tsx";
+import {schema, SignatureBlock} from "../blocks/BlockNoteSchema.tsx";
 import type { Block } from '../blocks/BlockNoteSchema';
 import {Signature} from "../types";
 
@@ -15,4 +15,13 @@ export const separateSignaturesFromDocument = (documentState: Block[]) => {
         delete sigBlock.props.address;
     });
     return { document, signatures };
+}
+
+// TODO: Temp Hacky Solution. Is there better way to do this?
+export const countNumberOfSignatures = (state: Block[]) => {
+    const signatureBlocks = _.filter(state, (block: Block) => block.type === "signature");
+    return {
+        numOfSignedSignatureBlocks: _.filter(state, (block: SignatureBlock) => block.props.name && block.props.address).length,
+        numOfSignatureBlocks: signatureBlocks.length
+    }
 }
