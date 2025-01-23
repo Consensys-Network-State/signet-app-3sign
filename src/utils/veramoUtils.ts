@@ -46,8 +46,6 @@ export async function signVCWithEIP712(credential: any) {
 export async function createDocumentVC(address: `0x${string}`, signatories: `0x${string}`[], documentState: Block[]) {
     const { document } = separateSignaturesFromDocument(documentState);
     const docStr = JSON.stringify(document);
-    let encryptSerialized;
-    let exportedKey;
 
     // Generate a key
     const encryptionKey = await SymmetricCrypto.generateKey();
@@ -55,7 +53,7 @@ export async function createDocumentVC(address: `0x${string}`, signatories: `0x$
     // Encrypt the message
     const encrypted = await SymmetricCrypto.encrypt(docStr, encryptionKey);
     // console.log("Encrypted data:", encrypted);
-    encryptSerialized = SymmetricCrypto.serializeEncryptedData(encrypted);
+    const encryptSerialized = SymmetricCrypto.serializeEncryptedData(encrypted);
     // console.log("Serialized Encrypted data:", encryptSerialized);
 
 
@@ -64,7 +62,7 @@ export async function createDocumentVC(address: `0x${string}`, signatories: `0x$
     // const decrypted = await SymmetricCrypto.decrypt(deceriazliedEncrypted, encryptionKey);
     // console.log("Original equals decrypted:", docStr === decrypted);
 
-    exportedKey = await SymmetricCrypto.exportKey(encryptionKey);
+    const exportedKey = await SymmetricCrypto.exportKey(encryptionKey);
 
     const did = await getDIDFromAddress(address);
 
