@@ -3,6 +3,7 @@ import {setupAgent} from "../veramo";
 import {ethers} from 'ethers';
 import {Block} from "../blocks/BlockNoteSchema.tsx";
 import {separateSignaturesFromDocument} from "./documentUtils.ts";
+import SymmetricCrypto from "./symmetricCrypto.ts";
 
 export const encodeObjectToBase64 = (obj: any) => {
     try {
@@ -44,6 +45,26 @@ export async function signVCWithEIP712(credential: any) {
 }
 export async function createDocumentVC(address: `0x${string}`, signatories: `0x${string}`[], documentState: Block[]) {
     const { document } = separateSignaturesFromDocument(documentState);
+    const docStr = JSON.stringify(document);
+    let encryptSerialized;
+    let exportedKey;
+
+    // Generate a key
+    const encryptionKey = await SymmetricCrypto.generateKey();
+    
+    // Encrypt the message
+    const encrypted = await SymmetricCrypto.encrypt(docStr, encryptionKey);
+    // console.log("Encrypted data:", encrypted);
+    encryptSerialized = SymmetricCrypto.serializeEncryptedData(encrypted);
+    // console.log("Serialized Encrypted data:", encryptSerialized);
+
+
+    // Sanity check - decrypt the message and match it with original
+    // const deceriazliedEncrypted = SymmetricCrypto.deserializeEncryptedData(encryptSerialized);
+    // const decrypted = await SymmetricCrypto.decrypt(deceriazliedEncrypted, encryptionKey);
+    // console.log("Original equals decrypted:", docStr === decrypted);
+
+    exportedKey = await SymmetricCrypto.exportKey(encryptionKey);
 
     const did = await getDIDFromAddress(address);
 
@@ -59,7 +80,7 @@ export async function createDocumentVC(address: `0x${string}`, signatories: `0x$
             issuanceDate: new Date().toISOString(),
             credentialSubject: {
                 id: did.did,
-                document: encodeObjectToBase64(document),
+                document: encryptSerialized,
                 timeStamp: new Date().toISOString(),
                 signatories,
             },
@@ -68,7 +89,16 @@ export async function createDocumentVC(address: `0x${string}`, signatories: `0x$
 
     const stringVC = JSON.stringify(vc);
     console.log(stringVC)
-    return stringVC;
+    return { stringVC, encryptionKey: exportedKey };
+}
+
+export async function decryptDocument(document: string, encryptionKey: string) {
+    // Import the given key and decrypt the message
+    const key = await SymmetricCrypto.importKey(encryptionKey);
+    const deceriazliedEncrypted = SymmetricCrypto.deserializeEncryptedData(document)
+    const decrypted = await SymmetricCrypto.decrypt(deceriazliedEncrypted, key);
+    // console.log("Decrypted message:", decrypted);
+    return decrypted;
 }
 
 export async function createSignatureVC(address: `0x${string}`, _documentState: Block[], documentVC: string) {
@@ -100,13 +130,14 @@ export async function createSignatureVC(address: `0x${string}`, _documentState: 
     return stringVC;
 }
 
-export async function validateAndProcessDocumentVC(vc: any) {
+export async function validateAndProcessDocumentVC(vc: any, encryptionKey: string) {
     const agent = await setupAgent();
     const verificationResult = await agent.verifyCredential({ credential: vc });
     if (!verificationResult.verified) throw new Error('Failed to sign document');
     // How do we check if the issuer of the VC is the correct person
+    const decryptedDocument = await decryptDocument(vc.credentialSubject.document, encryptionKey);
     return {
-        document: decodeBase64ToObject(vc.credentialSubject.document) as Block[],
+        document: JSON.parse(decryptedDocument) as Block[],
         signatories: vc.credentialSubject.signatories,
     }
 }

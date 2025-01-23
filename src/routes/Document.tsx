@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useState} from "react";
-import { useParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 import { ModeToggle } from "@ds3/react";
 import Account from "../web3/Account.tsx";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -12,6 +12,8 @@ import BNDocumentView, {DocumentStatus} from "../components/BNDocumentView.tsx";
 import {DocumentPayload} from "../types";
 const Document = () => {
     const { documentId } = useParams(); // Extracts :username from the URL
+    const [ searchParams ] = useSearchParams();
+    const encryptionKey = searchParams.get('key');
     const { isPending, isError, data, error } = useQuery({ queryKey: ['documents', documentId], queryFn: () => getDocument(documentId!) });
     const mutation = useMutation({
         mutationFn: ({ documentId, signatureVC }: { documentId: string, signatureVC: string }) => postSignature(documentId, signatureVC)
@@ -29,8 +31,9 @@ const Document = () => {
     useEffect(() => {
         const queryHandler = async () => {
             if (!address) return;
-            if (!isPending && !isError && data) {
-                const processedDocument = await validateAndProcessDocumentVC(JSON.parse(data.data.Document));
+            if (!isPending && !isError && data && encryptionKey) {
+
+                const processedDocument = await validateAndProcessDocumentVC(JSON.parse(data.data.Document), encryptionKey);
                 setDocument(processedDocument.document);
 
                 if (address.toLowerCase() === data.data.DocumentOwner) { // If you are the owner
@@ -50,7 +53,7 @@ const Document = () => {
             }
         }
         queryHandler();
-    }, [isPending, isError, data, address])
+    }, [isPending, isError, data, address, encryptionKey])
 
     useEffect(() => {
         if (mutation.isSuccess) {

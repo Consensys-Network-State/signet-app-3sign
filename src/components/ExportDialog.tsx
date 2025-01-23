@@ -39,24 +39,26 @@ const ExportDialog: FC<ExportDialogProps> = ({ editor }) => {
 
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (mutation.isSuccess && mutation.data) {
-            const { processId } = mutation.data?.data || {};
-            navigate(`/${processId}`);
-        }
-    }, [mutation.isSuccess, mutation.data])
-
     const { address } = useAccount();
 
     const onSubmit = async (data: ExportFormData) => {
         try {
             if (!address) throw new Error('Not signed in');
-            const document = await createDocumentVC(address, data.signatories.split(',') as `0x${string}`[], editor.document);
-            mutation.mutate(document);
+
+            const { stringVC, encryptionKey } = await createDocumentVC(address, data.signatories.split(',') as `0x${string}`[], editor.document);
+            mutation.mutate(stringVC, {
+                // onError,
+                // onSettled,
+                onSuccess: (data) => {
+                    if (data) {
+                        const { processId } = data.data || {};
+                        navigate(`/${processId}?key=${encryptionKey}`);
+                    }
+                },
+              });
         } catch (error: any) {
             console.log('Failed to Export', error);
         }
-
     };
 
     return (
