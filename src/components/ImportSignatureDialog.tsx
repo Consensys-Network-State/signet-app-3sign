@@ -9,7 +9,8 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger, TextAreaField,
+    DialogTrigger,
+    InputField
 } from '@ds3/react';
 import { useForm, Controller } from 'react-hook-form';
 import {setupAgent} from "../veramo";
@@ -70,9 +71,11 @@ const ImportSignatureDialog: FC = () => {
                         required: 'signatureVC is required'
                     }}
                     render={({ field }) => (
-                        <TextAreaField
+                        <InputField
                             label="VC"
                             placeholder="Input vc"
+                            multiline
+                            numberOfLines={4}
                             error={errors?.signatureVC?.message as string}
                             {...field}
                         />
