@@ -4,7 +4,6 @@ import {
   Text,
   InputField,
   RadioGroupField,
-  RadioGroupFieldItem,
   SelectField,
   SelectContent,
   SelectTrigger,
@@ -186,8 +185,8 @@ const SablierForm: FC<FormProps> = ({ form }) => {
               label="First Payment"
               {...otherProps}
             >
-              <RadioGroupFieldItem label='At Start' value='atStart' onLabelPress={() => onChange('atStart')}/>
-              <RadioGroupFieldItem label='End of First Month' value='endFirstMonth' onLabelPress={() => onChange('endFirstMonth')}/>
+              <RadioGroupField.Item label='At Start' value='atStart' onLabelPress={() => onChange('atStart')}/>
+              <RadioGroupField.Item label='End of First Month' value='endFirstMonth' onLabelPress={() => onChange('endFirstMonth')}/>
             </RadioGroupField>
           )}
         />

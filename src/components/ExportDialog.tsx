@@ -9,7 +9,8 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger, TextAreaField,
+    DialogTrigger,
+    InputField
 } from '@ds3/react';
 import { useForm, Controller } from 'react-hook-form';
 import {createDocumentVC} from "../utils/veramoUtils.ts";
@@ -80,9 +81,11 @@ const ExportDialog: FC<ExportDialogProps> = ({ editor }) => {
                         required: 'signatories are required'
                     }}
                     render={({ field }) => (
-                        <TextAreaField
+                        <InputField
                             label="Signatories"
                             placeholder="e.g. 0x1232..."
+                            multiline
+                            numberOfLines={4}
                             error={errors?.signatories?.message as string}
                             {...field}
                         />
