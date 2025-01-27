@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  TextArea,
+  Input,
 } from '@ds3/react';
 import {createSignatureVC} from "../utils/veramoUtils.ts";
 import { useAccount } from "wagmi";
@@ -100,7 +100,7 @@ const EthSignDialog: FC<EthSignDialogProps> =({ editor, disabled = false, isSimu
       </DialogTrigger>
       <DialogContent className='w-[520px] max-w-[520px]'>
         { sigVC ?
-            <TextArea value={sigVC} /> :
+            <Input value={sigVC} multiline numberOfLines={4} /> :
             <DialogHeader>
               <DialogTitle>Complete Signing</DialogTitle>
               <DialogDescription>
