@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import React, { FC } from 'react';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import {
   Text,
@@ -11,11 +11,13 @@ import {
   SelectItem,
   utils,
   SwitchField,
+  Input, AvatarImage, Avatar
 } from '@ds3/react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DatePickerField } from '../components/DatePickerField';
 import { Dayjs } from 'dayjs';
 import { supportedChains as chains } from '../utils/chainUtils';
+import makeBlockie from 'ethereum-blockies-base64';
 
 export type FormData = {
   chain: { value: string; label: string } | null;
@@ -126,14 +128,29 @@ const SablierForm: FC<FormProps> = ({ form }) => {
           rules={{
             required: 'Recipient is required',
           }}
-          render={({ field }) => (
-            <InputField
-              label="Recipient"
-              placeholder="Input address"
-              error={errors?.recipient?.message as string}
-              {...field}
-            />
-          )}
+          render={({ field }) => {
+            console.log(field);
+
+            return (
+              <InputField
+                label="Recipient"
+                placeholder="Input address"
+                error={errors?.recipient?.message as string}
+                {...field}
+              >
+                {!!field.value &&
+                    <Input.Icon
+                        icon={() =>
+                            <Avatar alt="Zach Nugent's Avatar" className="w-6 h-6">
+                              <AvatarImage source={{ uri: makeBlockie(field.value) }} />
+                            </Avatar>
+                        }
+                    />
+                }
+                <Input.Field />
+              </InputField>
+            );
+          }}
         />
       </div>
 

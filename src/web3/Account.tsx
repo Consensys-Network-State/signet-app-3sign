@@ -20,6 +20,7 @@ import { normalize } from 'viem/ens'
 import truncateEthAddress from 'truncate-eth-address'
 import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import makeBlockie from 'ethereum-blockies-base64';
 
 const Account: React.FC = () => {
   const { address } = useAccount()
@@ -40,7 +41,7 @@ const Account: React.FC = () => {
       <DropdownMenuTrigger asChild>
         <Button className="flex flex-row">
           <Avatar alt="Zach Nugent's Avatar" className="mr-3 w-9 h-9">
-            <AvatarImage source={{ uri: ensAvatar ? ensAvatar as string : "" }} />
+            <AvatarImage source={{ uri: ensAvatar ? ensAvatar as string : makeBlockie(address) }} />
             <AvatarFallback>
               <Text>ZN</Text>
             </AvatarFallback>
