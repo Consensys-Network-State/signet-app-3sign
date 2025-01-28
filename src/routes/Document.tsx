@@ -72,7 +72,7 @@ const Document = () => {
                         { !isLoading && !isError &&
                             (isAuthorized ?
                                 <BNDocumentView
-                                    documentPayload={{ documentId, documentVC: data.data.Document, signatures: data.data.Signatures, document } as DocumentPayload}
+                                    documentPayload={{ documentId, documentVC: data.data.Document, signatures: Object.values(data.data.Signatures), document } as DocumentPayload}
                                     documentStatus={documentStatus}
                                 /> :
                                 <span>You Don't Have Access To This Document</span>)

@@ -1,12 +1,11 @@
 import {
-    // Block,
     BlockNoteSchema,
     defaultBlockSpecs,
     defaultProps,
     CustomBlockConfig,
 } from '@blocknote/core';
 import { createReactBlockSpec } from "@blocknote/react";
-import { Icons, Card, CardContent, CardTitle, CardHeader, Text, Button } from "@ds3/react";
+import { Icons, Card, CardContent, CardTitle, CardHeader, Text } from "@ds3/react";
 import SablierIcon from "../assets/sablier.svg?react";
 import MonthlyIcon from "../assets/monthly.svg?react";
 import LineaIcon from "../assets/linea.svg?react";
@@ -15,6 +14,7 @@ import SablierDialog from "./SablierDialog.tsx";
 import { supportedChains, getChainById } from "../utils/chainUtils";
 import Signature from "./Signature.tsx";
 import SignatureDialog from "./SignatureDialog";
+import {BlockNoteMode, useBlockNoteStore} from "../store/blockNoteStore.ts";
 
 export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof schema.inlineContentSchema, typeof schema.styleSchema>(
     {
@@ -47,6 +47,7 @@ export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof 
     },
     {
         render: (props) => {
+            const { editorMode: currentEditorMode } = useBlockNoteStore();
             return (
                 <Card className='w-full max-w-md'>
                     <CardHeader>
@@ -54,12 +55,7 @@ export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof 
                             <Text className="flex items-center mr-auto">
                                 <SablierIcon className="w-8 h-8" /> Sablier Stream
                             </Text>
-
-                            <SablierDialog block={props.block} editor={props.editor}>
-                                <Button variant="ghost" size="sm">
-                                    <Icons.Pencil className="w-5 h-5 text-muted-foreground" />
-                                </Button>
-                            </SablierDialog>
+                            <SablierDialog block={props.block} editor={props.editor} disabled={currentEditorMode !== BlockNoteMode.EDIT}/>
                         </CardTitle>
                     </CardHeader>
                     <CardContent>

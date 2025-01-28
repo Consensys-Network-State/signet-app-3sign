@@ -1,4 +1,3 @@
-import {FC, useEffect, useMemo, useState} from 'react';
 import {
   Text,
   Button,
@@ -24,12 +23,12 @@ interface EthSignDialogProps {
   editor: any;
   disabled?: boolean;
   isSimulationMode?: boolean;
-  onSuccessfulSignature?: (any) => void;
+  onSuccessfulSignature?: (data: any) => void;
 }
 
-const EthSignDialog: FC<EthSignDialogProps> =({ editor, onSuccessfulSignature, disabled = false, isSimulationMode = false, documentPayload }) => {
+const EthSignDialog: React.FC<EthSignDialogProps> =({ editor, onSuccessfulSignature, disabled = false, isSimulationMode = false, documentPayload }) => {
 
-  const [sigVC, setSigVC] = useState<string | null>(null);
+  const [sigVC, setSigVC] = React.useState<string | null>(null);
 
   const { address } = useAccount();
 
@@ -39,9 +38,9 @@ const EthSignDialog: FC<EthSignDialogProps> =({ editor, onSuccessfulSignature, d
 
   const queryClient = useQueryClient();
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState("");
 
 
   const handleSimulateSignature = async () => {
@@ -79,7 +78,7 @@ const EthSignDialog: FC<EthSignDialogProps> =({ editor, onSuccessfulSignature, d
     }
   }
 
-  const Footer = useMemo(() => {
+  const Footer = React.useMemo(() => {
     if (!sigVC) {
       return <>
         <DialogClose asChild>

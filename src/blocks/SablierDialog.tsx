@@ -11,22 +11,22 @@ import {
   DialogTitle,
   DialogTrigger,
   Card,
-  CardContent,
+  CardContent, Icons,
 } from '@ds3/react';
 import SablierForm, { FormData } from "./SablierForm.tsx";
 import { useForm } from 'react-hook-form';
 import SablierIcon from "../assets/sablier.svg?react";
-import { FC, ReactNode } from "react";
+import { FC } from "react";
 import type { SablierBlock } from './BlockNoteSchema';
 
 interface SablierDialogProps {
-  children?: ReactNode;
+  disabled?: boolean
   block: SablierBlock;
   editor: any;
 }
 
 const SablierDialog: FC<SablierDialogProps> = (props) => {
-  const { children } = props;
+  const { disabled = false } = props;
   const form = useForm<FormData>({
     defaultValues: {
       chain: { value: props.block.props.chain, label: props.block.props.chain },
@@ -55,8 +55,10 @@ const SablierDialog: FC<SablierDialogProps> = (props) => {
 
   return (
       <Dialog>
-        <DialogTrigger asChild>
-          {children}
+        <DialogTrigger asChild disabled={disabled}>
+          <Button variant="ghost" size="sm">
+            <Icons.Pencil className="w-5 h-5 text-muted-foreground" />
+          </Button>
         </DialogTrigger>
         <DialogContent className='w-[800px] max-w-[800px]'>
           <DialogHeader>

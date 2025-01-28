@@ -41,7 +41,7 @@ const Account: React.FC = () => {
       <DropdownMenuTrigger asChild>
         <Button className="flex flex-row">
           <Avatar alt="Zach Nugent's Avatar" className="mr-3 w-9 h-9">
-            <AvatarImage source={{ uri: ensAvatar ? ensAvatar as string : makeBlockie(address) }} />
+            <AvatarImage source={{ uri: ensAvatar ? ensAvatar as string : makeBlockie(address!) }} />
             <AvatarFallback>
               <Text>ZN</Text>
             </AvatarFallback>

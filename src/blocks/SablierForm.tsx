@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React from 'react';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import {
   Text,
@@ -10,14 +10,16 @@ import {
   SelectValue,
   SelectItem,
   utils,
+  Field,
   SwitchField,
   Input, AvatarImage, Avatar
 } from '@ds3/react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DatePickerField } from '../components/DatePickerField';
 import { Dayjs } from 'dayjs';
-import { supportedChains as chains } from '../utils/chainUtils';
+import {supportedChains as chains} from '../utils/chainUtils';
 import makeBlockie from 'ethereum-blockies-base64';
+import ChainLogo from "../components/ChainLogo.tsx";
 
 export type FormData = {
   chain: { value: string; label: string } | null;
@@ -34,7 +36,7 @@ interface FormProps {
   form: UseFormReturn<FormData>; // React Hook Form's `useForm` return type
 }
 
-const SablierForm: FC<FormProps> = ({ form }) => {
+const SablierForm: React.FC<FormProps> = ({ form }) => {
   const {
     control,
     formState: { errors },
@@ -79,11 +81,16 @@ const SablierForm: FC<FormProps> = ({ form }) => {
 
               <SelectContent insets={contentInsets} className="p-0">
                 {chains.map((chain) => (
-                  // @ts-expect-error SelectItem value should also support numbers not only strings
-                  <SelectItem key={chain.id} label={chain.name} value={chain.id}>
-                    <Text>{chain.name}</Text>
-                  </SelectItem>
-                ))}
+                  <SelectItem
+                      key={chain.id}
+                      // @ts-expect-error Select item value should support ReactNode
+                      label={
+                        <div className="flex items-center"><ChainLogo className="mr-2" chainId={chain.id}/><Text>{chain.name}</Text></div>
+                      }
+                      // @ts-expect-error SelectItem value should also support numbers not only strings
+                      value={chain.id}
+                  />
+              ))}
               </SelectContent>
             </SelectField>
           )}
@@ -196,12 +203,13 @@ const SablierForm: FC<FormProps> = ({ form }) => {
               error={errors?.firstPayment?.message as string}
               value={value}
               onValueChange={onChange}
-              className='flex-col gap-3'
               label="First Payment"
               {...otherProps}
             >
-              <RadioGroupField.Item label='At Start' value='atStart' onLabelPress={() => onChange('atStart')}/>
-              <RadioGroupField.Item label='End of First Month' value='endFirstMonth' onLabelPress={() => onChange('endFirstMonth')}/>
+              <Field.Row>
+                <RadioGroupField.Item label='At Start' value='atStart' onLabelPress={() => onChange('atStart')}/>
+                <RadioGroupField.Item label='End of First Month' value='endFirstMonth' onLabelPress={() => onChange('endFirstMonth')}/>
+              </Field.Row>
             </RadioGroupField>
           )}
         />

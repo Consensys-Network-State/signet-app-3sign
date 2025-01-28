@@ -26,6 +26,7 @@
     "@veramo/did-resolver": "^6.0.0",
     "@veramo/key-manager": "^6.0.0",
     "axios": "^1.7.9",
+    "classnames": "^2.5.1",
     "dayjs": "^1.11.13",
     "did-resolver": "^4.1.0",
     "ethereum-blockies-base64": "^1.0.2",

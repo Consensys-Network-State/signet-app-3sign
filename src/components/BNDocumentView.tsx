@@ -21,7 +21,6 @@ import {
     Text
 } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
-import {FC, useEffect, useMemo, useState} from 'react';
 import {BlockNoteMode, useBlockNoteStore} from '../store/blockNoteStore';
 import {Block, schema} from "../blocks/BlockNoteSchema.tsx";
 import {
@@ -78,14 +77,14 @@ interface BNDocumentViewProps {
     [key: string]: unknown; // Optional: For additional props
 }
 
-const BNDocumentView: FC<BNDocumentViewProps> = ({ documentPayload, documentStatus = DocumentStatus.UNDEFINED, ...props }) => {
+const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, documentStatus = DocumentStatus.UNDEFINED, ...props }) => {
     const editor = useCreateBlockNote({
         schema,
         initialContent: documentPayload ? documentPayload.document : grantAgreement as Block[]
     })
 
-    const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
-    const [sigVC, setSigVC] = useState('');
+    const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false);
+    const [sigVC, setSigVC] = React.useState('');
     const onSuccessfulSignature = (signatureVC: string) => {
         setSigVC(signatureVC);
         setIsSuccessDialogOpen(true);
@@ -93,11 +92,11 @@ const BNDocumentView: FC<BNDocumentViewProps> = ({ documentPayload, documentStat
 
     const { editorMode: currentEditorMode } = useBlockNoteStore();
 
-    const [editorMode, setEditorMode] = useState<BlockNoteMode | null>(null);
+    const [editorMode, setEditorMode] = React.useState<BlockNoteMode | null>(null);
 
-    const [tempStateStore, setTempStateStore] = useState<Block[]>([]);
+    const [tempStateStore, setTempStateStore] = React.useState<Block[]>([]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (!editorMode) setEditorMode(currentEditorMode);
         else if (editorMode !== BlockNoteMode.SIMULATION && currentEditorMode === BlockNoteMode.SIMULATION) {
             setTempStateStore(editor.document); // DO A BACKUP
@@ -111,7 +110,7 @@ const BNDocumentView: FC<BNDocumentViewProps> = ({ documentPayload, documentStat
     }, [currentEditorMode, editorMode]);
 
 
-    const Header = useMemo(() => {
+    const Header = React.useMemo(() => {
         if (editorMode === BlockNoteMode.VIEW) {
             if (documentStatus === DocumentStatus.UNSIGNED) {
                 return <div className="bg-primary-4 p-2 flex items-center justify-between rounded-t-3 sticky top-0 z-20">
@@ -122,7 +121,7 @@ const BNDocumentView: FC<BNDocumentViewProps> = ({ documentPayload, documentStat
                 return <div className="bg-primary-4 p-2 flex items-center justify-between rounded-t-3 sticky top-0 z-20">
                     <Text>Document Is Signed!!!</Text>
                     <div className="flex space-x-4">
-                        <ViewSignatureDialog sigVC={Object.values(documentPayload?.signatures)[0] as string} />
+                        <ViewSignatureDialog sigVC={documentPayload?.signatures?.[0]!} />
                     </div>
                 </div>
             }

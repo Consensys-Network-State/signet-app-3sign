@@ -1,4 +1,3 @@
-import {FC, useState} from 'react';
 import {
     Text,
     Button,
@@ -27,7 +26,7 @@ interface ExportDialogProps {
     editor: any;
 }
 
-const ExportDialog: FC<ExportDialogProps> = ({ editor }) => {
+const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
     const {handleSubmit, formState: { errors }, control} = useForm<ExportFormData>({
         defaultValues: {
             signatories: ""
@@ -38,9 +37,9 @@ const ExportDialog: FC<ExportDialogProps> = ({ editor }) => {
         mutationFn: postDocument
     })
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [result, setResult] = useState("");
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [error, setError] = React.useState("");
+    const [result, setResult] = React.useState("");
 
     const { address } = useAccount();
     const onSubmit = async (data: ExportFormData) => {

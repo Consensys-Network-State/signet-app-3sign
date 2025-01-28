@@ -1,4 +1,3 @@
-import {FC} from 'react';
 import {
     Text,
     Button,
@@ -18,7 +17,7 @@ interface ViewSignatureDialogProps {
     sigVC: string,
 }
 
-const ViewSignatureDialog: FC<ViewSignatureDialogProps> = ({ sigVC }) => {
+const ViewSignatureDialog: React.FC<ViewSignatureDialogProps> = ({ sigVC }) => {
 
     return (
         <Dialog>
