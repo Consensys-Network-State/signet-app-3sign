@@ -1,6 +1,6 @@
 import * as React from 'react';
 import DatePicker from "./DatePicker";
-import { Field } from "@ds3/react";
+import { Field, useField } from "@ds3/react";
 import { AlertCircle, Calendar } from 'lucide-react-native';
 import { RootProps as SelectProps } from '@rn-primitives/select';
 import { Dayjs } from 'dayjs';
@@ -13,6 +13,7 @@ interface DatePickerProps extends Omit<SelectProps, 'value'> {
   label?: string;
   description?: string;
   children?: React.ReactNode;
+  required?: boolean;
 }
 
 const DatePickerField = React.forwardRef<React.ElementRef<typeof DatePicker>, DatePickerProps>(
@@ -22,8 +23,14 @@ const DatePickerField = React.forwardRef<React.ElementRef<typeof DatePicker>, Da
       label,
       description,
       children,
+      required,
       ...otherProps
     } = props;
+
+    const { fieldId, descriptionId, ariaProps } = useField({
+      error,
+      required
+    });
 
     const inputRef = React.useRef<React.ComponentRef<typeof DatePicker>>(null);
 
@@ -43,7 +50,7 @@ const DatePickerField = React.forwardRef<React.ElementRef<typeof DatePicker>, Da
         {label && (
           <Field.Row>
             <Field.Icon icon={error ? AlertCircle : Calendar} />
-            <Field.Label>
+            <Field.Label nativeID={fieldId}>
               {label}
             </Field.Label>
           </Field.Row>
@@ -51,13 +58,14 @@ const DatePickerField = React.forwardRef<React.ElementRef<typeof DatePicker>, Da
 
         <DatePicker
           ref={inputRef}
+          {...ariaProps}
           {...otherProps}
         >
           {children}
         </DatePicker>
 
         {(description || error) && (
-          <Field.Description>
+          <Field.Description nativeID={descriptionId}>
             {error || description}
           </Field.Description>
         )}
