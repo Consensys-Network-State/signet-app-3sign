@@ -17,6 +17,8 @@ import { useAccount } from "wagmi";
 import { useMutation } from "@tanstack/react-query";
 import {postDocument} from "../api";
 import * as React from "react";
+import { useNavigate } from "react-router";
+
 
 interface ExportFormData {
     signatories: string;
@@ -39,9 +41,10 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
 
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState("");
-    const [result, setResult] = React.useState("");
 
     const { address } = useAccount();
+    const navigate = useNavigate();
+
     const onSubmit = async (data: ExportFormData) => {
         try {
             if (!address) throw new Error('Not signed in');
@@ -57,10 +60,11 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
                     setIsLoading(false);
                     if (data) {
                         const { processId } = data.data || {};
-                        setResult(`${window.location.origin}/${processId}`);
+                        navigate(`/${processId}`, { state: { showModal: true } })
                     }
                 },
             });
+
         } catch (error: any) {
             setError('Failed to sign document');
             setIsLoading(false);
@@ -76,22 +80,13 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
             </DialogTrigger>
             <DialogContent className='w-[520px] max-w-[520px]'>
                 <DialogHeader>
-                    {!result ?
-                        <>
-                            <DialogTitle>Export Doc</DialogTitle>
-                            <DialogDescription>
-                                Set signatories and sign to export doc
-                            </DialogDescription>
-                        </> :
-                        <>
-                            <DialogTitle>Success! </DialogTitle>
-                            <DialogDescription>
-                                Your Agreement Has Been Exported
-                            </DialogDescription>
-                        </>
-                    }
+                    <>
+                        <DialogTitle>Export Doc</DialogTitle>
+                        <DialogDescription>
+                            Set signatories and sign to export doc
+                        </DialogDescription>
+                    </>
                 </DialogHeader>
-                { !result ?
                     <>
                         <Controller
                             control={control}
@@ -115,28 +110,19 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
                                 Something went wrong: {error}
                             </Text>
                         }
-                    </> :
-                    <InputField disabled value={result} label={"Send this link to the parties that need to sign"}/>
-                }
+                    </>
                 <DialogFooter>
-                    { !result ?
-                        <>
-                            <DialogClose asChild>
-                                <Button variant='ghost'>
-                                    <Text>Cancel</Text>
-                                </Button>
-                            </DialogClose>
-                            <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
-                                <Button.Spinner />
-                                <Button.Text>Export</Button.Text>
-                            </Button>
-                        </> :
+                    <>
                         <DialogClose asChild>
                             <Button variant='ghost'>
-                                <Text>Close</Text>
+                                <Text>Cancel</Text>
                             </Button>
                         </DialogClose>
-                    }
+                        <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
+                            <Button.Spinner />
+                            <Button.Text>Export</Button.Text>
+                        </Button>
+                    </>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

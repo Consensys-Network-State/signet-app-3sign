@@ -1,8 +1,21 @@
 import React from "react";
 import { ModeToggle } from "@ds3/react";
 import { Connect } from "../web3/Connect.tsx";
+import { useLocation, useNavigate } from "react-router";
+import { useAccount } from "wagmi";
 
 const Login: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isConnected } = useAccount();
+
+  // Redirect to where you were trying to go
+  React.useEffect(() => {
+    if (isConnected) {
+      navigate(location.state?.redirect || '/');
+    }
+  }, [isConnected]);
+
   return (
     <div className="h-screen">
       <div className="flex items-center justify-center h-full w-full">

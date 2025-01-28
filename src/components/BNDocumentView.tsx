@@ -18,7 +18,8 @@ import {
     DialogTitle,
     Icons,
     InputField,
-    Text
+    Text,
+    useTheme
 } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
 import {BlockNoteMode, useBlockNoteStore} from '../store/blockNoteStore';
@@ -78,6 +79,7 @@ interface BNDocumentViewProps {
 }
 
 const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, documentStatus = DocumentStatus.UNDEFINED, ...props }) => {
+    const { mode } = useTheme();
     const editor = useCreateBlockNote({
         schema,
         initialContent: documentPayload ? documentPayload.document : grantAgreement as Block[]
@@ -177,6 +179,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, docume
             editor={editor}
             editable={editorMode === BlockNoteMode.EDIT}
             slashMenu={false}
+            theme={mode}
             {...props}
         >
             <SuggestionMenuController

@@ -4,24 +4,22 @@ import Login from "./routes/Login.tsx";
 import Document from "./routes/Document.tsx";
 import { Routes, Route } from 'react-router';
 import { useAccount } from "wagmi";
-import { Navigate } from 'react-router';
+import { Navigate, useLocation } from 'react-router';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isConnected } = useAccount();
-
+  const location = useLocation();
   if (!isConnected) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" state={{ redirect: location.pathname }} />;
   }
 
   return <>{children}</>;
 };
 
 const Router: React.FC = () => {
-  const { isConnected } = useAccount();
-
   return (
     <Routes>
-        <Route path="/login" element={isConnected ? <Navigate to="/" /> : <Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/" element={
             <ProtectedRoute>
               <Home />
