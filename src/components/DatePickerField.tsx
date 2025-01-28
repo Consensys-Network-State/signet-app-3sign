@@ -1,10 +1,4 @@
-import {
-  ElementRef,
-  forwardRef,
-  useRef,
-  ComponentRef,
-  useImperativeHandle
-} from 'react';
+import * as React from 'react';
 import DatePicker from "./DatePicker";
 import { Field } from "@ds3/react";
 import { AlertCircle, Calendar } from 'lucide-react-native';
@@ -18,24 +12,26 @@ interface DatePickerProps extends Omit<SelectProps, 'value'> {
   error?: string | undefined;
   label?: string;
   description?: string;
+  children?: React.ReactNode;
 }
 
-const DatePickerField = forwardRef<ElementRef<typeof DatePicker>, DatePickerProps>(
+const DatePickerField = React.forwardRef<React.ElementRef<typeof DatePicker>, DatePickerProps>(
   (props, ref) => {
     const {
       error,
       label,
       description,
+      children,
       ...otherProps
     } = props;
 
-    const inputRef = useRef<ComponentRef<typeof DatePicker>>(null);
+    const inputRef = React.useRef<React.ComponentRef<typeof DatePicker>>(null);
 
-    useImperativeHandle(
+    React.useImperativeHandle(
       ref,
       () => {
         if (!inputRef.current) {
-          return {} as ComponentRef<typeof DatePicker>;
+          return {} as React.ComponentRef<typeof DatePicker>;
         }
         return inputRef.current;
       },
@@ -56,7 +52,9 @@ const DatePickerField = forwardRef<ElementRef<typeof DatePicker>, DatePickerProp
         <DatePicker
           ref={inputRef}
           {...otherProps}
-        />
+        >
+          {children}
+        </DatePicker>
 
         {(description || error) && (
           <Field.Description>
