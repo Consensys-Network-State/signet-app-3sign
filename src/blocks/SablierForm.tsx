@@ -129,8 +129,6 @@ const SablierForm: FC<FormProps> = ({ form }) => {
             required: 'Recipient is required',
           }}
           render={({ field }) => {
-            console.log(field);
-
             return (
               <InputField
                 label="Recipient"

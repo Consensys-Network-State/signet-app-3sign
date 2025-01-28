@@ -47,7 +47,6 @@ const SignatureDialog = (props: SignatureDialogProps) => {
   const isSigningDisabled = !(editorMode === BlockNoteMode.SIGNATURE || editorMode === BlockNoteMode.SIMULATION);
 
   const onSubmit = (data: FormData) => {
-    console.log("Signature Form Data", JSON.stringify(data, null, 2));
     props.editor.updateBlock(props.block, {
       props: { name: data.name, address: data.address},
     })

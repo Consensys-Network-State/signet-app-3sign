@@ -27,7 +27,7 @@ import {Block, schema} from "../blocks/BlockNoteSchema.tsx";
 import {
     useCreateBlockNote,
 } from "@blocknote/react";
-import EthSignDialog from "../blocks/EthSignDialog.tsx";
+import EthSignDialog from "./EthSignDialog.tsx";
 import ExportDialog from "./ExportDialog.tsx";
 import grantAgreement from '../templates/grant-agreement.json';
 import {DocumentPayload} from "../types";

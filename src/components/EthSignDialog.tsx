@@ -89,7 +89,7 @@ const EthSignDialog: FC<EthSignDialogProps> =({ editor, onSuccessfulSignature, d
         </DialogClose>
 
         <Button onPress={isSimulationMode ? handleSimulateSignature: handleSign} loading={isLoading}>
-          {/*<Button.Spinner />*/}
+          <Button.Spinner />
           <Button.Text>Sign &amp; Finish</Button.Text>
         </Button>
       </>

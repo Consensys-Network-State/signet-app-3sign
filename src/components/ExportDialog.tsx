@@ -63,7 +63,7 @@ const ExportDialog: FC<ExportDialogProps> = ({ editor }) => {
                 },
             });
         } catch (error: any) {
-            setError(error.message);
+            setError('Failed to sign document');
             setIsLoading(false);
         }
     };
@@ -127,9 +127,8 @@ const ExportDialog: FC<ExportDialogProps> = ({ editor }) => {
                                     <Text>Cancel</Text>
                                 </Button>
                             </DialogClose>
-                            { /** TODO: There Seems to be some Babel Error for Spinner, how do we fix this? */}
                             <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
-                                {/*<Button.Spinner />*/}
+                                <Button.Spinner />
                                 <Button.Text>Export</Button.Text>
                             </Button>
                         </> :
