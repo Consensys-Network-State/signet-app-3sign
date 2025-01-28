@@ -10,5 +10,6 @@ export interface Signature {
 export interface DocumentPayload {
     documentId: string;
     documentVC: string;
+    signatures: string[];
     document: Block[];
 }

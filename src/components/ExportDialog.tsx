@@ -1,4 +1,4 @@
-import {FC, useEffect} from 'react';
+import {FC, useState} from 'react';
 import {
     Text,
     Button,
@@ -10,14 +10,14 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-    InputField
+    InputField,
 } from '@ds3/react';
 import { useForm, Controller } from 'react-hook-form';
 import {createDocumentVC} from "../utils/veramoUtils.ts";
 import { useAccount } from "wagmi";
 import { useMutation } from "@tanstack/react-query";
 import {postDocument} from "../api";
-import { useNavigate } from "react-router";
+import * as React from "react";
 
 interface ExportFormData {
     signatories: string;
@@ -38,26 +38,34 @@ const ExportDialog: FC<ExportDialogProps> = ({ editor }) => {
         mutationFn: postDocument
     })
 
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        if (mutation.isSuccess && mutation.data) {
-            const { processId } = mutation.data?.data || {};
-            navigate(`/${processId}`);
-        }
-    }, [mutation.isSuccess, mutation.data])
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [result, setResult] = useState("");
 
     const { address } = useAccount();
-
     const onSubmit = async (data: ExportFormData) => {
         try {
             if (!address) throw new Error('Not signed in');
+            setError("");
+            setIsLoading(true);
             const document = await createDocumentVC(address, data.signatories.split(',') as `0x${string}`[], editor.document);
-            mutation.mutate(document);
+            mutation.mutate(document, {
+                onError: (error) => {
+                    setIsLoading(false);
+                    setError(error.message);
+                },
+                onSuccess: (data) => {
+                    setIsLoading(false);
+                    if (data) {
+                        const { processId } = data.data || {};
+                        setResult(`${window.location.origin}/${processId}`);
+                    }
+                },
+            });
         } catch (error: any) {
-            console.log('Failed to Export', error);
+            setError(error.message);
+            setIsLoading(false);
         }
-
     };
 
     return (
@@ -69,41 +77,68 @@ const ExportDialog: FC<ExportDialogProps> = ({ editor }) => {
             </DialogTrigger>
             <DialogContent className='w-[520px] max-w-[520px]'>
                 <DialogHeader>
-                    <DialogTitle>Export Doc</DialogTitle>
-                    <DialogDescription>
-                        Set signatories and sign to export doc
-                    </DialogDescription>
+                    {!result ?
+                        <>
+                            <DialogTitle>Export Doc</DialogTitle>
+                            <DialogDescription>
+                                Set signatories and sign to export doc
+                            </DialogDescription>
+                        </> :
+                        <>
+                            <DialogTitle>Success! </DialogTitle>
+                            <DialogDescription>
+                                Your Agreement Has Been Exported
+                            </DialogDescription>
+                        </>
+                    }
                 </DialogHeader>
-                <Controller
-                    control={control}
-                    name="signatories"
-                    rules={{
-                        required: 'signatories are required'
-                    }}
-                    render={({ field }) => (
-                        <InputField
-                            label="Signatories"
-                            placeholder="e.g. 0x1232..."
-                            multiline
-                            numberOfLines={4}
-                            error={errors?.signatories?.message as string}
-                            {...field}
+                { !result ?
+                    <>
+                        <Controller
+                            control={control}
+                            name="signatories"
+                            rules={{
+                                required: 'signatories are required'
+                            }}
+                            render={({ field }) => (
+                                <InputField
+                                    label="Signatories"
+                                    placeholder="e.g. 0x1232..."
+                                    multiline
+                                    numberOfLines={4}
+                                    error={errors?.signatories?.message as string}
+                                    {...field}
+                                />
+                            )}
                         />
-                    )}
-                />
-
+                        { !!error &&
+                            <Text className="text-sm color-error-a11">
+                                Something went wrong: {error}
+                            </Text>
+                        }
+                    </> :
+                    <InputField disabled value={result} label={"Send this link to the parties that need to sign"}/>
+                }
                 <DialogFooter>
-                    <DialogClose asChild>
-                        <Button variant='ghost'>
-                            <Text>Cancel</Text>
-                        </Button>
-                    </DialogClose>
-
-                    <DialogClose asChild>
-                        <Button onPress={handleSubmit(onSubmit)}>
-                            <Text>Export</Text>
-                        </Button>
-                    </DialogClose>
+                    { !result ?
+                        <>
+                            <DialogClose asChild>
+                                <Button variant='ghost'>
+                                    <Text>Cancel</Text>
+                                </Button>
+                            </DialogClose>
+                            { /** TODO: There Seems to be some Babel Error for Spinner, how do we fix this? */}
+                            <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
+                                {/*<Button.Spinner />*/}
+                                <Button.Text>Export</Button.Text>
+                            </Button>
+                        </> :
+                        <DialogClose asChild>
+                            <Button variant='ghost'>
+                                <Text>Close</Text>
+                            </Button>
+                        </DialogClose>
+                    }
                 </DialogFooter>
             </DialogContent>
         </Dialog>

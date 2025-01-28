@@ -2,8 +2,8 @@ import {useEffect, useMemo, useState} from "react";
 import { useParams } from "react-router";
 import { ModeToggle } from "@ds3/react";
 import Account from "../web3/Account.tsx";
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import {getDocument, postSignature} from "../api";
+import { useQuery } from '@tanstack/react-query'
+import {getDocument} from "../api";
 import {validateAndProcessDocumentVC} from "../utils/veramoUtils.ts";
 import {Block} from "../blocks/BlockNoteSchema.tsx";
 import {BlockNoteMode, useBlockNoteStore} from "../store/blockNoteStore.ts";
@@ -13,10 +13,6 @@ import {DocumentPayload} from "../types";
 const Document = () => {
     const { documentId } = useParams(); // Extracts :username from the URL
     const { isPending, isError, data, error } = useQuery({ queryKey: ['documents', documentId], queryFn: () => getDocument(documentId!) });
-    const mutation = useMutation({
-        mutationFn: ({ documentId, signatureVC }: { documentId: string, signatureVC: string }) => postSignature(documentId, signatureVC)
-    })
-
     const { setEditorMode } = useBlockNoteStore();
 
     const [document, setDocument] = useState<Block[] | null>(null);
@@ -24,7 +20,6 @@ const Document = () => {
     const [documentStatus, setDocumentStatus] = useState<DocumentStatus>(DocumentStatus.UNDEFINED);
     const [isInitialized, setIsInitialized] = useState<boolean>(false);
     const { address } = useAccount();
-    const queryClient = useQueryClient()
 
     useEffect(() => {
         const queryHandler = async () => {
@@ -52,12 +47,6 @@ const Document = () => {
         queryHandler();
     }, [isPending, isError, data, address])
 
-    useEffect(() => {
-        if (mutation.isSuccess) {
-            queryClient.invalidateQueries({ queryKey: ['documents', documentId] })
-        }
-    }, [mutation.isSuccess])
-
     const isAuthorized = useMemo(() => {
         if (!address) return false;
         return !(address.toLowerCase() !== data?.data?.DocumentOwner && !(data?.data?.Signatories || []).find((a: string) => a === address.toLowerCase()));
@@ -78,17 +67,12 @@ const Document = () => {
 
                 <div className="flex-grow overflow-y-auto">
                     <div className="mx-auto w-full max-w-[1200px] p-4">
-                        {/*{ editorMode === BlockNoteMode.VIEW &&*/}
-                        {/*    <div className="bg-primary-4 p-2 flex items-center justify-between rounded-t-3 sticky top-0 z-20">*/}
-                        {/*        <Text>{isSigned ? "Document Is Signed!!!" : "Document Is Not Signed"}</Text>*/}
-                        {/*    </div>*/}
-                        {/*}*/}
                         { isLoading && <span>Loading...</span> }
                         { isError && <span>Error: {error.message}</span> }
                         { !isLoading && !isError &&
                             (isAuthorized ?
                                 <BNDocumentView
-                                    documentPayload={{ documentId, documentVC: data.data.Document, document } as DocumentPayload}
+                                    documentPayload={{ documentId, documentVC: data.data.Document, signatures: data.data.Signatures, document } as DocumentPayload}
                                     documentStatus={documentStatus}
                                 /> :
                                 <span>You Don't Have Access To This Document</span>)

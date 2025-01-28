@@ -9,7 +9,17 @@ import {
     insertOrUpdateBlock,
     filterSuggestionItems,
 } from '@blocknote/core';
-import {Icons, Text} from '@ds3/react';
+import {
+    Button,
+    Dialog,
+    DialogContent,
+    DialogDescription, DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    Icons,
+    InputField,
+    Text
+} from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
 import {FC, useEffect, useMemo, useState} from 'react';
 import {BlockNoteMode, useBlockNoteStore} from '../store/blockNoteStore';
@@ -21,6 +31,8 @@ import EthSignDialog from "../blocks/EthSignDialog.tsx";
 import ExportDialog from "./ExportDialog.tsx";
 import grantAgreement from '../templates/grant-agreement.json';
 import {DocumentPayload} from "../types";
+import * as React from "react";
+import ViewSignatureDialog from "./ViewSignatureDialog.tsx";
 
 // Slash menu item to insert an Alert block
 const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
@@ -72,6 +84,13 @@ const BNDocumentView: FC<BNDocumentViewProps> = ({ documentPayload, documentStat
         initialContent: documentPayload ? documentPayload.document : grantAgreement as Block[]
     })
 
+    const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+    const [sigVC, setSigVC] = useState('');
+    const onSuccessfulSignature = (signatureVC: string) => {
+        setSigVC(signatureVC);
+        setIsSuccessDialogOpen(true);
+    }
+
     const { editorMode: currentEditorMode } = useBlockNoteStore();
 
     const [editorMode, setEditorMode] = useState<BlockNoteMode | null>(null);
@@ -99,8 +118,12 @@ const BNDocumentView: FC<BNDocumentViewProps> = ({ documentPayload, documentStat
                     <Text>Document Is Not Signed</Text>
                 </div>
             } else if (documentStatus === DocumentStatus.SIGNED) {
+                // TODO: We're just displaying one signature for now. This will need to change when supporting multiple signatures
                 return <div className="bg-primary-4 p-2 flex items-center justify-between rounded-t-3 sticky top-0 z-20">
                     <Text>Document Is Signed!!!</Text>
+                    <div className="flex space-x-4">
+                        <ViewSignatureDialog sigVC={Object.values(documentPayload?.signatures)[0] as string} />
+                    </div>
                 </div>
             }
         }
@@ -127,7 +150,7 @@ const BNDocumentView: FC<BNDocumentViewProps> = ({ documentPayload, documentStat
             return <div className="bg-primary-4 p-2 flex items-center justify-between rounded-t-3 sticky top-0 z-20">
                 <Text>Review the document, fill in all details required, and sign all signature blocks</Text>
                 <div className="flex space-x-4">
-                    <EthSignDialog editor={editor} documentPayload={documentPayload!} />
+                    <EthSignDialog editor={editor} documentPayload={documentPayload!} onSuccessfulSignature={onSuccessfulSignature} />
                 </div>
             </div>
         }
@@ -137,6 +160,20 @@ const BNDocumentView: FC<BNDocumentViewProps> = ({ documentPayload, documentStat
 
     return <>
         { Header }
+        <Dialog open={isSuccessDialogOpen}>
+            <DialogContent className='w-[520px] max-w-[520px]'>
+                <DialogHeader>
+                    <DialogTitle>Success!</DialogTitle>
+                    <DialogDescription>You have successfully signed this agreement</DialogDescription>
+                </DialogHeader>
+                <InputField disabled value={sigVC} multiline numberOfLines={4} label={"This is your portable VC"}/>
+                <DialogFooter>
+                    <Button variant='ghost' onPress={() => setIsSuccessDialogOpen(false)}>
+                        <Text>Close</Text>
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
         <BlockNoteView
             editor={editor}
             editable={editorMode === BlockNoteMode.EDIT}
