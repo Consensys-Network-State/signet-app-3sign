@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -11,28 +10,27 @@ import {
   InputField,
 } from '@ds3/react';
 import * as React from "react";
-import { ShieldCheck } from 'lucide-react-native';
+import {ReactNode} from "react";
 
 interface ViewSignatureDialogProps {
   sigVC: string,
+  children?: ReactNode,
 }
 
-const ViewSignatureDialog: React.FC<ViewSignatureDialogProps> = ({ sigVC }) => {
+const ViewSignatureDialog: React.FC<ViewSignatureDialogProps> = ({ sigVC, children }) => {
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant='soft'>
-          <Button.Icon icon={ShieldCheck} />
-          <Button.Text>View VC</Button.Text>
-        </Button>
+        { children ? children :
+          <Button variant='soft'>
+            <Button.Text>View Signature</Button.Text>
+          </Button>
+        }
       </DialogTrigger>
       <DialogContent className='w-[520px] max-w-[520px]'>
         <DialogHeader>
           <DialogTitle>Signature</DialogTitle>
-          <DialogDescription>
-            This Agreement Has Been Signed
-          </DialogDescription>
         </DialogHeader>
         <InputField disabled value={sigVC} multiline numberOfLines={4} label={"This is the signature in a portable VC format"}/>
         <DialogFooter>

@@ -52,7 +52,7 @@ const EthSignDialog: React.FC<EthSignDialogProps> =({ editor, onSuccessfulSignat
     setError("");
     setIsLoading(true);
     try {
-      const signatureVC = await createSignatureVC(address as `0x${string}`, editor.document, documentPayload!.documentVC);
+      const signatureVC = await createSignatureVC(address as `0x${string}`, editor.document, documentPayload!.raw.Document);
       mutation.mutate(
           {documentId: documentPayload!.documentId, signatureVC},
           {

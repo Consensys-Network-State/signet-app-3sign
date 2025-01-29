@@ -77,7 +77,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
       <DialogTrigger asChild>
         <Button variant='soft' color="primary">
           <Button.Icon icon={Upload} />
-          <Button.Text>Publish</Button.Text>
+          <Button.Text>Publish Agreement</Button.Text>
         </Button>
       </DialogTrigger>
       <DialogContent className='w-[520px] max-w-[520px]'>

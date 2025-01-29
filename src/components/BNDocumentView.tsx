@@ -15,7 +15,7 @@ import {
   DialogContent,
   DialogDescription, DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle, DialogTrigger,
   Icons,
   InputField,
   Text,
@@ -34,7 +34,10 @@ import {DocumentPayload} from "../types";
 import * as React from "react";
 import ViewSignatureDialog from "./ViewSignatureDialog.tsx";
 import Layout from "../routes/Layout.tsx";
-import { Share } from 'lucide-react-native';
+import { View } from "react-native";
+import {COLOR_MODES} from "@ds3/config";
+import AddressDisplay from "./AddressDisplay.tsx";
+import { ShieldCheck, Share2 } from 'lucide-react-native';
 
 // Slash menu item to insert an Alert block
 const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
@@ -75,12 +78,11 @@ export enum DocumentStatus {
 
 interface BNDocumentViewProps {
   documentPayload?: DocumentPayload;
-  documentStatus?: DocumentStatus;
   // Add other properties of `props` if necessary
   [key: string]: unknown; // Optional: For additional props
 }
 
-const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, documentStatus = DocumentStatus.UNDEFINED, ...props }) => {
+const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...props }) => {
   const { mode } = useTheme();
   const editor = useCreateBlockNote({
     schema,
@@ -113,29 +115,47 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, docume
     }
   }, [currentEditorMode, editorMode]);
 
+  const documentStatus = React.useMemo(() => {
+    if (documentPayload) {
+      if (documentPayload.raw.IsComplete) return DocumentStatus.SIGNED;
+      return DocumentStatus.UNSIGNED;
+    }
+    return DocumentStatus.UNDEFINED;
+  }, [documentPayload]);
+
 
   const headerButtons = React.useMemo(() => {
     if (editorMode === BlockNoteMode.VIEW) {
-      if (documentStatus === DocumentStatus.UNSIGNED) {
-        return <>
-          <div className="bg-primary-4 p-2 flex items-center justify-between rounded-t-3 sticky top-0 z-20">
-            <Text>Document Is Not Signed</Text>
-          </div>
-          <Button variant="soft">
-            <Button.Icon icon={Share}/>
-            <Button.Text>Share</Button.Text>
-          </Button>
-        </>
-      } else if (documentStatus === DocumentStatus.SIGNED) {
-        // TODO: We're just displaying one signature for now. This will need to change when supporting multiple signatures
-        return <>
-          <ViewSignatureDialog sigVC={documentPayload?.signatures?.[0]!} />
-          <Button variant="soft">
-            <Button.Icon icon={Share}/>
-            <Button.Text>Share</Button.Text>
-          </Button>
-        </>
-      }
+      return <>
+        { documentStatus === DocumentStatus.SIGNED &&
+          // TODO: We're just displaying one signature for now. This will need to change when supporting multiple signatures
+            <ViewSignatureDialog sigVC={Object.values(documentPayload!.raw.Signatures)[0]}>
+                <Button variant='soft'>
+                    <Button.Icon icon={ShieldCheck} />
+                    <Button.Text>View VC</Button.Text>
+                </Button>
+            </ViewSignatureDialog>
+        }
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="soft">
+              <Button.Icon icon={Share2}/>
+              <Button.Text>Share</Button.Text>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className='w-[520px] max-w-[520px]'>
+            <DialogHeader>
+              <DialogTitle>Share</DialogTitle>
+            </DialogHeader>
+            <InputField disabled value={`${window.location.origin}${location.pathname}`} label={"Shareable link to this agreement"}/>
+            <DialogFooter>
+              <Button variant='ghost'>
+                <Text>Close</Text>
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
     }
 
     else if (editorMode === BlockNoteMode.EDIT) {
@@ -183,7 +203,41 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, docume
       rightHeader={headerButtons}
       status={statusBar}
     >
+      { (editorMode === BlockNoteMode.VIEW || editorMode === BlockNoteMode.SIGNATURE) &&
+        <View className="grid grid-cols-2 gap-4 mb-4">
+          <View className={`flex flex-col shadow-lg w-full h-32 px-8 py-6 rounded-md ${mode === COLOR_MODES.Dark ? 'bg-neutral-3': ''}`}>
+            <Text className="font-light text-4 mb-4">Agreement Author</Text>
+            <View className="flex flex-row items-center h-12">
+              <AddressDisplay address={documentPayload!.raw.DocumentOwner}/>
+              <View className="my-auto ml-auto">
+                <ViewSignatureDialog sigVC={documentPayload!.raw.Document}>
+                  <Button variant="soft" color="success">
+                      <Button.Icon icon={Icons.Signature} />
+                      <Button.Text>View Signature</Button.Text>
+                  </Button>
+                </ViewSignatureDialog>
+              </View>
+
+            </View>
+          </View>
+          <View className={`flex flex-col shadow-lg w-full h-32 px-8 py-6 rounded-md ${mode === COLOR_MODES.Dark ? 'bg-neutral-3': ''}`}>
+            <Text className="font-light text-4 mb-4">Agreement Signatory</Text>
+              <View className="flex flex-row items-center h-12">
+                <AddressDisplay address={documentPayload!.raw.Signatories[0]}/>
+                <View className="my-auto ml-auto">
+                  <ViewSignatureDialog sigVC={documentPayload!.raw.IsComplete ? Object.values(documentPayload!.raw.Signatures)[0] : ''}>
+                      <Button className="my-auto ml-auto" variant="soft" disabled={!(documentPayload!.raw.IsComplete)} color={documentPayload!.raw.IsComplete ? "success" : "error" }>
+                          <Button.Icon icon={Icons.Signature} />
+                          <Button.Text>{documentPayload!.raw.IsComplete ? "View Signature" : "Not Signed"}</Button.Text>
+                      </Button>
+                  </ViewSignatureDialog>
+                </View>
+              </View>
+          </View>
+        </View>
+      }
       <BlockNoteView
+        className="shadow-lg"
         editor={editor}
         editable={editorMode === BlockNoteMode.EDIT}
         slashMenu={false}

@@ -17,7 +17,7 @@ import {validateAndProcessDocumentVC} from "../utils/veramoUtils.ts";
 import {Block} from "../blocks/BlockNoteSchema.tsx";
 import {BlockNoteMode, useBlockNoteStore} from "../store/blockNoteStore.ts";
 import { useAccount, useDisconnect } from "wagmi";
-import BNDocumentView, { DocumentStatus } from "../components/BNDocumentView.tsx";
+import BNDocumentView from "../components/BNDocumentView.tsx";
 import { DocumentPayload } from "../types";
 import { View } from 'react-native';
 
@@ -27,10 +27,7 @@ const Document = () => {
   const { documentId } = useParams(); // Extracts :username from the URL
   const { isPending, isError, data, error } = useQuery({ queryKey: ['documents', documentId], queryFn: () => getDocument(documentId!) });
   const { setEditorMode } = useBlockNoteStore();
-
   const [document, setDocument] = React.useState<Block[] | null>(null);
-
-  const [documentStatus, setDocumentStatus] = React.useState<DocumentStatus>(DocumentStatus.UNDEFINED);
   const [isInitialized, setIsInitialized] = React.useState<boolean>(false);
   const { address } = useAccount();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
@@ -51,15 +48,11 @@ const Document = () => {
 
         if (address.toLowerCase() === data.data.DocumentOwner) { // If you are the owner
           setEditorMode(BlockNoteMode.VIEW);
-          // TODO: Check if all signers have signed
-          setDocumentStatus(!!data.data.Signatures[data.data.Signatories[0]] ? DocumentStatus.SIGNED : DocumentStatus.UNSIGNED)
         } else if (data.data.Signatories.find((a: string) => a === address.toLowerCase())) { // If you are a signer ...
           if (!!data.data.Signatures[address.toLowerCase()]) { // ... and you have signed
             setEditorMode(BlockNoteMode.VIEW);
-            setDocumentStatus(DocumentStatus.SIGNED);
           } else { // ... and you haven't signed
             setEditorMode(BlockNoteMode.SIGNATURE);
-            setDocumentStatus(DocumentStatus.UNSIGNED);
           }
         }
         setIsInitialized(true);
@@ -121,8 +114,7 @@ const Document = () => {
         { !isLoading && !isError &&
           (isAuthorized ?
             <BNDocumentView
-              documentPayload={{ documentId, documentVC: data.data.Document, signatures: Object.values(data.data.Signatures), document } as DocumentPayload}
-              documentStatus={documentStatus}
+              documentPayload={{ documentId, document, raw: data?.data } as DocumentPayload}
             /> :
             <FullView>
               <Text>You Don't Have Access To This Document</Text>
