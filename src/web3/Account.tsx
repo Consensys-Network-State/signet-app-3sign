@@ -54,7 +54,7 @@ const Account: React.FC<AccountProps> = ({ className }) => {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem onPress={() => navigator.clipboard.writeText(address) }>
             <Icons.Copy className='text-foreground' size={14} />
             <Text>Copy address</Text>
           </DropdownMenuItem>

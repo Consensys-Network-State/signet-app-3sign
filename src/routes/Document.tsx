@@ -9,7 +9,7 @@ import {
   DialogTitle,
   InputField,
   Text,
-  Spinner,
+  Spinner, Theme, H1, H3, ModeToggle,
 } from "@ds3/react";
 import { useQuery } from '@tanstack/react-query'
 import {getDocument} from "../api";
@@ -20,6 +20,8 @@ import { useAccount, useDisconnect } from "wagmi";
 import BNDocumentView from "../components/BNDocumentView.tsx";
 import { DocumentPayload } from "../types";
 import { View } from 'react-native';
+import AddressDisplay from "../components/AddressDisplay.tsx";
+import AuthenticationLayout from "../components/AuthenticationLayout.tsx";
 
 const Document = () => {
   const location = useLocation();
@@ -116,12 +118,12 @@ const Document = () => {
             <BNDocumentView
               documentPayload={{ documentId, document, raw: data?.data } as DocumentPayload}
             /> :
-            <FullView>
-              <Text>You Don't Have Access To This Document</Text>
-              <Button variant="soft" onPress={disconnect}>
-                <Button.Text>Disconnnect</Button.Text>
-              </Button>
-            </FullView>
+            <AuthenticationLayout>
+              <Text className="text-neutral-11 mb-4">This agreement is only accessible by the following wallets</Text>
+              <AddressDisplay address={data?.data?.DocumentOwner}/>
+              <AddressDisplay address={data?.data?.Signatories?.[0] || null}/>
+              <Text className="text-neutral-11 mt-4">Please connect using a different account with MetaMask</Text>
+            </AuthenticationLayout>
           )
         }
       </>
