@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text } from "react-native";
-import { ModeToggle } from "@ds3/react";
+import { View } from "react-native";
+import { ModeToggle, Text } from "@ds3/react";
 import Account from "../web3/Account.tsx";
 import { H4 } from "@ds3/react/src/components/Heading.tsx";
 
@@ -27,23 +27,22 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
   };
 
   return (
-    <View className="screen bg-neutral-1">
+    <View className="h-screen bg-neutral-1">
       <View className="flex flex-col h-full">
-        {/* Status Message */}
-        {status && (
-          <View className={`w-full p-4 ${getStatusBackgroundColor(status.type)}`}>
-            <Text className="text-sm text-center">
-              {status.message}
-            </Text>
-          </View>
-        )}
 
         {/* Navbar */}
         <View className="bg-neutral-1 shadow-md sticky top-0 z-20">
-          <View className="flex flex-row items-center justify-between px-4 py-6">
+          {/* Status Message */}
+          {status && (
+            <View className={`w-full px-8 py-2 ${getStatusBackgroundColor(status.type)}`}>
+              <Text>{status.message}</Text>
+            </View>
+          )}
+
+          <View className="flex flex-row items-center justify-between px-8 py-6">
             <H4 className="text-primary-12">APOC</H4>
 
-            <View className="flex flex-row items-center space-x-4">
+            <View className="flex flex-row items-center px-4 gap-2">
               {rightHeader}
               <Account />
               <ModeToggle />

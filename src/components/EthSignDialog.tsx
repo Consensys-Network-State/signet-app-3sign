@@ -17,6 +17,7 @@ import {postSignature} from "../api";
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {DocumentPayload} from "../types";
 import * as React from "react";
+import { Signature } from 'lucide-react-native';
 
 interface EthSignDialogProps {
   documentPayload?: DocumentPayload,
@@ -105,8 +106,9 @@ const EthSignDialog: React.FC<EthSignDialogProps> =({ editor, onSuccessfulSignat
   return (
     <Dialog open={isOpen}>
       <DialogTrigger asChild disabled={disabled}>
-        <Button variant='outline' onPress={() => setIsOpen(true)}>
-          <Text>Sign Agreement</Text>
+        <Button variant='soft' color="primary" onPress={() => setIsOpen(true)}>
+          <Button.Icon icon={Signature} />
+          <Button.Text>Sign</Button.Text>
         </Button>
       </DialogTrigger>
       <DialogContent className='w-[520px] max-w-[520px]'>
