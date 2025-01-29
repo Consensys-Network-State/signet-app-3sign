@@ -29,7 +29,7 @@ import {
 } from "@blocknote/react";
 import EthSignDialog from "./EthSignDialog.tsx";
 import ExportDialog from "./ExportDialog.tsx";
-import grantAgreement from '../templates/grant-agreement.json';
+import newAgreement from '../templates/new-agreement.json';
 import {DocumentPayload} from "../types";
 import * as React from "react";
 import ViewSignatureDialog from "./ViewSignatureDialog.tsx";
@@ -84,7 +84,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, docume
   const { mode } = useTheme();
   const editor = useCreateBlockNote({
     schema,
-    initialContent: documentPayload ? documentPayload.document : grantAgreement as Block[]
+    initialContent: documentPayload ? documentPayload.document : newAgreement as Block[]
   })
 
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false);
