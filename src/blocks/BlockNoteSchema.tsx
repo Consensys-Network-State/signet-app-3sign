@@ -94,7 +94,7 @@ const SignatureBlock: any = createReactBlockSpec<CustomBlockConfig, typeof schem
     {
         render: (props) => {
             return (
-                <div className="mb-4">
+                <div className="mb-4 w-full">
                     { !props.block.props.name || !props.block.props.address ?
                         <SignatureDialog {...props} /> :
                         <Signature name={props.block.props.name} address={props.block.props.address}/>

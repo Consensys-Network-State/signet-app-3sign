@@ -25,9 +25,10 @@ interface EthSignDialogProps {
   disabled?: boolean;
   isSimulationMode?: boolean;
   onSuccessfulSignature?: (data: any) => void;
+  triggerProps?: any
 }
 
-const EthSignDialog: React.FC<EthSignDialogProps> =({ editor, onSuccessfulSignature, disabled = false, isSimulationMode = false, documentPayload }) => {
+const EthSignDialog: React.FC<EthSignDialogProps> =({ editor, onSuccessfulSignature, disabled = false, isSimulationMode = false, documentPayload, triggerProps = {} }) => {
 
   const [sigVC, setSigVC] = React.useState<string | null>(null);
 
@@ -106,7 +107,7 @@ const EthSignDialog: React.FC<EthSignDialogProps> =({ editor, onSuccessfulSignat
   return (
     <Dialog open={isOpen}>
       <DialogTrigger asChild disabled={disabled}>
-        <Button variant='soft' color="primary" onPress={() => setIsOpen(true)}>
+        <Button variant='soft' color="primary" onPress={() => setIsOpen(true)} {...triggerProps}>
           <Button.Icon icon={Signature} />
           <Button.Text>Sign</Button.Text>
         </Button>

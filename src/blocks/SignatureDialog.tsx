@@ -19,6 +19,7 @@ import Signature from "./Signature.tsx";
 import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import type { SignatureBlock } from './BlockNoteSchema';
 import {ReactNode} from "react";
+import { Signature as SignatureIcon } from 'lucide-react-native';
 
 interface SignatureDialogProps {
   children?: ReactNode;
@@ -59,10 +60,11 @@ const SignatureDialog = (props: SignatureDialogProps) => {
   } = watch();
 
   return (
-    <Dialog>
-      <DialogTrigger asChild disabled={isSigningDisabled}>
-        <Button variant='outline'>
-          <Text>Signature Dialog</Text>
+    <Dialog className="w-full">
+      <DialogTrigger className="w-full" asChild disabled={isSigningDisabled}>
+        <Button variant='dashed' color="primary">
+          <Button.Icon icon={SignatureIcon}/>
+          <Button.Text>Sign Here</Button.Text>
         </Button>
       </DialogTrigger>
       <DialogContent className='w-[520px] max-w-[520px]'>
