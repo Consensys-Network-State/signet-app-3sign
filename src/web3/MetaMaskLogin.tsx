@@ -7,7 +7,7 @@ interface MetaMaskLoginProps {
   className?: string;
 }
 
-const MetaMaskLogin: React.FC = ({ className }: MetaMaskLoginProps) => {
+const MetaMaskLogin: React.FC<MetaMaskLoginProps> = ({ className }) => {
   const [isConnecting, setIsConnecting] = React.useState(false)
 
   const { connectors, connect } = useConnect({

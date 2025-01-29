@@ -14,7 +14,7 @@ const queryClient = new QueryClient()
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SafeAreaProvider>
-      <ThemeProvider className="bg-neutral-1 color-neutral-12" config={import.meta.env.DS3}>
+      <ThemeProvider config={import.meta.env.DS3}>
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>

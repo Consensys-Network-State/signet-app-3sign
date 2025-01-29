@@ -36,7 +36,7 @@ const Login: React.FC = () => {
           </Theme>
         </View>
       </View>
-      <ModeToggle className="absolute top-2 right-2 px-4 py-2" />
+      <ModeToggle className="absolute top-2 right-2" />
     </View>
   );
 }

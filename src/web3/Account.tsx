@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Button,
   Avatar,
-  AvatarFallback,
   AvatarImage,
   Text,
   DropdownMenu,
@@ -18,9 +17,9 @@ import {
 import { useAccount, useDisconnect, useEnsAvatar, useEnsName } from "wagmi";
 import { normalize } from 'viem/ens'
 import truncateEthAddress from 'truncate-eth-address'
-import { View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import makeBlockie from 'ethereum-blockies-base64';
+import { ChevronDown } from 'lucide-react-native';
 
 const Account: React.FC = () => {
   const { address } = useAccount()
@@ -39,17 +38,12 @@ const Account: React.FC = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="flex flex-row">
-          <Avatar alt="Zach Nugent's Avatar" className="mr-3 w-9 h-9">
+        <Button className="flex flex-row" variant="soft">
+          <Avatar alt="Zach Nugent's Avatar" className="mr-3 w-6 h-6">
             <AvatarImage source={{ uri: ensAvatar ? ensAvatar as string : makeBlockie(address!) }} />
-            <AvatarFallback>
-              <Text>ZN</Text>
-            </AvatarFallback>
           </Avatar>
-          <View>
-            <Text>{ensName}</Text>
-            { address && <Text>{truncateEthAddress(address as string)}</Text> }
-          </View>
+          { address && <Text>{truncateEthAddress(address as string)}</Text> }
+          <Button.Icon icon={ChevronDown} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent insets={contentInsets} className='w-64 native:w-72'>
@@ -71,8 +65,6 @@ const Account: React.FC = () => {
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
-
-
   )
 }
 
