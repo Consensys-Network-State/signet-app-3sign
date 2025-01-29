@@ -18,8 +18,8 @@ const Login: React.FC = () => {
   }, [isConnected, navigate, location]);
 
   return (
-    <div className="h-screen bg-neutral-1">
-      <div className="flex items-center justify-center h-full w-full">
+    <View className="h-screen bg-neutral-1">
+      <View className="flex items-center justify-center h-full w-full">
         <View
           className="flex items-center justify-center bg-no-repeat w-full max-w-[612px] min-w-[300px] h-full"
           style={{ backgroundImage: 'url("./tie.png")' }}
@@ -35,9 +35,9 @@ const Login: React.FC = () => {
             <Text className="text-neutral-11">*Suit and tie remain optional in crypto</Text>
           </Theme>
         </View>
-      </div>
+      </View>
       <ModeToggle className="absolute top-2 right-2 px-4 py-2" />
-    </div>
+    </View>
   );
 }
 
