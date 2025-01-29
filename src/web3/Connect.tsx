@@ -5,7 +5,12 @@ export function Connect() {
   const { connectors, connect } = useConnect()
 
   return connectors.map((connector) => (
-    <Button key={connector.uid} onPress={() => connect({ connector })}>
+    <Button
+      className="w-full"
+      variant="soft"
+      key={connector.uid}
+      onPress={() => connect({ connector })}
+    >
       <Text>{connector.name}</Text>
     </Button>
   ))
