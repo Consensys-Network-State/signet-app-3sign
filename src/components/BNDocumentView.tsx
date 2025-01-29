@@ -254,17 +254,19 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
           }
         />
       </BlockNoteView>
-      <EthSignDialog
-        editor={editor}
-        documentPayload={documentPayload!}
-        onSuccessfulSignature={onSuccessfulSignature}
-        triggerProps={{
-          color: 'primary',
-          variant: 'soft',
-          size: 'lg',
-          className: 'mt-4 w-full'
-        }}
-      />
+      { currentEditorMode === BlockNoteMode.SIGNATURE &&
+        <EthSignDialog
+          editor={editor}
+          documentPayload={documentPayload!}
+          onSuccessfulSignature={onSuccessfulSignature}
+          triggerProps={{
+            color: 'primary',
+            variant: 'soft',
+            size: 'lg',
+            className: 'mt-4 w-full'
+          }}
+        />
+      }
     </Layout>
   </>
 }
