@@ -52,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
 
         {/* Main Content */}
         <View className="flex-1">
-          <View className="mx-auto w-full max-w-[1200px] p-8 m-12 rounded-4 shadow-lg">
+          <View className="mx-auto w-full max-w-[1200px] p-8 m-12 rounded-4">
             {children}
           </View>
         </View>

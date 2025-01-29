@@ -8,19 +8,22 @@ import {
   DialogHeader,
   DialogTitle,
   InputField,
-  Text
+  Text,
+  Spinner,
 } from "@ds3/react";
 import { useQuery } from '@tanstack/react-query'
 import {getDocument} from "../api";
 import {validateAndProcessDocumentVC} from "../utils/veramoUtils.ts";
 import {Block} from "../blocks/BlockNoteSchema.tsx";
 import {BlockNoteMode, useBlockNoteStore} from "../store/blockNoteStore.ts";
-import { useAccount } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
 import BNDocumentView, { DocumentStatus } from "../components/BNDocumentView.tsx";
 import { DocumentPayload } from "../types";
+import { View } from 'react-native';
 
 const Document = () => {
   const location = useLocation();
+  const { disconnect } = useDisconnect()
   const { documentId } = useParams(); // Extracts :username from the URL
   const { isPending, isError, data, error } = useQuery({ queryKey: ['documents', documentId], queryFn: () => getDocument(documentId!) });
   const { setEditorMode } = useBlockNoteStore();
@@ -63,7 +66,7 @@ const Document = () => {
       }
     }
     queryHandler();
-  }, [isPending, isError, data, address])
+  }, [isPending, isError, data, address, setEditorMode])
 
   const isAuthorized = React.useMemo(() => {
     if (!address) return false;
@@ -71,6 +74,16 @@ const Document = () => {
   }, [address, data]);
 
   const isLoading = isPending || !isInitialized;
+
+  const FullView: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+    return (
+      <View className="h-screen flex items-center justify-center">
+        <View className="flex items-center justify-center">
+          {children}
+        </View>
+      </View>
+    );
+  }
 
   return (
     <>
@@ -90,15 +103,34 @@ const Document = () => {
       </Dialog>
 
       <>
-        { isLoading && <span>Loading...</span> }
-        { isError && <span>Error: {error.message}</span> }
+        { isLoading &&
+          <FullView>
+            <Spinner className="h-9 w-9" color="primary" />
+          </FullView>
+        }
+
+        { isError &&
+          <FullView>
+            <Text>Error: {error.message}</Text>
+            <Button variant="soft" onPress={disconnect}>
+              <Button.Text>Disconnnect</Button.Text>
+            </Button>
+          </FullView>
+        }
+
         { !isLoading && !isError &&
           (isAuthorized ?
             <BNDocumentView
               documentPayload={{ documentId, documentVC: data.data.Document, signatures: Object.values(data.data.Signatures), document } as DocumentPayload}
               documentStatus={documentStatus}
             /> :
-            <span>You Don't Have Access To This Document</span>)
+            <FullView>
+              <Text>You Don't Have Access To This Document</Text>
+              <Button variant="soft" onPress={disconnect}>
+                <Button.Text>Disconnnect</Button.Text>
+              </Button>
+            </FullView>
+          )
         }
       </>
     </>

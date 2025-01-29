@@ -21,7 +21,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import makeBlockie from 'ethereum-blockies-base64';
 import { ChevronDown } from 'lucide-react-native';
 
-const Account: React.FC = () => {
+interface AccountProps {
+  className?: string;
+}
+
+const Account: React.FC<AccountProps> = ({ className }) => {
   const { address } = useAccount()
   const { disconnect } = useDisconnect()
   const { data: ensName } = useEnsName({ address })
@@ -38,7 +42,7 @@ const Account: React.FC = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="flex flex-row" variant="soft">
+        <Button className={utils.cn("flex flex-row", className)} variant="soft" >
           <Avatar alt="Zach Nugent's Avatar" className="mr-3 w-6 h-6">
             <AvatarImage source={{ uri: ensAvatar ? ensAvatar as string : makeBlockie(address!) }} />
           </Avatar>
