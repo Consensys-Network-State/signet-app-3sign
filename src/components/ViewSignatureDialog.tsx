@@ -7,10 +7,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  InputField,
+  DialogDescription,
 } from '@ds3/react';
 import * as React from "react";
 import {ReactNode} from "react";
+import {InputClipboard} from "./InputClipboard.tsx";
 
 interface ViewSignatureDialogProps {
   sigVC: string,
@@ -31,11 +32,15 @@ const ViewSignatureDialog: React.FC<ViewSignatureDialogProps> = ({ sigVC, childr
       <DialogContent className='w-[520px] max-w-[520px]'>
         <DialogHeader>
           <DialogTitle>Signature</DialogTitle>
+          <DialogDescription>
+            This is the signature in a portable VC format
+          </DialogDescription>
         </DialogHeader>
-        <InputField disabled value={sigVC} multiline numberOfLines={4} label={"This is the signature in a portable VC format"}/>
+
+        <InputClipboard value={sigVC} multiline numberOfLines={12} />
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant='ghost'>
+            <Button variant='soft' color="primary">
               <Button.Text>Close</Button.Text>
             </Button>
           </DialogClose>

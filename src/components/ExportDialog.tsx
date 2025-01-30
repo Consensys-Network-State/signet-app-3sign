@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
   InputField,
+  Input,
 } from '@ds3/react';
 import { useForm, Controller } from 'react-hook-form';
 import { createDocumentVC } from "../utils/veramoUtils.ts";
@@ -19,6 +20,8 @@ import { postDocument } from "../api";
 import * as React from "react";
 import { useNavigate } from "react-router";
 import { Upload } from 'lucide-react-native';
+import { isAddress } from 'viem'
+import AddressAvatar from "../web3/AddressAvatar.tsx";
 
 interface ExportFormData {
   signatories: string;
@@ -101,7 +104,8 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
             control={control}
             name="signatories"
             rules={{
-              required: 'signatories are required'
+              required: 'Signatory is required',
+              validate: (value) => isAddress(value) || 'Invalid Ethereum address'
             }}
             render={({ field }) => (
               <InputField
@@ -109,7 +113,12 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
                 placeholder="e.g. 0x1232..."
                 error={errors?.signatories?.message as string}
                 {...field}
-              />
+              >
+                {isAddress(field.value) &&
+                  <AddressAvatar address={field.value} className="w-6 h-6" />
+                }
+                <Input.Field />
+              </InputField>
             )}
           />
           { !!error &&

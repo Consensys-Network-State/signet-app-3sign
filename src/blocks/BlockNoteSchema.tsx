@@ -16,6 +16,7 @@ import Signature from "./Signature.tsx";
 import SignatureDialog from "./SignatureDialog";
 import { BlockNoteMode, useBlockNoteStore } from "../store/blockNoteStore.ts";
 import { View } from 'react-native';
+import truncateEthAddress from 'truncate-eth-address';
 
 export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof schema.inlineContentSchema, typeof schema.styleSchema>(
   {
@@ -32,16 +33,26 @@ export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof 
         values: supportedChains.map((c) => { return c.id } )
       },
       token: {
-        default: "",
+        default: '0x0000000000000000000000000000000000000000',
       },
       amount: {
         default: 0,
       },
+      recipient: {
+        default: ''
+      },
+      startDate: {
+        default: '',
+      },
       duration: {
         default: 1,
       },
-      firstUnlock: {
-        default: 'default',
+      firstPayment: {
+        default: "atStart",
+        values: ["atStart", "endFirstMonth"]
+      },
+      transferability: {
+        default: false
       }
     },
     content: "inline",
@@ -49,6 +60,8 @@ export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof 
   {
     render: (props) => {
       const { editorMode: currentEditorMode } = useBlockNoteStore();
+
+      console.log('Props', props.block.props)
       return (
         <Card className='w-full max-w-md'>
           <CardHeader>
@@ -66,13 +79,13 @@ export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof 
               <View className="col-span-1 color-neutral-10">Chain</View>
               <View className="col-span-2 flex flex-row items-center gap-2">{props.block.props.chain && <><LineaIcon />{getChainById(props.block.props.chain)?.name}<Icons.SquareArrowOutUpRight size={18} /></>}</View>
               <View className="col-span-1 color-neutral-10">Token</View>
-              <View className="col-span-2 flex items-center gap-2">{props.block.props.token && <><TokenIcon /> {props.block.props.token} <Icons.SquareArrowOutUpRight size={18} /></>}</View>
+              <View className="col-span-2 flex flex-row items-center gap-2">{props.block.props.token && <><TokenIcon /> {truncateEthAddress(props.block.props.token)} <Icons.SquareArrowOutUpRight size={18} /></>}</View>
               <View className="col-span-1 color-neutral-10">Amount</View>
               <View className="col-span-2">{props.block.props.amount}</View>
               <View className="col-span-1 color-neutral-10">Duration</View>
               <View className="col-span-2"> {props.block.props.duration}{/** 3 months <Text className="color-neutral-10 text-3">(Sept 1, 2024 - Jan 1, 2024)</Text> */} </View>
               <View className="col-span-1 color-neutral-10">First Unlock</View>
-              <View className="col-span-2">{props.block.props.firstUnlock}{/** Oct 1, 2024 */}</View>
+              <View className="col-span-2">{props.block.props.startDate}{/** Oct 1, 2024 */}</View>
             </View>
           </CardContent>
         </Card>

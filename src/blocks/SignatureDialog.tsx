@@ -19,11 +19,12 @@ import {
 import Signature from "./Signature.tsx";
 import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import type { SignatureBlock } from './BlockNoteSchema';
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { Signature as SignatureIcon } from 'lucide-react-native';
 import { useAccount } from 'wagmi';
 import { View } from 'react-native';
 import AddressAvatar from "../web3/AddressAvatar.tsx";
+import { isAddress } from 'viem';
 
 interface SignatureDialogProps {
   children?: ReactNode;
@@ -42,7 +43,7 @@ const SignatureDialog = (props: SignatureDialogProps) => {
   const form = useForm<FormData>({
     defaultValues: {
       name: '',
-      address: walletAddress || '' // Set default address
+      address: walletAddress || ''
     }
   });
 
@@ -103,7 +104,8 @@ const SignatureDialog = (props: SignatureDialogProps) => {
                 control={control}
                 name="address"
                 rules={{
-                  required: 'Address is required'
+                  required: 'Address is required',
+                  validate: (value) => isAddress(value) || 'Invalid Ethereum address'
                 }}
                 render={({ field: { value, ...otherProps } }) => (
                   <InputField
@@ -113,7 +115,7 @@ const SignatureDialog = (props: SignatureDialogProps) => {
                     value={value}
                     {...otherProps}
                   >
-                    {!!value &&
+                    {isAddress(value) &&
                       <AddressAvatar address={value} className="w-6 h-6" />
                     }
                     <Input.Field />

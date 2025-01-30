@@ -96,7 +96,7 @@ const Document = () => {
             value={`${window.location.origin}${location.pathname}`}
           />
           <DialogFooter>
-            <Button variant='ghost' onPress={() => setIsModalOpen(false)}>
+            <Button variant='soft' color="primary" onPress={() => setIsModalOpen(false)}>
               <Text>Close</Text>
             </Button>
           </DialogFooter>

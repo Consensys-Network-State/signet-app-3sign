@@ -21,6 +21,7 @@ import { supportedChains as chains } from '../utils/chainUtils';
 import ChainAvatar from "../web3/ChainAvatar.tsx";
 import { View } from 'react-native';
 import AddressAvatar from "../web3/AddressAvatar.tsx";
+import { isAddress } from 'viem';
 
 export type FormData = {
   chain: { value: string; label: string } | null;
@@ -28,7 +29,7 @@ export type FormData = {
   amount: string;
   recipient: string;
   startDate: Dayjs | undefined;
-  numMonths: string;
+  duration: string;
   firstPayment: 'atStart' | 'endFirstMonth';
   transferability: boolean;
 };
@@ -138,6 +139,7 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
           name="recipient"
           rules={{
             required: 'Recipient is required',
+            validate: (value) => isAddress(value) || 'Invalid Ethereum address'
           }}
           render={({ field }) => {
             return (
@@ -147,7 +149,7 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
                 error={errors?.recipient?.message as string}
                 {...field}
               >
-                {!!field.value &&
+                {isAddress(field.value) &&
                   <AddressAvatar address={field.value} className="w-6 h-6" />
                 }
                 <Input.Field />
@@ -175,7 +177,7 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
         />
         <Controller
           control={control}
-          name="numMonths"
+          name="duration"
           rules={{
             required: 'Number of months is required',
           }}
@@ -183,7 +185,7 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
             <InputField
               label="Number of Months"
               placeholder="Number of months"
-              error={errors?.numMonths?.message as string}
+              error={errors?.duration?.message as string}
               {...field}
             />
           )}

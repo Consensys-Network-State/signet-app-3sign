@@ -17,9 +17,9 @@ import {
   DialogHeader,
   DialogTitle, DialogTrigger,
   Icons,
-  InputField,
   Text,
-  useTheme
+  useTheme,
+  DialogClose,
 } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
 import { BlockNoteMode, useBlockNoteStore } from '../store/blockNoteStore';
@@ -39,6 +39,7 @@ import { View } from "react-native";
 import {COLOR_MODES} from "@ds3/config";
 import AddressCard from "../web3/AddressCard.tsx";
 import { ShieldCheck, Share2 } from 'lucide-react-native';
+import {InputClipboard} from "./InputClipboard.tsx";
 
 // Slash menu item to insert an Alert block
 const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
@@ -147,12 +148,17 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
           <DialogContent className='w-[520px] max-w-[520px]'>
             <DialogHeader>
               <DialogTitle>Share</DialogTitle>
+              <DialogDescription>
+                <Text>Shareable link to this agreement</Text>
+              </DialogDescription>
             </DialogHeader>
-            <InputField disabled value={`${window.location.origin}${location.pathname}`} label={"Shareable link to this agreement"}/>
+            <InputClipboard value={`${window.location.origin}${location.pathname}`} />
             <DialogFooter>
-              <Button variant='ghost'>
-                <Text>Close</Text>
-              </Button>
+              <DialogClose asChild>
+                <Button variant='soft' color="primary">
+                  <Text>Close</Text>
+                </Button>
+              </DialogClose>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -190,11 +196,15 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
       <DialogContent className='w-[520px] max-w-[520px]'>
         <DialogHeader>
           <DialogTitle>Success!</DialogTitle>
-          <DialogDescription>You have successfully signed this agreement</DialogDescription>
+          <DialogDescription>
+            <Text className="block pb-4">You have successfully signed this agreement</Text>
+
+            <Text className="block">This is your portable VC:</Text>
+          </DialogDescription>
         </DialogHeader>
-        <InputField disabled value={sigVC} multiline numberOfLines={4} label={"This is your portable VC"}/>
+        <InputClipboard value={sigVC} multiline numberOfLines={12} />
         <DialogFooter>
-          <Button variant='ghost' onPress={() => setIsSuccessDialogOpen(false)}>
+          <Button variant='soft' color="primary" onPress={() => setIsSuccessDialogOpen(false)}>
             <Text>Close</Text>
           </Button>
         </DialogFooter>
@@ -255,19 +265,19 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
           }
         />
       </BlockNoteView>
-      { currentEditorMode === BlockNoteMode.SIGNATURE &&
-        <EthSignDialog
-          editor={editor}
-          documentPayload={documentPayload!}
-          onSuccessfulSignature={onSuccessfulSignature}
-          triggerProps={{
-            color: 'primary',
-            variant: 'soft',
-            size: 'lg',
-            className: 'mt-4 w-full'
-          }}
-        />
-      }
+      {/*{ currentEditorMode === BlockNoteMode.SIGNATURE &&*/}
+      {/*  <EthSignDialog*/}
+      {/*    editor={editor}*/}
+      {/*    documentPayload={documentPayload!}*/}
+      {/*    onSuccessfulSignature={onSuccessfulSignature}*/}
+      {/*    triggerProps={{*/}
+      {/*      color: 'primary',*/}
+      {/*      variant: 'soft',*/}
+      {/*      size: 'lg',*/}
+      {/*      className: 'mt-4 w-full'*/}
+      {/*    }}*/}
+      {/*  />*/}
+      {/*}*/}
     </Layout>
   </>
 }

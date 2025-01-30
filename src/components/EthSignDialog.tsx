@@ -17,7 +17,7 @@ import { postSignature } from "../api";
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { DocumentPayload } from "../types";
 import * as React from "react";
-import { Signature } from 'lucide-react-native';
+import { Upload } from 'lucide-react-native';
 
 interface EthSignDialogProps {
   documentPayload?: DocumentPayload,
@@ -96,9 +96,9 @@ const EthSignDialog: React.FC<EthSignDialogProps> =({
           </Button>
         </DialogClose>
 
-        <Button onPress={isSimulationMode ? handleSimulateSignature: handleSign} loading={isLoading}>
+        <Button variant="soft" color="error" onPress={isSimulationMode ? handleSimulateSignature: handleSign} loading={isLoading}>
           <Button.Spinner />
-          <Button.Text>Sign &amp; Finish</Button.Text>
+          <Button.Text>{isLoading ? 'Submitting...' : 'Submit'}</Button.Text>
         </Button>
       </>
     }
@@ -114,16 +114,17 @@ const EthSignDialog: React.FC<EthSignDialogProps> =({
   return (
     <Dialog open={isOpen}>
       <DialogTrigger asChild disabled={disabled}>
+        {/* todo: make solid */}
         <Button variant='soft' color="primary" onPress={() => setIsOpen(true)} {...triggerProps}>
-          <Button.Icon icon={Signature} />
-          <Button.Text>Sign</Button.Text>
+          <Button.Icon icon={Upload} />
+          <Button.Text>Submit Signature</Button.Text>
         </Button>
       </DialogTrigger>
       <DialogContent className='w-[520px] max-w-[520px]'>
         { !!sigVC ?
             <>
               <DialogHeader>
-                <DialogTitle>Success!</DialogTitle>
+                <DialogTitle>Submit Signature</DialogTitle>
                 <DialogDescription>
                   You have successfully signed the agreement
                 </DialogDescription>
@@ -133,7 +134,8 @@ const EthSignDialog: React.FC<EthSignDialogProps> =({
             <DialogHeader>
               <DialogTitle>Complete Signing</DialogTitle>
               <DialogDescription>
-                Sign the full document now to complete the signing ceremony and finalize the agreement.
+                You will be prompted to sign this completed agreement with your meta mask wallet which will generate a verifiable claim that will be published against the original agreement.
+                This action is irreversible.
               </DialogDescription>
             </DialogHeader>
         }
