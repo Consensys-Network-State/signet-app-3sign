@@ -19,7 +19,7 @@ import {
 import Signature from "./Signature.tsx";
 import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import type { SignatureBlock } from './BlockNoteSchema';
-import React, { ReactNode } from "react";
+import React from "react";
 import { Signature as SignatureIcon } from 'lucide-react-native';
 import { useAccount } from 'wagmi';
 import { View } from 'react-native';
@@ -27,7 +27,7 @@ import AddressAvatar from "../web3/AddressAvatar.tsx";
 import { isAddress } from 'viem';
 
 interface SignatureDialogProps {
-  children?: ReactNode;
+  children?: React.ReactNode;
   block: SignatureBlock;
   editor: any; //typeof schema.BlockNoteEditor;
 }
@@ -37,7 +37,7 @@ export type FormData = {
   address: string,
 };
 
-const SignatureDialog = (props: SignatureDialogProps) => {
+const SignatureDialog: React.FC<SignatureDialogProps> = (props: SignatureDialogProps) => {
   const { address: walletAddress } = useAccount();
 
   const form = useForm<FormData>({

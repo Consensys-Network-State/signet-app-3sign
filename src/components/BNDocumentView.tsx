@@ -189,7 +189,10 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
     }
 
     return undefined;
-  }, [editorMode]);
+  }, [editorMode]) as {
+    message: string;
+    type?: 'warning' | 'info' | 'error';
+  } | undefined;
 
   return <>
     <Dialog open={isSuccessDialogOpen}>
@@ -252,7 +255,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
         editor={editor}
         editable={editorMode === BlockNoteMode.EDIT}
         slashMenu={false}
-        theme={mode}
+        theme={mode || 'light'}
         {...props}
       >
         <SuggestionMenuController
