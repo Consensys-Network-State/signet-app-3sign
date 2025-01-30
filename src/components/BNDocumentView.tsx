@@ -29,8 +29,8 @@ import {
 } from "@blocknote/react";
 import EthSignDialog from "./EthSignDialog.tsx";
 import ExportDialog from "./ExportDialog.tsx";
-// import newAgreement from '../templates/new-agreement.json';
-import grantAgreement from '../templates/grant-agreement.json';
+import newAgreement from '../templates/new-agreement.json';
+// import grantAgreement from '../templates/grant-agreement.json';
 import { DocumentPayload } from "../types";
 import * as React from "react";
 import ViewSignatureDialog from "./ViewSignatureDialog.tsx";
@@ -88,7 +88,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
   const { mode } = useTheme();
   const editor = useCreateBlockNote({
     schema,
-    initialContent: documentPayload ? documentPayload.document : grantAgreement as Block[]
+    initialContent: documentPayload ? documentPayload.document : newAgreement as Block[]
   })
 
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false);
@@ -115,7 +115,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
     } else {
       setEditorMode(currentEditorMode);
     }
-  }, [currentEditorMode, editorMode]);
+  }, [currentEditorMode, editorMode, editor, tempStateStore]);
 
   const documentStatus = React.useMemo(() => {
     if (documentPayload) {
@@ -178,7 +178,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
     }
 
     return <></>
-  }, [editorMode, documentStatus]);
+  }, [editorMode, documentStatus, documentPayload, editor]);
 
   const statusBar = React.useMemo(() => {
     if (editorMode === BlockNoteMode.SIGNATURE) {
@@ -189,7 +189,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
     }
 
     return undefined;
-  }, [editorMode, documentStatus]);
+  }, [editorMode]);
 
   return <>
     <Dialog open={isSuccessDialogOpen}>
