@@ -61,7 +61,6 @@ export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof 
     render: (props) => {
       const { editorMode: currentEditorMode } = useBlockNoteStore();
 
-      console.log('Props', props.block.props)
       return (
         <Card className='w-full max-w-md'>
           <CardHeader>

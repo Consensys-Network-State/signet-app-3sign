@@ -35,13 +35,6 @@ const Document = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   React.useEffect(() => {
-    // Check if we arrived here with showModal flag
-    if (location.state?.showModal) {
-      setIsModalOpen(true);
-    }
-  }, [location]);
-
-  React.useEffect(() => {
     const queryHandler = async () => {
       if (!address) return;
       if (!isPending && !isError && data) {
@@ -69,6 +62,13 @@ const Document = () => {
   }, [address, data]);
 
   const isLoading = isPending || !isInitialized;
+
+  React.useEffect(() => {
+    // Check if we arrived here with showModal flag
+    if (location.state?.showModal && !isLoading) {
+      setIsModalOpen(true);
+    }
+  }, [location, isLoading]);
 
   const FullView: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     return (
