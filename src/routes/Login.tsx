@@ -1,10 +1,10 @@
 import * as React from "react";
-import { ModeToggle, Text, Theme, H1, H3 } from "@ds3/react";
+import { Text } from "@ds3/react";
 import { useLocation, useNavigate } from "react-router";
 import { useAccount } from "wagmi";
 import { View } from 'react-native';
 import MetaMaskLogin from "../web3/MetaMaskLogin.tsx";
-import AuthenticationLayout from "../components/AuthenticationLayout.tsx";
+import AuthenticationLayout from "../layouts/AuthenticationLayout.tsx";
 
 const Login: React.FC = () => {
   const location = useLocation();

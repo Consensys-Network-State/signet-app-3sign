@@ -22,21 +22,22 @@ import {
   useTheme
 } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
-import {BlockNoteMode, useBlockNoteStore} from '../store/blockNoteStore';
-import {Block, schema} from "../blocks/BlockNoteSchema.tsx";
+import { BlockNoteMode, useBlockNoteStore } from '../store/blockNoteStore';
+import { Block, schema } from "../blocks/BlockNoteSchema.tsx";
 import {
   useCreateBlockNote,
 } from "@blocknote/react";
 import EthSignDialog from "./EthSignDialog.tsx";
 import ExportDialog from "./ExportDialog.tsx";
-import newAgreement from '../templates/new-agreement.json';
-import {DocumentPayload} from "../types";
+// import newAgreement from '../templates/new-agreement.json';
+import grantAgreement from '../templates/grant-agreement.json';
+import { DocumentPayload } from "../types";
 import * as React from "react";
 import ViewSignatureDialog from "./ViewSignatureDialog.tsx";
-import Layout from "../routes/Layout.tsx";
+import Layout from "../layouts/Layout.tsx";
 import { View } from "react-native";
 import {COLOR_MODES} from "@ds3/config";
-import AddressDisplay from "./AddressDisplay.tsx";
+import AddressDisplay from "../web3/AddressDisplay.tsx";
 import { ShieldCheck, Share2 } from 'lucide-react-native';
 
 // Slash menu item to insert an Alert block
@@ -86,7 +87,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
   const { mode } = useTheme();
   const editor = useCreateBlockNote({
     schema,
-    initialContent: documentPayload ? documentPayload.document : newAgreement as Block[]
+    initialContent: documentPayload ? documentPayload.document : grantAgreement as Block[]
   })
 
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false);

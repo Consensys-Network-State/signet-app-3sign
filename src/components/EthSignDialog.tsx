@@ -11,11 +11,11 @@ import {
   DialogTrigger,
   InputField,
 } from '@ds3/react';
-import {createSignatureVC} from "../utils/veramoUtils.ts";
+import { createSignatureVC } from "../utils/veramoUtils.ts";
 import { useAccount } from "wagmi";
-import {postSignature} from "../api";
+import { postSignature } from "../api";
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import {DocumentPayload} from "../types";
+import { DocumentPayload } from "../types";
 import * as React from "react";
 import { Signature } from 'lucide-react-native';
 
@@ -28,7 +28,14 @@ interface EthSignDialogProps {
   triggerProps?: any
 }
 
-const EthSignDialog: React.FC<EthSignDialogProps> =({ editor, onSuccessfulSignature, disabled = false, isSimulationMode = false, documentPayload, triggerProps = {} }) => {
+const EthSignDialog: React.FC<EthSignDialogProps> =({
+    editor,
+    onSuccessfulSignature,
+    disabled = false,
+    isSimulationMode = false,
+    documentPayload,
+    triggerProps = {}
+}) => {
 
   const [sigVC, setSigVC] = React.useState<string | null>(null);
 
@@ -102,7 +109,7 @@ const EthSignDialog: React.FC<EthSignDialogProps> =({ editor, onSuccessfulSignat
         </Button>
       </DialogClose>
     );
-  }, [sigVC, isSimulationMode])
+  }, [sigVC, isSimulationMode, handleSign, handleSimulateSignature, isLoading])
 
   return (
     <Dialog open={isOpen}>

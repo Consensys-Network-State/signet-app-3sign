@@ -20,6 +20,7 @@ import { Dayjs } from 'dayjs';
 import {supportedChains as chains} from '../utils/chainUtils';
 import makeBlockie from 'ethereum-blockies-base64';
 import ChainLogo from "../components/ChainLogo.tsx";
+import { View } from 'react-native';
 
 export type FormData = {
   chain: { value: string; label: string } | null;
@@ -52,8 +53,8 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <div className="flex flex-col gap-4">
+    <View className="grid grid-cols-2 gap-4">
+      <View className="flex flex-col gap-4">
         <Controller
           control={control}
           name="chain"
@@ -85,7 +86,7 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
                       key={chain.id}
                       // @ts-expect-error Select item value should support ReactNode
                       label={
-                        <div className="flex items-center"><ChainLogo className="mr-2" chainId={chain.id}/><Text>{chain.name}</Text></div>
+                        <View className="flex flex-row items-center"><ChainLogo className="mr-2" chainId={chain.id}/><Text>{chain.name}</Text></View>
                       }
                       // @ts-expect-error SelectItem value should also support numbers not only strings
                       value={chain.id}
@@ -157,9 +158,9 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
             );
           }}
         />
-      </div>
+      </View>
 
-      <div className="flex flex-col gap-4">
+      <View className="flex flex-col gap-4">
         <Controller
           control={control}
           name="startDate"
@@ -228,8 +229,8 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
             />
           )}
         />
-      </div>
-    </div>
+      </View>
+    </View>
   );
 };
 

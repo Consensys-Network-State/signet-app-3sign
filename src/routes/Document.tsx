@@ -9,19 +9,19 @@ import {
   DialogTitle,
   InputField,
   Text,
-  Spinner, Theme, H1, H3, ModeToggle,
+  Spinner,
 } from "@ds3/react";
 import { useQuery } from '@tanstack/react-query'
-import {getDocument} from "../api";
-import {validateAndProcessDocumentVC} from "../utils/veramoUtils.ts";
-import {Block} from "../blocks/BlockNoteSchema.tsx";
-import {BlockNoteMode, useBlockNoteStore} from "../store/blockNoteStore.ts";
+import { getDocument } from "../api";
+import { validateAndProcessDocumentVC } from "../utils/veramoUtils.ts";
+import { Block } from "../blocks/BlockNoteSchema.tsx";
+import { BlockNoteMode, useBlockNoteStore } from "../store/blockNoteStore.ts";
 import { useAccount, useDisconnect } from "wagmi";
 import BNDocumentView from "../components/BNDocumentView.tsx";
 import { DocumentPayload } from "../types";
 import { View } from 'react-native';
-import AddressDisplay from "../components/AddressDisplay.tsx";
-import AuthenticationLayout from "../components/AuthenticationLayout.tsx";
+import AddressDisplay from "../web3/AddressDisplay.tsx";
+import AuthenticationLayout from "../layouts/AuthenticationLayout.tsx";
 
 const Document = () => {
   const location = useLocation();

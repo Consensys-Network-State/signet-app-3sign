@@ -1,6 +1,6 @@
+import * as React from 'react';
 import DateTimePicker, { DateType } from 'react-native-ui-datepicker';
 import dayjs, { Dayjs } from 'dayjs';
-import { ComponentRef, useImperativeHandle, useState, forwardRef, useRef, ElementRef } from 'react';
 import { Platform, LayoutChangeEvent } from 'react-native';
 import {
   Text,
@@ -20,7 +20,7 @@ interface DatePickerProps extends Omit<SelectProps, 'value'> {
   placeholder?: string;
 }
 
-const DatePicker = forwardRef<ElementRef<typeof SelectTrigger>, DatePickerProps>((props, ref) => {
+const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, DatePickerProps>((props, ref) => {
   const {
     value,
     onChange,
@@ -28,19 +28,19 @@ const DatePicker = forwardRef<ElementRef<typeof SelectTrigger>, DatePickerProps>
     ...otherProps
   } = props;
 
-  const [triggerWidth, setTriggerWidth] = useState(0);
+  const [triggerWidth, setTriggerWidth] = React.useState(0);
   const insets = useSafeAreaInsets();
-  const triggerRef = useRef<ElementRef<typeof SelectTrigger>>(null);
+  const triggerRef = React.useRef<React.ElementRef<typeof SelectTrigger>>(null);
 
-  useImperativeHandle(
+  React.useImperativeHandle(
     ref,
     () => {
       if (!triggerRef.current) {
-        return {} as ComponentRef<typeof DatePicker>;
+        return {} as React.ComponentRef<typeof DatePicker>;
       }
       return triggerRef.current;
     },
-    [triggerRef.current]
+    []
   );
 
   const contentInsets = {

@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import Home from "./routes/Home.tsx";
 import Login from "./routes/Login.tsx";
 import Document from "./routes/Document.tsx";
@@ -19,17 +19,17 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 const Router: React.FC = () => {
   return (
     <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-        } />
-        <Route path="/:documentId" element={
-            <ProtectedRoute>
-                <Document />
-            </ProtectedRoute>
-        } />
+      <Route path="/login" element={<Login />} />
+      <Route path="/" element={
+        <ProtectedRoute>
+          <Home />
+        </ProtectedRoute>
+      } />
+      <Route path="/:documentId" element={
+        <ProtectedRoute>
+            <Document />
+        </ProtectedRoute>
+      } />
     </Routes>
   );
 }

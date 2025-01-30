@@ -12,14 +12,13 @@ import {
   InputField,
 } from '@ds3/react';
 import { useForm, Controller } from 'react-hook-form';
-import {createDocumentVC} from "../utils/veramoUtils.ts";
+import { createDocumentVC } from "../utils/veramoUtils.ts";
 import { useAccount } from "wagmi";
 import { useMutation } from "@tanstack/react-query";
-import {postDocument} from "../api";
+import { postDocument } from "../api";
 import * as React from "react";
 import { useNavigate } from "react-router";
 import { Upload } from 'lucide-react-native';
-
 
 interface ExportFormData {
   signatories: string;
