@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuGroup,
   Icons,
-  utils,
+  cn,
 } from "@ds3/react";
 import { useAccount, useDisconnect, useEnsAvatar, useEnsName } from "wagmi";
 import { normalize } from 'viem/ens'
@@ -42,7 +42,7 @@ const Account: React.FC<AccountProps> = ({ className }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className={utils.cn("flex flex-row", className)} variant="soft" >
+        <Button className={cn("flex flex-row", className)} variant="soft" >
           <Avatar alt="Zach Nugent's Avatar" className="mr-3 w-6 h-6">
             <AvatarImage source={{ uri: ensAvatar ? ensAvatar as string : makeBlockie(address!) }} />
           </Avatar>

@@ -82,9 +82,17 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
       <DialogContent className='w-[520px] max-w-[520px]'>
         <DialogHeader>
           <>
-            <DialogTitle>Export Doc</DialogTitle>
+            <DialogTitle>Publish Agreement</DialogTitle>
             <DialogDescription>
-              Set signatories and sign to export doc
+              <Text className="block pt-4">
+                You will be prompted to sign this agreement with your meta mask wallet.
+                This will create a verifiable claim of this agreement and your signature, that will be stored on AO.
+                This action is immutable and irreversible.
+              </Text>
+
+              <Text className="block pt-4">
+                Set the address of the Signatory you wish to co-sign this document:
+              </Text>
             </DialogDescription>
           </>
         </DialogHeader>
@@ -97,10 +105,8 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
             }}
             render={({ field }) => (
               <InputField
-                label="Signatories"
+                label="Signatory"
                 placeholder="e.g. 0x1232..."
-                multiline
-                numberOfLines={4}
                 error={errors?.signatories?.message as string}
                 {...field}
               />
@@ -119,9 +125,9 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
                 <Text>Cancel</Text>
               </Button>
             </DialogClose>
-            <Button onPress={handleSubmit(onSubmit)} loading={isLoading}>
+            <Button variant="soft" color="error" onPress={handleSubmit(onSubmit)} loading={isLoading}>
               <Button.Spinner />
-              <Button.Text>Export</Button.Text>
+              <Button.Text>{isLoading ? 'Publishing...' : 'Publish'}</Button.Text>
             </Button>
           </>
         </DialogFooter>

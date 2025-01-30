@@ -7,7 +7,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  InputField,
   Text,
   Spinner,
 } from "@ds3/react";
@@ -22,6 +21,7 @@ import { DocumentPayload } from "../types";
 import { View } from 'react-native';
 import AddressDisplay from "../web3/AddressDisplay.tsx";
 import AuthenticationLayout from "../layouts/AuthenticationLayout.tsx";
+import { InputClipboard } from "../components/InputClipboard.tsx";
 
 const Document = () => {
   const location = useLocation();
@@ -86,9 +86,15 @@ const Document = () => {
         <DialogContent className='w-[520px] max-w-[520px]'>
           <DialogHeader>
             <DialogTitle>Success!</DialogTitle>
-            <DialogDescription>You have successfully published this agreement</DialogDescription>
+            <DialogDescription>
+              <Text className="block pb-4">You have successfully published this agreement</Text>
+
+              <Text className="block">Copy and send this link to the parties that need to sign</Text>
+            </DialogDescription>
           </DialogHeader>
-          <InputField disabled value={`${window.location.origin}${location.pathname}`} label={"Send this link to the parties that need to sign"}/>
+          <InputClipboard
+            value={`${window.location.origin}${location.pathname}`}
+          />
           <DialogFooter>
             <Button variant='ghost' onPress={() => setIsModalOpen(false)}>
               <Text>Close</Text>

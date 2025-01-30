@@ -9,10 +9,12 @@ import {
   SelectTrigger,
   SelectValue,
   SelectItem,
-  utils,
+  cn,
   Field,
   SwitchField,
-  Input, AvatarImage, Avatar
+  Input,
+  AvatarImage,
+  Avatar
 } from '@ds3/react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DatePickerField } from '../components/DatePickerField';
@@ -72,7 +74,7 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
             >
               <SelectTrigger>
                 <SelectValue
-                  className={utils.cn(
+                  className={cn(
                     'text-sm native:text-lg',
                     value ? 'text-foreground' : 'text-muted-foreground'
                   )}

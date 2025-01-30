@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Button, Text, utils } from "@ds3/react";
+import { Button, Text, cn } from "@ds3/react";
 import { useConnect, Connector } from "wagmi";
 import MetaMaskLogo from "../assets/metamask.svg?react";
 
@@ -33,7 +33,7 @@ const MetaMaskLogin: React.FC<MetaMaskLoginProps> = ({ className }) => {
 
   return (metaMaskConnector ?
     <Button
-      className={utils.cn("w-full", className)}
+      className={cn("w-full", className)}
       variant="soft"
       onPress={handleConnect}
       disabled={isConnecting}
