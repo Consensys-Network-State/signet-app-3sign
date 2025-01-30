@@ -18,8 +18,10 @@ import {
 import Signature from "./Signature.tsx";
 import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import type { SignatureBlock } from './BlockNoteSchema';
-import {ReactNode} from "react";
+import { ReactNode } from "react";
 import { Signature as SignatureIcon } from 'lucide-react-native';
+import { useAccount } from 'wagmi';
+import { View } from 'react-native';
 
 interface SignatureDialogProps {
   children?: ReactNode;
@@ -33,7 +35,14 @@ export type FormData = {
 };
 
 const SignatureDialog = (props: SignatureDialogProps) => {
-  const form = useForm<FormData>();
+  const { address: walletAddress } = useAccount();
+
+  const form = useForm<FormData>({
+    defaultValues: {
+      name: '',
+      address: walletAddress || '' // Set default address
+    }
+  });
 
   const {
     reset,
@@ -71,7 +80,7 @@ const SignatureDialog = (props: SignatureDialogProps) => {
         <DialogHeader>
           <DialogTitle>Adopt Your Signature</DialogTitle>
           <DialogDescription>
-            <div className="flex flex-col gap-4">
+            <View className="flex flex-col gap-4">
               <Controller
                 control={control}
                 name="name"
@@ -115,7 +124,7 @@ const SignatureDialog = (props: SignatureDialogProps) => {
 
                 </CardContent>
               </Card>
-            </div>
+            </View>
           </DialogDescription>
         </DialogHeader>
 
