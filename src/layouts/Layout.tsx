@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { View } from "react-native";
 import { ModeToggle, Text } from "@ds3/react";
 import Account from "../web3/Account.tsx";
@@ -51,7 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
         </View>
 
         {/* Main Content */}
-        <View className="flex-1">
+        <View className="flex-1 flex-grow overflow-y-auto">
           <View className="mx-auto w-full max-w-[1200px] p-8 m-12 rounded-4">
             {children}
           </View>
