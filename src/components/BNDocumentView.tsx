@@ -37,7 +37,7 @@ import ViewSignatureDialog from "./ViewSignatureDialog.tsx";
 import Layout from "../layouts/Layout.tsx";
 import { View } from "react-native";
 import {COLOR_MODES} from "@ds3/config";
-import AddressDisplay from "../web3/AddressDisplay.tsx";
+import AddressCard from "../web3/AddressCard.tsx";
 import { ShieldCheck, Share2 } from 'lucide-react-native';
 
 // Slash menu item to insert an Alert block
@@ -209,7 +209,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
           <View className={`flex flex-col shadow-lg w-full h-32 px-8 py-6 rounded-md ${mode === COLOR_MODES.Dark ? 'bg-neutral-3': ''}`}>
             <Text className="font-light text-4 mb-4">Agreement Author</Text>
             <View className="flex flex-row items-center h-12">
-              <AddressDisplay address={documentPayload!.raw.DocumentOwner}/>
+              <AddressCard address={documentPayload!.raw.DocumentOwner}/>
               <View className="my-auto ml-auto">
                 <ViewSignatureDialog sigVC={documentPayload!.raw.Document}>
                   <Button variant="soft" color="success">
@@ -224,7 +224,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
           <View className={`flex flex-col shadow-lg w-full h-32 px-8 py-6 rounded-md ${mode === COLOR_MODES.Dark ? 'bg-neutral-3': ''}`}>
             <Text className="font-light text-4 mb-4">Agreement Signatory</Text>
               <View className="flex flex-row items-center h-12">
-                <AddressDisplay address={documentPayload!.raw.Signatories[0]}/>
+                <AddressCard address={documentPayload!.raw.Signatories[0]}/>
                 <View className="my-auto ml-auto">
                   <ViewSignatureDialog sigVC={documentPayload!.raw.IsComplete ? Object.values(documentPayload!.raw.Signatures)[0] : ''}>
                       <Button className="my-auto ml-auto" variant="soft" disabled={!(documentPayload!.raw.IsComplete)} color={documentPayload!.raw.IsComplete ? "success" : "error" }>

@@ -1,13 +1,13 @@
 import React from 'react';
 import { polygon, optimism, arbitrum, linea } from 'viem/chains';
-import { Avatar, AvatarImage } from "@ds3/react";
-import classNames from 'classnames';
+import { Avatar, AvatarImage, cn } from "@ds3/react";
 
-interface ChainLogoProps {
+interface ChainAvatarProps {
   chainId: number;
   className?: string
 }
-const ChainLogo: React.FC<ChainLogoProps> = ({ chainId, className }) => {
+
+const ChainAvatar: React.FC<ChainAvatarProps> = ({ chainId, className }) => {
   const uri = React.useMemo(() => {
     switch(chainId) {
       case polygon.id: return 'https://cryptologos.cc/logos/polygon-matic-logo.png?v=040';
@@ -20,11 +20,11 @@ const ChainLogo: React.FC<ChainLogoProps> = ({ chainId, className }) => {
   return (
     <Avatar
       alt="chain-logo"
-      className={classNames("w-5 h-5", className)}
+      className={cn("w-5 h-5", className)}
     >
       <AvatarImage source={{ uri }}/>
     </Avatar>
   );
 }
 
-export default ChainLogo;
+export default ChainAvatar;

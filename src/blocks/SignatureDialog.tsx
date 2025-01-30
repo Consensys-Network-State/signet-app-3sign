@@ -14,6 +14,7 @@ import {
   Label,
   Card,
   CardContent,
+  Input,
 } from '@ds3/react';
 import Signature from "./Signature.tsx";
 import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
@@ -22,6 +23,7 @@ import { ReactNode } from "react";
 import { Signature as SignatureIcon } from 'lucide-react-native';
 import { useAccount } from 'wagmi';
 import { View } from 'react-native';
+import AddressAvatar from "../web3/AddressAvatar.tsx";
 
 interface SignatureDialogProps {
   children?: ReactNode;
@@ -103,13 +105,19 @@ const SignatureDialog = (props: SignatureDialogProps) => {
                 rules={{
                   required: 'Address is required'
                 }}
-                render={({ field }) => (
+                render={({ field: { value, ...otherProps } }) => (
                   <InputField
                     label="Address"
                     placeholder="Your address"
                     error={errors?.address?.message as string}
-                    {...field}
-                  />
+                    value={value}
+                    {...otherProps}
+                  >
+                    {!!value &&
+                      <AddressAvatar address={value} className="w-6 h-6" />
+                    }
+                    <Input.Field />
+                  </InputField>
                 )}
               />
 
@@ -137,12 +145,12 @@ const SignatureDialog = (props: SignatureDialogProps) => {
 
           {isValid ?
             <DialogClose asChild>
-              <Button onPress={handleSubmit(onSubmit)}>
-                <Text>Adopt and Sign</Text>
+              <Button variant="soft" color="primary" onPress={handleSubmit(onSubmit)}>
+                <Text>Adopt Signature</Text>
               </Button>
             </DialogClose> :
-            <Button onPress={handleSubmit(onSubmit)}>
-              <Text>Adopt and Sign</Text>
+            <Button variant="soft" color="primary" onPress={handleSubmit(onSubmit)}>
+              <Text>Adopt Signature</Text>
             </Button>
           }
         </DialogFooter>

@@ -15,17 +15,17 @@ import { getDocument } from "../api";
 import { validateAndProcessDocumentVC } from "../utils/veramoUtils.ts";
 import { Block } from "../blocks/BlockNoteSchema.tsx";
 import { BlockNoteMode, useBlockNoteStore } from "../store/blockNoteStore.ts";
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount } from "wagmi";
 import BNDocumentView from "../components/BNDocumentView.tsx";
 import { DocumentPayload } from "../types";
 import { View } from 'react-native';
-import AddressDisplay from "../web3/AddressDisplay.tsx";
+import AddressCard from "../web3/AddressCard.tsx";
 import AuthenticationLayout from "../layouts/AuthenticationLayout.tsx";
 import { InputClipboard } from "../components/InputClipboard.tsx";
+import DisconnectButton from "../web3/DisconnectButton.tsx";
 
 const Document = () => {
   const location = useLocation();
-  const { disconnect } = useDisconnect()
   const { documentId } = useParams(); // Extracts :username from the URL
   const { isPending, isError, data, error } = useQuery({ queryKey: ['documents', documentId], queryFn: () => getDocument(documentId!) });
   const { setEditorMode } = useBlockNoteStore();
@@ -113,9 +113,7 @@ const Document = () => {
         { isError &&
           <FullView>
             <Text>Error: {error.message}</Text>
-            <Button variant="soft" onPress={disconnect}>
-              <Button.Text>Disconnnect</Button.Text>
-            </Button>
+            <DisconnectButton className="self-center" />
           </FullView>
         }
 
@@ -126,9 +124,12 @@ const Document = () => {
             /> :
             <AuthenticationLayout>
               <Text className="text-neutral-11 mb-4">This agreement is only accessible by the following wallets</Text>
-              <AddressDisplay address={data?.data?.DocumentOwner}/>
-              <AddressDisplay address={data?.data?.Signatories?.[0] || null}/>
-              <Text className="text-neutral-11 mt-4">Please connect using a different account with MetaMask</Text>
+              <View className="flex flex-row gap-4">
+                <AddressCard address={data?.data?.DocumentOwner}/>
+                <AddressCard address={data?.data?.Signatories?.[0] || null}/>
+              </View>
+              <Text className="text-neutral-11 mt-4 mb-4">Please connect using a different account with MetaMask</Text>
+              <DisconnectButton className="self-center" />
             </AuthenticationLayout>
           )
         }

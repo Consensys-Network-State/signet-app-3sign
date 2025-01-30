@@ -13,16 +13,14 @@ import {
   Field,
   SwitchField,
   Input,
-  AvatarImage,
-  Avatar
 } from '@ds3/react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DatePickerField } from '../components/DatePickerField';
 import { Dayjs } from 'dayjs';
-import {supportedChains as chains} from '../utils/chainUtils';
-import makeBlockie from 'ethereum-blockies-base64';
-import ChainLogo from "../components/ChainLogo.tsx";
+import { supportedChains as chains } from '../utils/chainUtils';
+import ChainAvatar from "../web3/ChainAvatar.tsx";
 import { View } from 'react-native';
+import AddressAvatar from "../web3/AddressAvatar.tsx";
 
 export type FormData = {
   chain: { value: string; label: string } | null;
@@ -88,7 +86,10 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
                       key={chain.id}
                       // @ts-expect-error Select item value should support ReactNode
                       label={
-                        <View className="flex flex-row items-center"><ChainLogo className="mr-2" chainId={chain.id}/><Text>{chain.name}</Text></View>
+                        <View className="flex flex-row items-center">
+                          <ChainAvatar className="mr-2" chainId={chain.id}/>
+                          <Text>{chain.name}</Text>
+                        </View>
                       }
                       // @ts-expect-error SelectItem value should also support numbers not only strings
                       value={chain.id}
@@ -147,13 +148,7 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
                 {...field}
               >
                 {!!field.value &&
-                    <Input.Icon
-                        icon={() =>
-                            <Avatar alt="Zach Nugent's Avatar" className="w-6 h-6">
-                              <AvatarImage source={{ uri: makeBlockie(field.value) }} />
-                            </Avatar>
-                        }
-                    />
+                  <AddressAvatar address={field.value} className="w-6 h-6" />
                 }
                 <Input.Field />
               </InputField>
