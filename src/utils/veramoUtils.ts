@@ -65,22 +65,18 @@ export async function createDocumentVC(address: `0x${string}`, signatories: `0x$
       },
     }
   );
-  const stringVC = JSON.stringify(vc);
-  console.log(stringVC)
-  return stringVC;
+  return JSON.stringify(vc);
 }
 
-export async function createSignatureVC(address: `0x${string}`, _documentState: Block[], documentVC: string) {
-  // TODO: Do something with signatures
-  // const { document, signatures } = separateSignaturesFromDocument(documentState);
-
+export async function createSignatureVC(address: `0x${string}`, documentState: Block[], documentVC: string) {
+  const { signatures } = separateSignaturesFromDocument(documentState);
   const did = await getDIDFromAddress(address);
 
   // Construct VC from this
   const vc = await signVCWithEIP712(
     {
       id: uuidv4(),
-      issuer: { id: did.did },
+      issuer: {id: did.did},
       '@context': ['https://www.w3.org/2018/credentials/v1'],
       type: [
         'VerifiableCredential',
@@ -91,12 +87,11 @@ export async function createSignatureVC(address: `0x${string}`, _documentState: 
         id: did.did,
         documentHash: ethers.keccak256(new TextEncoder().encode(documentVC)),
         timeStamp: new Date().toISOString(),
+        signatureBlocks: JSON.stringify(signatures),
       },
     }
   );
-  const stringVC = JSON.stringify(vc);
-  console.log(stringVC)
-  return stringVC;
+  return JSON.stringify(vc);
 }
 
 export async function validateAndProcessDocumentVC(vc: any) {

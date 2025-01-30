@@ -40,6 +40,7 @@ import {COLOR_MODES} from "@ds3/config";
 import AddressCard from "../web3/AddressCard.tsx";
 import { ShieldCheck, Share2 } from 'lucide-react-native';
 import {InputClipboard} from "./InputClipboard.tsx";
+import {constructBNDocumentFromDocumentPayload} from "../utils/documentUtils.ts";
 
 // Slash menu item to insert an Alert block
 const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
@@ -88,7 +89,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
   const { mode } = useTheme();
   const editor = useCreateBlockNote({
     schema,
-    initialContent: documentPayload ? documentPayload.document : newAgreement as Block[]
+    initialContent: documentPayload ? constructBNDocumentFromDocumentPayload(documentPayload) : newAgreement as Block[]
   })
 
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false);
