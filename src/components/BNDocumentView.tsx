@@ -1,46 +1,41 @@
 import "@blocknote/core/fonts/inter.css";
-import { BlockNoteView } from "@blocknote/mantine";
+import {BlockNoteView} from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
-import {
-  SuggestionMenuController,
-  getDefaultReactSlashMenuItems
-} from "@blocknote/react";
-import {
-  insertOrUpdateBlock,
-  filterSuggestionItems,
-} from '@blocknote/core';
+import {getDefaultReactSlashMenuItems, SuggestionMenuController, useCreateBlockNote} from "@blocknote/react";
+import {filterSuggestionItems, insertOrUpdateBlock,} from '@blocknote/core';
 import {
   Button,
   Dialog,
+  DialogClose,
   DialogContent,
-  DialogDescription, DialogFooter,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
-  DialogTitle, DialogTrigger,
+  DialogTitle,
+  DialogTrigger,
   Icons,
   Text,
   useTheme,
-  DialogClose,
 } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
-import { BlockNoteMode, useBlockNoteStore } from '../store/blockNoteStore';
-import { Block, schema } from "../blocks/BlockNoteSchema.tsx";
-import {
-  useCreateBlockNote,
-} from "@blocknote/react";
+import {BlockNoteMode, useBlockNoteStore} from '../store/blockNoteStore';
+import {Block, schema} from "../blocks/BlockNoteSchema.tsx";
 import EthSignDialog from "./EthSignDialog.tsx";
 import ExportDialog from "./ExportDialog.tsx";
 import newAgreement from '../templates/new-agreement.json';
 // import grantAgreement from '../templates/grant-agreement.json';
-import { DocumentPayload } from "../types";
+import {DocumentPayload} from "../types";
 import * as React from "react";
 import ViewSignatureDialog from "./ViewSignatureDialog.tsx";
 import Layout from "../layouts/Layout.tsx";
-import { View } from "react-native";
+import {View} from "react-native";
 import {COLOR_MODES} from "@ds3/config";
 import AddressCard from "../web3/AddressCard.tsx";
-import { ShieldCheck, Share2 } from 'lucide-react-native';
+import {Share2, ShieldCheck} from 'lucide-react-native';
 import {InputClipboard} from "./InputClipboard.tsx";
 import {constructBNDocumentFromDocumentPayload} from "../utils/documentUtils.ts";
+import ClearAllDialog from "./ClearAllDialog.tsx";
+import {useEditStore} from "../store/editorStore.ts";
 
 // Slash menu item to insert an Alert block
 const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
@@ -87,9 +82,16 @@ interface BNDocumentViewProps {
 
 const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...props }) => {
   const { mode } = useTheme();
+  const { editState, setEditState } = useEditStore();
+  const [editorMode, setEditorMode] = React.useState<BlockNoteMode | null>(null);
+
   const editor = useCreateBlockNote({
     schema,
-    initialContent: documentPayload ? constructBNDocumentFromDocumentPayload(documentPayload) : newAgreement as Block[]
+    initialContent: documentPayload ?
+      constructBNDocumentFromDocumentPayload(documentPayload) :
+        editState && editorMode === BlockNoteMode.EDIT ?
+          editState as Block[]:
+          newAgreement as Block[]
   })
 
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false);
@@ -101,7 +103,6 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
 
   const { editorMode: currentEditorMode } = useBlockNoteStore();
 
-  const [editorMode, setEditorMode] = React.useState<BlockNoteMode | null>(null);
 
   const [tempStateStore, setTempStateStore] = React.useState<Block[]>([]);
 
@@ -167,7 +168,10 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
     }
 
     else if (editorMode === BlockNoteMode.EDIT) {
-      return <ExportDialog editor={editor} />
+      return <>
+        <ExportDialog editor={editor} />
+        <ClearAllDialog editor={editor} />
+      </>
     }
 
     else if (editorMode === BlockNoteMode.SIMULATION) {
@@ -194,6 +198,12 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
     message: string;
     type?: 'warning' | 'info' | 'error';
   } | undefined;
+
+  const onEdit = () => {
+    if (editorMode === BlockNoteMode.EDIT) {
+      setEditState(editor.document);
+    }
+  }
 
   return <>
     <Dialog open={isSuccessDialogOpen}>
@@ -253,6 +263,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
       }
       <BlockNoteView
         className="shadow-lg"
+        onChange={onEdit}
         editor={editor}
         editable={editorMode === BlockNoteMode.EDIT}
         slashMenu={false}
