@@ -84,12 +84,13 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
   const { mode } = useTheme();
   const { editState, setEditState } = useEditStore();
   const [editorMode, setEditorMode] = React.useState<BlockNoteMode | null>(null);
+  const { editorMode: currentEditorMode } = useBlockNoteStore();
 
   const editor = useCreateBlockNote({
     schema,
     initialContent: documentPayload ?
       constructBNDocumentFromDocumentPayload(documentPayload) :
-        editState && editorMode === BlockNoteMode.EDIT ?
+        editState && currentEditorMode === BlockNoteMode.EDIT ?
           editState as Block[]:
           newAgreement as Block[]
   })
@@ -101,7 +102,6 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
     setIsSuccessDialogOpen(true);
   }
 
-  const { editorMode: currentEditorMode } = useBlockNoteStore();
 
 
   const [tempStateStore, setTempStateStore] = React.useState<Block[]>([]);
