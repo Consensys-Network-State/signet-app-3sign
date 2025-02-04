@@ -8,6 +8,13 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Router from './Router';
 import { config } from './wagmi.config'
 import './index.css'
+import { Buffer } from 'buffer';
+
+// Required for Veramo libraries
+// Make Buffer available globally
+window.Buffer = Buffer;
+// Polyfill global Buffer
+globalThis.Buffer = Buffer;
 
 const queryClient = new QueryClient()
 

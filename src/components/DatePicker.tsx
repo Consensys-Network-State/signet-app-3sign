@@ -12,6 +12,13 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootProps as SelectProps } from '@rn-primitives/select';
 
+// TODO: There's a weird issue where you get the error: React is not defined when using the DateTimePicker Component
+//  from react-native-ui-datepicker. Setting window.React = React fixes it.
+//  Should Investigate why this is required for the production environment
+// Claudes Answer: The root cause is that the library probably assumes React is globally available
+//  (common in React Native) but in a Vite production build, it's not. The dev server handles this differently than the production build.
+window.React = React;
+
 type SingleChange = { date: DateType };
 
 interface DatePickerProps extends Omit<SelectProps, 'value'> {
