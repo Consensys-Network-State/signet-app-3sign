@@ -1,8 +1,9 @@
 import * as React from "react";
 import { View } from "react-native";
-import { ModeToggle, Text } from "@ds3/react";
+import {Icon, ModeToggle, Text} from "@ds3/react";
 import Account from "../web3/Account.tsx";
 import { H4 } from "@ds3/react/src/components/Heading.tsx";
+import { Info } from 'lucide-react-native';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -10,6 +11,7 @@ interface LayoutProps {
   status?: {
     message: string;
     type?: 'warning' | 'info' | 'error';
+    actions?: React.ReactNode;
   };
 }
 
@@ -34,8 +36,16 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
         <View className="bg-neutral-1 shadow-md sticky top-0 z-20">
           {/* Status Message */}
           {status && (
-            <View className={`w-full px-8 py-2 ${getStatusBackgroundColor(status.type)}`}>
-              <Text>{status.message}</Text>
+            <View className={`w-full flex flex-row h-14 items-center justify-between px-8 py-2 ${getStatusBackgroundColor(status.type)}`}>
+              <View className="flex flex-row items-center">
+                <Icon className="mr-2" icon={Info} />
+                <Text>{status.message}</Text>
+              </View>
+              { status.actions &&
+                <View className="flex flex-row items-center px-4 gap-2">
+                  {status.actions}
+                </View>
+              }
             </View>
           )}
 

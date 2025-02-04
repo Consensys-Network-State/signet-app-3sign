@@ -96,7 +96,7 @@ const EthSignDialog: React.FC<EthSignDialogProps> =({
           </Button>
         </DialogClose>
 
-        <Button variant="soft" color="error" onPress={isSimulationMode ? handleSimulateSignature: handleSign} loading={isLoading}>
+        <Button variant="soft" color="primary" onPress={isSimulationMode ? handleSimulateSignature: handleSign} loading={isLoading}>
           <Button.Spinner />
           <Button.Text>{isLoading ? 'Submitting...' : 'Submit'}</Button.Text>
         </Button>

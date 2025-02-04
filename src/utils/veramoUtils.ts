@@ -39,7 +39,7 @@ export async function signVCWithEIP712(credential: any) {
     proofFormat: 'EthereumEip712Signature2021',
   });
   const verificationResult = await agent.verifyCredential({ credential: vc });
-  if (!verificationResult.verified) throw new Error('Failed to sign document');
+  if (!verificationResult.verified) throw new Error('Failed to sign with wallet');
   return vc;
 }
 export async function createDocumentVC(address: `0x${string}`, signatories: `0x${string}`[], documentState: Block[]) {
@@ -97,7 +97,7 @@ export async function createSignatureVC(address: `0x${string}`, documentState: B
 export async function validateAndProcessDocumentVC(vc: any) {
   const agent = await setupAgent();
   const verificationResult = await agent.verifyCredential({ credential: vc });
-  if (!verificationResult.verified) throw new Error('Failed to sign document');
+  if (!verificationResult.verified) throw new Error('Failed to validate document');
   // How do we check if the issuer of the VC is the correct person
   return {
     document: decodeBase64ToObject(vc.credentialSubject.document) as Block[],

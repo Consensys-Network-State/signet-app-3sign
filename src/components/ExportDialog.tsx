@@ -28,10 +28,11 @@ interface ExportFormData {
 }
 
 interface ExportDialogProps {
+  disabled?: boolean;
   editor: any;
 }
 
-const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
+const ExportDialog: React.FC<ExportDialogProps> = ({ editor, disabled = false }) => {
   const {handleSubmit, formState: { errors }, control} = useForm<ExportFormData>({
     defaultValues: {
       signatories: ""
@@ -76,8 +77,8 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant='soft' color="primary">
+      <DialogTrigger asChild disabled={disabled}>
+        <Button variant='soft' color="primary" >
           <Button.Icon icon={Upload} />
           <Button.Text>Publish Agreement</Button.Text>
         </Button>
@@ -134,7 +135,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor }) => {
                 <Text>Cancel</Text>
               </Button>
             </DialogClose>
-            <Button variant="soft" color="error" onPress={handleSubmit(onSubmit)} loading={isLoading}>
+            <Button variant="soft" color="primary" onPress={handleSubmit(onSubmit)} loading={isLoading}>
               <Button.Spinner />
               <Button.Text>{isLoading ? 'Publishing...' : 'Publish'}</Button.Text>
             </Button>

@@ -23,7 +23,6 @@ import {Block, schema} from "../blocks/BlockNoteSchema.tsx";
 import EthSignDialog from "./EthSignDialog.tsx";
 import ExportDialog from "./ExportDialog.tsx";
 import newAgreement from '../templates/new-agreement.json';
-// import grantAgreement from '../templates/grant-agreement.json';
 import {DocumentPayload} from "../types";
 import * as React from "react";
 import ViewSignatureDialog from "./ViewSignatureDialog.tsx";
@@ -36,6 +35,9 @@ import {InputClipboard} from "./InputClipboard.tsx";
 import {constructBNDocumentFromDocumentPayload} from "../utils/documentUtils.ts";
 import ClearAllDialog from "./ClearAllDialog.tsx";
 import {useEditStore} from "../store/editorStore.ts";
+import { useAccount, useSwitchChain } from "wagmi";
+import { mainnet } from 'viem/chains';
+import ChainAvatar from "../web3/ChainAvatar.tsx";
 
 // Slash menu item to insert an Alert block
 const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
@@ -102,7 +104,8 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
     setIsSuccessDialogOpen(true);
   }
 
-
+  const { chainId } = useAccount();
+  const { switchChain } = useSwitchChain()
 
   const [tempStateStore, setTempStateStore] = React.useState<Block[]>([]);
 
@@ -127,6 +130,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
     return DocumentStatus.UNDEFINED;
   }, [documentPayload]);
 
+  const isWrongChain = React.useMemo(() => chainId !== mainnet.id, [chainId]);
 
   const headerButtons = React.useMemo(() => {
     if (editorMode === BlockNoteMode.VIEW) {
@@ -169,34 +173,45 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
 
     else if (editorMode === BlockNoteMode.EDIT) {
       return <>
-        <ExportDialog editor={editor} />
+        <ExportDialog editor={editor} disabled={isWrongChain} />
         <ClearAllDialog editor={editor} />
       </>
     }
 
     else if (editorMode === BlockNoteMode.SIMULATION) {
-      return <EthSignDialog editor={editor} isSimulationMode />
+      return <EthSignDialog editor={editor} isSimulationMode disabled={isWrongChain} />
     }
 
     else if (editorMode === BlockNoteMode.SIGNATURE) {
-      return <EthSignDialog editor={editor} documentPayload={documentPayload!} onSuccessfulSignature={onSuccessfulSignature} />
+      return <EthSignDialog editor={editor} documentPayload={documentPayload!} onSuccessfulSignature={onSuccessfulSignature} disabled={isWrongChain} />
     }
 
     return <></>
-  }, [editorMode, documentStatus, documentPayload, editor]);
+  }, [editorMode, documentStatus, documentPayload, editor, isWrongChain]);
 
   const statusBar = React.useMemo(() => {
-    if (editorMode === BlockNoteMode.SIGNATURE) {
+    if (isWrongChain && currentEditorMode !== BlockNoteMode.VIEW) {
       return {
-        type: 'warning',
+        type: 'primary',
+        message: `Switch to Mainnet Ethereum to ${editorMode === BlockNoteMode.SIGNATURE ? 'sign' : 'publish'} this document...`,
+        actions:  <Button variant="soft" className="bg-primary-6" onPress={() => switchChain({ chainId: mainnet.id })}>
+          <ChainAvatar chainId={mainnet.id}/>
+          <Button.Text>Switch to Mainnet</Button.Text>
+        </Button>,
+      }
+    }
+    if (currentEditorMode === BlockNoteMode.SIGNATURE) {
+      return {
+        type: 'primary',
         message: 'Review the document, fill in all required fields before signing.'
       }
     }
 
     return undefined;
-  }, [editorMode]) as {
+  }, [currentEditorMode, isWrongChain]) as {
     message: string;
     type?: 'warning' | 'info' | 'error';
+    actions?: React.ReactNode;
   } | undefined;
 
   const onEdit = () => {
@@ -251,7 +266,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
                 <AddressCard address={documentPayload!.raw.Signatories[0]}/>
                 <View className="my-auto ml-auto">
                   <ViewSignatureDialog sigVC={documentPayload!.raw.IsComplete ? Object.values(documentPayload!.raw.Signatures)[0] : ''}>
-                      <Button className="my-auto ml-auto" variant="soft" disabled={!(documentPayload!.raw.IsComplete)} color={documentPayload!.raw.IsComplete ? "success" : "error" }>
+                      <Button className="my-auto ml-auto" variant="soft" disabled={!(documentPayload!.raw.IsComplete)} color={documentPayload!.raw.IsComplete ? "success" : "neutral" }>
                           <Button.Icon icon={Icons.Signature} />
                           <Button.Text>{documentPayload!.raw.IsComplete ? "View Signature" : "Not Signed"}</Button.Text>
                       </Button>
