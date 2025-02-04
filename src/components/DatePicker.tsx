@@ -8,9 +8,12 @@ import {
   SelectTrigger,
   SelectContent,
   Icons,
+  useTheme,
 } from "@ds3/react";
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootProps as SelectProps } from '@rn-primitives/select';
+import {COLOR_MODES} from "@ds3/config";
 
 // TODO: There's a weird issue where you get the error: React is not defined when using the DateTimePicker Component
 //  from react-native-ui-datepicker. Setting window.React = React fixes it.
@@ -38,6 +41,52 @@ const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, Date
   const [triggerWidth, setTriggerWidth] = React.useState(0);
   const insets = useSafeAreaInsets();
   const triggerRef = React.useRef<React.ElementRef<typeof SelectTrigger>>(null);
+  const { mode } = useTheme();
+
+  const textColor = mode === COLOR_MODES.Dark ? '#FFFFFF' : '#000000';
+  const style = {
+    // headerContainerStyle: {
+    //   backgroundColor: '#222',
+    // },
+    // headerTextContainerStyle?: ViewStyle;
+    headerTextStyle: {
+      color: textColor
+    },
+    // headerButtonStyle?: ViewStyle;
+    // dayContainerStyle: {
+    //   backgroundColor: '#222',
+    // },
+    // todayContainerStyle: {
+    //   backgroundColor: '#200',
+    // },
+    todayTextStyle: {
+      color: textColor
+    },
+    // monthContainerStyle: {
+    //   backgroundColor: '#222',
+    // },
+    // yearContainerStyle: {
+    //   backgroundColor: '#222',
+    // },
+    // weekDaysContainerStyle?: ViewStyle;
+    weekDaysTextStyle: {
+      color: textColor
+    },
+    calendarTextStyle: {
+      color: textColor
+    },
+    selectedTextStyle: {
+      color: textColor
+    },
+    // selectedItemColor: {
+    //   backGroundColor: '#000000',
+    // },
+    // timePickerContainerStyle?: ViewStyle;
+    timePickerTextStyle: {
+      color: textColor
+    },
+    // timePickerIndicatorStyle?: ViewStyle;
+  }
 
   React.useImperativeHandle(
     ref,
@@ -84,13 +133,16 @@ const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, Date
         }
       </SelectTrigger>
       <SelectContent insets={contentInsets} style={{ width: triggerWidth }} className="p-0">
-        <DateTimePicker
-          mode="single"
-          date={value || dayjs()}
-          onChange={onSelectDate}
-          buttonNextIcon={<Icons.ChevronRight />}
-          buttonPrevIcon={<Icons.ChevronLeft />}
-        />
+        <View className={mode === COLOR_MODES.Dark ? "bg-neutral-11" : ""}>
+          <DateTimePicker
+            mode="single"
+            {...style}
+            date={value || dayjs()}
+            onChange={onSelectDate}
+            buttonNextIcon={<Icons.ChevronRight />}
+            buttonPrevIcon={<Icons.ChevronLeft />}
+          />
+        </View>
       </SelectContent>
     </Select>
   );
