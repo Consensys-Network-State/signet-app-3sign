@@ -1,106 +1,143 @@
-import {useEffect, useMemo, useState} from "react";
-import { useParams, useSearchParams } from "react-router";
-import { ModeToggle } from "@ds3/react";
-import Account from "../web3/Account.tsx";
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import {getDocument, postSignature} from "../api";
-import {validateAndProcessDocumentVC} from "../utils/veramoUtils.ts";
-import {Block} from "../blocks/BlockNoteSchema.tsx";
-import {BlockNoteMode, useBlockNoteStore} from "../store/blockNoteStore.ts";
+import { useSearchParams } from "react-router";
+import * as React from 'react';
+import { useParams, useLocation } from "react-router";
+import {
+  Button, Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Text,
+  Spinner,
+} from "@ds3/react";
+import { useQuery } from '@tanstack/react-query'
+import { getDocument } from "../api";
+import { validateAndProcessDocumentVC } from "../utils/veramoUtils.ts";
+import { Block } from "../blocks/BlockNoteSchema.tsx";
+import { BlockNoteMode, useBlockNoteStore } from "../store/blockNoteStore.ts";
 import { useAccount } from "wagmi";
-import BNDocumentView, {DocumentStatus} from "../components/BNDocumentView.tsx";
-import {DocumentPayload} from "../types";
+import BNDocumentView from "../components/BNDocumentView.tsx";
+import { DocumentPayload } from "../types";
+import { View } from 'react-native';
+import AddressCard from "../web3/AddressCard.tsx";
+import AuthenticationLayout from "../layouts/AuthenticationLayout.tsx";
+import { InputClipboard } from "../components/InputClipboard.tsx";
+import DisconnectButton from "../web3/DisconnectButton.tsx";
+
 const Document = () => {
-    const { documentId } = useParams(); // Extracts :username from the URL
-    const [ searchParams ] = useSearchParams();
-    const encryptionKey = searchParams.get('key');
-    const { isPending, isError, data, error } = useQuery({ queryKey: ['documents', documentId], queryFn: () => getDocument(documentId!) });
-    const mutation = useMutation({
-        mutationFn: ({ documentId, signatureVC }: { documentId: string, signatureVC: string }) => postSignature(documentId, signatureVC)
-    })
+  const location = useLocation();
+  const [ searchParams ] = useSearchParams();
+  const encryptionKey = searchParams.get('key');
+  const { documentId } = useParams(); // Extracts :username from the URL
+  const { isPending, isError, data, error } = useQuery({ queryKey: ['documents', documentId], queryFn: () => getDocument(documentId!) });
+  const { setEditorMode } = useBlockNoteStore();
+  const [document, setDocument] = React.useState<Block[] | null>(null);
+  const [isInitialized, setIsInitialized] = React.useState<boolean>(false);
+  const { address } = useAccount();
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
-    const { setEditorMode } = useBlockNoteStore();
-
-    const [document, setDocument] = useState<Block[] | null>(null);
-
-    const [documentStatus, setDocumentStatus] = useState<DocumentStatus>(DocumentStatus.UNDEFINED);
-    const [isInitialized, setIsInitialized] = useState<boolean>(false);
-    const { address } = useAccount();
-    const queryClient = useQueryClient()
-
-    useEffect(() => {
-        const queryHandler = async () => {
-            if (!address) return;
-            if (!isPending && !isError && data && encryptionKey) {
-
-                const processedDocument = await validateAndProcessDocumentVC(JSON.parse(data.data.Document), encryptionKey);
-                setDocument(processedDocument.document);
-
-                if (address.toLowerCase() === data.data.DocumentOwner) { // If you are the owner
-                    setEditorMode(BlockNoteMode.VIEW);
-                    // TODO: Check if all signers have signed
-                    setDocumentStatus(!!data.data.Signatures[data.data.Signatories[0]] ? DocumentStatus.SIGNED : DocumentStatus.UNSIGNED)
-                } else if (data.data.Signatories.find((a: string) => a === address.toLowerCase())) { // If you are a signer ...
-                    if (!!data.data.Signatures[address.toLowerCase()]) { // ... and you have signed
-                        setEditorMode(BlockNoteMode.VIEW);
-                        setDocumentStatus(DocumentStatus.SIGNED);
-                    } else { // ... and you haven't signed
-                        setEditorMode(BlockNoteMode.SIGNATURE);
-                        setDocumentStatus(DocumentStatus.UNSIGNED);
-                    }
-                }
-                setIsInitialized(true);
-            }
+  React.useEffect(() => {
+    const queryHandler = async () => {
+      if (!address) return;
+      if (!isPending && !isError && data && encryptionKey) {
+        const processedDocument = await validateAndProcessDocumentVC(JSON.parse(data.data.Document), encryptionKey);
+        setDocument(processedDocument.document);
+        if (address.toLowerCase() === data.data.DocumentOwner) { // If you are the owner
+          setEditorMode(BlockNoteMode.VIEW);
+        } else if (data.data.Signatories.find((a: string) => a === address.toLowerCase())) { // If you are a signer ...
+          if (!!data.data.Signatures[address.toLowerCase()]) { // ... and you have signed
+            setEditorMode(BlockNoteMode.VIEW);
+          } else { // ... and you haven't signed
+            setEditorMode(BlockNoteMode.SIGNATURE);
+          }
         }
-        queryHandler();
-    }, [isPending, isError, data, address, encryptionKey])
+        setIsInitialized(true);
+      }
+    }
+    queryHandler();
+  }, [isPending, isError, data, address, setEditorMode, encryptionKey])
 
-    useEffect(() => {
-        if (mutation.isSuccess) {
-            queryClient.invalidateQueries({ queryKey: ['documents', documentId] })
-        }
-    }, [mutation.isSuccess])
+  const isAuthorized = React.useMemo(() => {
+    if (!address) return false;
+    return !(address.toLowerCase() !== data?.data?.DocumentOwner && !(data?.data?.Signatories || []).find((a: string) => a === address.toLowerCase()));
+  }, [address, data]);
 
-    const isAuthorized = useMemo(() => {
-        if (!address) return false;
-        return !(address.toLowerCase() !== data?.data?.DocumentOwner && !(data?.data?.Signatories || []).find((a: string) => a === address.toLowerCase()));
-    }, [address, data]);
+  const isLoading = isPending || !isInitialized;
 
-    const isLoading = isPending || !isInitialized;
+  React.useEffect(() => {
+    // Check if we arrived here with showModal flag
+    if (location.state?.showModal && !isLoading) {
+      setIsModalOpen(true);
+    }
+  }, [location, isLoading]);
 
+  const FullView: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     return (
-        <div className="h-screen">
-            <div className="flex flex-col h-full">
-                <div className="bg-blue-500 text-white p-4 flex items-center justify-between m-3 rounded-3">
-                    <h1 className="text-lg font-bold">APOC</h1>
-                    <div className="flex space-x-4">
-                        <Account />
-                        <ModeToggle />
-                    </div>
-                </div>
-
-                <div className="flex-grow overflow-y-auto">
-                    <div className="mx-auto w-full max-w-[1200px] p-4">
-                        {/*{ editorMode === BlockNoteMode.VIEW &&*/}
-                        {/*    <div className="bg-primary-4 p-2 flex items-center justify-between rounded-t-3 sticky top-0 z-20">*/}
-                        {/*        <Text>{isSigned ? "Document Is Signed!!!" : "Document Is Not Signed"}</Text>*/}
-                        {/*    </div>*/}
-                        {/*}*/}
-                        { isLoading && <span>Loading...</span> }
-                        { isError && <span>Error: {error.message}</span> }
-                        { !isLoading && !isError &&
-                            (isAuthorized ?
-                                <BNDocumentView
-                                    documentPayload={{ documentId, documentVC: data.data.Document, document } as DocumentPayload}
-                                    documentStatus={documentStatus}
-                                /> :
-                                <span>You Don't Have Access To This Document</span>)
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
+      <View className="h-screen flex items-center justify-center">
+        <View className="flex items-center justify-center">
+          {children}
+        </View>
+      </View>
     );
+  }
+
+  return (
+    <>
+      <Dialog open={isModalOpen}>
+        <DialogContent className='w-[520px] max-w-[520px]'>
+          <DialogHeader>
+            <DialogTitle>Success!</DialogTitle>
+            <DialogDescription>
+              <Text className="block pb-4">You have successfully published this agreement</Text>
+
+              <Text className="block">Copy and send this link to the parties that need to sign</Text>
+            </DialogDescription>
+          </DialogHeader>
+          <InputClipboard
+            value={`${window.location.origin}${location.pathname}?key=${encryptionKey}`}
+          />
+          <DialogFooter>
+            <Button variant='soft' color="primary" onPress={() => setIsModalOpen(false)}>
+              <Text>Close</Text>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <>
+        { isLoading &&
+          <FullView>
+            <Spinner className="h-9 w-9" color="primary" />
+          </FullView>
+        }
+
+        { isError &&
+          <FullView>
+            <Text>Error: {error.message}</Text>
+            <DisconnectButton className="self-center" />
+          </FullView>
+        }
+
+        { !isLoading && !isError &&
+          (isAuthorized ?
+            <BNDocumentView
+              documentPayload={{ documentId, document, raw: data?.data } as DocumentPayload}
+            /> :
+            <AuthenticationLayout>
+              <Text className="text-neutral-11 mb-4">This agreement is only accessible by the following wallets</Text>
+              <View className="flex flex-row gap-4">
+                <AddressCard address={data?.data?.DocumentOwner}/>
+                <AddressCard address={data?.data?.Signatories?.[0] || null}/>
+              </View>
+              <Text className="text-neutral-11 mt-4 mb-4">Please connect using a different account with MetaMask</Text>
+              <DisconnectButton className="self-center" />
+            </AuthenticationLayout>
+          )
+        }
+      </>
+    </>
+  );
 };
 
 export default Document;

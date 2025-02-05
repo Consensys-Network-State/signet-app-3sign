@@ -14,14 +14,20 @@ import {
   Label,
   Card,
   CardContent,
+  Input,
 } from '@ds3/react';
 import Signature from "./Signature.tsx";
 import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import type { SignatureBlock } from './BlockNoteSchema';
-import {ReactNode} from "react";
+import React from "react";
+import { Signature as SignatureIcon } from 'lucide-react-native';
+import { useAccount } from 'wagmi';
+import { View } from 'react-native';
+import AddressAvatar from "../web3/AddressAvatar.tsx";
+import { isAddress } from 'viem';
 
 interface SignatureDialogProps {
-  children?: ReactNode;
+  children?: React.ReactNode;
   block: SignatureBlock;
   editor: any; //typeof schema.BlockNoteEditor;
 }
@@ -31,8 +37,15 @@ export type FormData = {
   address: string,
 };
 
-const SignatureDialog = (props: SignatureDialogProps) => {
-  const form = useForm<FormData>();
+const SignatureDialog: React.FC<SignatureDialogProps> = (props: SignatureDialogProps) => {
+  const { address: walletAddress } = useAccount();
+
+  const form = useForm<FormData>({
+    defaultValues: {
+      name: '',
+      address: walletAddress || ''
+    }
+  });
 
   const {
     reset,
@@ -47,7 +60,6 @@ const SignatureDialog = (props: SignatureDialogProps) => {
   const isSigningDisabled = !(editorMode === BlockNoteMode.SIGNATURE || editorMode === BlockNoteMode.SIMULATION);
 
   const onSubmit = (data: FormData) => {
-    console.log("Signature Form Data", JSON.stringify(data, null, 2));
     props.editor.updateBlock(props.block, {
       props: { name: data.name, address: data.address},
     })
@@ -60,17 +72,18 @@ const SignatureDialog = (props: SignatureDialogProps) => {
   } = watch();
 
   return (
-    <Dialog>
-      <DialogTrigger asChild disabled={isSigningDisabled}>
-        <Button variant='outline'>
-          <Text>Signature Dialog</Text>
+    <Dialog className="w-full">
+      <DialogTrigger className="w-full" asChild disabled={isSigningDisabled}>
+        <Button variant='dashed' color="primary">
+          <Button.Icon icon={SignatureIcon}/>
+          <Button.Text>Sign Here</Button.Text>
         </Button>
       </DialogTrigger>
       <DialogContent className='w-[520px] max-w-[520px]'>
         <DialogHeader>
           <DialogTitle>Adopt Your Signature</DialogTitle>
           <DialogDescription>
-            <div className="flex flex-col gap-4">
+            <View className="flex flex-col gap-4">
               <Controller
                 control={control}
                 name="name"
@@ -91,15 +104,22 @@ const SignatureDialog = (props: SignatureDialogProps) => {
                 control={control}
                 name="address"
                 rules={{
-                  required: 'Address is required'
+                  required: 'Address is required',
+                  validate: (value) => isAddress(value) || 'Invalid Ethereum address'
                 }}
-                render={({ field }) => (
+                render={({ field: { value, ...otherProps } }) => (
                   <InputField
                     label="Address"
                     placeholder="Your address"
                     error={errors?.address?.message as string}
-                    {...field}
-                  />
+                    value={value}
+                    {...otherProps}
+                  >
+                    {isAddress(value) &&
+                      <AddressAvatar address={value} className="w-6 h-6" />
+                    }
+                    <Input.Field />
+                  </InputField>
                 )}
               />
 
@@ -114,7 +134,7 @@ const SignatureDialog = (props: SignatureDialogProps) => {
 
                 </CardContent>
               </Card>
-            </div>
+            </View>
           </DialogDescription>
         </DialogHeader>
 
@@ -127,12 +147,12 @@ const SignatureDialog = (props: SignatureDialogProps) => {
 
           {isValid ?
             <DialogClose asChild>
-              <Button onPress={handleSubmit(onSubmit)}>
-                <Text>Adopt and Sign</Text>
+              <Button variant="soft" color="primary" onPress={handleSubmit(onSubmit)}>
+                <Text>Adopt Signature</Text>
               </Button>
             </DialogClose> :
-            <Button onPress={handleSubmit(onSubmit)}>
-              <Text>Adopt and Sign</Text>
+            <Button variant="soft" color="primary" onPress={handleSubmit(onSubmit)}>
+              <Text>Adopt Signature</Text>
             </Button>
           }
         </DialogFooter>

@@ -12,27 +12,33 @@ import {
   DialogTrigger,
   Card,
   CardContent,
+  IconButton
 } from '@ds3/react';
 import SablierForm, { FormData } from "./SablierForm.tsx";
 import { useForm } from 'react-hook-form';
 import SablierIcon from "../assets/sablier.svg?react";
-import { FC, ReactNode } from "react";
+import { FC } from "react";
 import type { SablierBlock } from './BlockNoteSchema';
+import { Pencil } from "lucide-react-native";
 
 interface SablierDialogProps {
-  children?: ReactNode;
+  disabled?: boolean
   block: SablierBlock;
   editor: any;
 }
 
 const SablierDialog: FC<SablierDialogProps> = (props) => {
-  const { children } = props;
+  const { disabled = false } = props;
   const form = useForm<FormData>({
     defaultValues: {
       chain: { value: props.block.props.chain, label: props.block.props.chain },
       token: props.block.props.token,
       amount: props.block.props.amount,
-      numMonths: props.block.props.duration,
+      recipient: props.block.props.recipient,
+      startDate: props.block.props.startDate,
+      duration: props.block.props.duration,
+      firstPayment: props.block.props.firstPayment,
+      transferability: props.block.props.transferability
     }
   });
 
@@ -42,21 +48,24 @@ const SablierDialog: FC<SablierDialogProps> = (props) => {
   } = form;
 
   const onSubmit = (data: FormData) => {
-    console.log("Sablier Form Data", JSON.stringify(data, null, 2));
     props.editor.updateBlock(props.block, {
       props: {
         chain: (data.chain!).value,
         token: data.token,
         amount: data.amount,
-        duration: data.numMonths,
+        recipient: data.recipient,
+        startDate: data.startDate?.format('MMM D, YYYY'),
+        duration: data.duration,
+        firstPayment: data.firstPayment,
+        transferability: data.transferability,
       },
     })
   };
 
   return (
       <Dialog>
-        <DialogTrigger asChild>
-          {children}
+        <DialogTrigger asChild disabled={disabled}>
+          <IconButton variant="ghost" size="sm" icon={Pencil} />
         </DialogTrigger>
         <DialogContent className='w-[800px] max-w-[800px]'>
           <DialogHeader>
@@ -86,11 +95,11 @@ const SablierDialog: FC<SablierDialogProps> = (props) => {
 
             {isValid ?
               <DialogClose asChild>
-                <Button onPress={handleSubmit(onSubmit)}>
+                <Button variant="soft" color="primary" onPress={handleSubmit(onSubmit)}>
                   <Text>Save</Text>
                 </Button>
               </DialogClose> :
-              <Button onPress={handleSubmit(onSubmit)}>
+              <Button variant="soft" color="primary" onPress={handleSubmit(onSubmit)}>
                 <Text>Save</Text>
               </Button>
             }

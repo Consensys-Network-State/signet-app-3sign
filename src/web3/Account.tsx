@@ -1,9 +1,6 @@
-import React from 'react';
+import * as React from 'react';
 import {
   Button,
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
   Text,
   DropdownMenu,
   DropdownMenuItem,
@@ -13,19 +10,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuGroup,
   Icons,
-  utils,
+  cn,
+  openLink,
+  copyToClipboard
 } from "@ds3/react";
-import { useAccount, useDisconnect, useEnsAvatar, useEnsName } from "wagmi";
-import { normalize } from 'viem/ens'
-import truncateEthAddress from 'truncate-eth-address'
-import { View } from 'react-native'
+import { useAccount, useDisconnect } from "wagmi";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ChevronDown } from 'lucide-react-native';
+import AddressAvatar from "./AddressAvatar.tsx";
+import Address from "./Address.tsx";
 
-const Account: React.FC = () => {
+interface AccountProps {
+  className?: string;
+}
+
+const Account: React.FC<AccountProps> = ({ className }) => {
   const { address } = useAccount()
   const { disconnect } = useDisconnect()
-  const { data: ensName } = useEnsName({ address })
-  const { data: ensAvatar } = useEnsAvatar({ name: ensName ? normalize(ensName as string) : "" })
 
   const insets = useSafeAreaInsets();
   const contentInsets = {
@@ -38,28 +39,21 @@ const Account: React.FC = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="flex flex-row">
-          <Avatar alt="Zach Nugent's Avatar" className="mr-3 w-9 h-9">
-            <AvatarImage source={{ uri: ensAvatar ? ensAvatar as string : "" }} />
-            <AvatarFallback>
-              <Text>ZN</Text>
-            </AvatarFallback>
-          </Avatar>
-          <View>
-            <Text>{ensName}</Text>
-            { address && <Text>{truncateEthAddress(address as string)}</Text> }
-          </View>
+        <Button className={cn("flex flex-row", className)} variant="soft" >
+          <AddressAvatar address={address} className="mr-1 w-6 h-6" />
+          <Address address={address} />
+          <Button.Icon icon={ChevronDown} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent insets={contentInsets} className='w-64 native:w-72'>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem onPress={() => copyToClipboard(address as string) }>
             <Icons.Copy className='text-foreground' size={14} />
             <Text>Copy address</Text>
           </DropdownMenuItem>
-          <DropdownMenuItem onPress={() => utils.openLink(`https://etherscan.io/address/${address}`)}>
+          <DropdownMenuItem onPress={() => openLink(`https://etherscan.io/address/${address}`)}>
             <Icons.SquareArrowOutUpLeft className='text-foreground' size={14} />
             <Text>View on explorer</Text>
           </DropdownMenuItem>
@@ -70,8 +64,6 @@ const Account: React.FC = () => {
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
-
-
   )
 }
 

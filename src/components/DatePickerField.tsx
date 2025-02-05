@@ -1,15 +1,7 @@
-import {
-  ElementRef,
-  forwardRef,
-  useId,
-  useRef,
-  ComponentRef,
-  useImperativeHandle
-} from 'react';
-import { View } from 'react-native';
-import DatePicker from "./DatePicker.tsx";
-import { Text, Label } from '@ds3/react';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import * as React from 'react';
+import DatePicker from "./DatePicker";
+import { Field, useField } from "@ds3/react";
+import { AlertCircle, Calendar } from 'lucide-react-native';
 import { RootProps as SelectProps } from '@rn-primitives/select';
 import { Dayjs } from 'dayjs';
 
@@ -20,68 +12,64 @@ interface DatePickerProps extends Omit<SelectProps, 'value'> {
   error?: string | undefined;
   label?: string;
   description?: string;
+  children?: React.ReactNode;
+  required?: boolean;
 }
 
-const DatePickerField = forwardRef<ElementRef<typeof DatePicker>, DatePickerProps>(
+const DatePickerField = React.forwardRef<React.ElementRef<typeof DatePicker>, DatePickerProps>(
   (props, ref) => {
-
     const {
       error,
       label,
       description,
+      children,
+      required,
       ...otherProps
     } = props;
 
-    const inputRef = useRef<ComponentRef<typeof DatePicker>>(null);
+    const { fieldId, descriptionId, ariaProps } = useField({
+      error,
+      required
+    });
 
-    useImperativeHandle(
+    const inputRef = React.useRef<React.ComponentRef<typeof DatePicker>>(null);
+
+    React.useImperativeHandle(
       ref,
       () => {
         if (!inputRef.current) {
-          return {} as ComponentRef<typeof DatePicker>;
+          return {} as React.ComponentRef<typeof DatePicker>;
         }
         return inputRef.current;
       },
-      [inputRef.current]
+      []
     );
 
-    const componentId = useId();
-    const fieldId = `${componentId}-field`;
-    const fieldErrorId = `${componentId}-field-error`;
-    const fieldDescriptionId = `${componentId}-field-description`;
-
     return (
-      <View>
+      <Field color={error ? "error" : "neutral"}>
         {label && (
-          <Label nativeID={fieldId}>
-            {label}
-          </Label>
+          <Field.Row>
+            <Field.Icon icon={error ? AlertCircle : Calendar} />
+            <Field.Label nativeID={fieldId}>
+              {label}
+            </Field.Label>
+          </Field.Row>
         )}
 
         <DatePicker
           ref={inputRef}
-          aria-labelledby={fieldId}
-          aria-describedby={!error ? fieldDescriptionId : fieldErrorId}
-          aria-invalid={!!error}
+          {...ariaProps}
           {...otherProps}
-        />
+        >
+          {children}
+        </DatePicker>
 
-        {description && !error && (
-          <Animated.View entering={FadeInDown}>
-            <Text nativeID={fieldDescriptionId}>
-              {description}
-            </Text>
-          </Animated.View>
+        {(description || error) && (
+          <Field.Description nativeID={descriptionId}>
+            {error || description}
+          </Field.Description>
         )}
-
-        {error && (
-          <Animated.View entering={FadeInDown}>
-            <Text className="text-destructive" nativeID={fieldErrorId}>
-              {error}
-            </Text>
-          </Animated.View>
-        )}
-      </View>
+      </Field>
     );
   }
 );
@@ -89,3 +77,4 @@ const DatePickerField = forwardRef<ElementRef<typeof DatePicker>, DatePickerProp
 DatePickerField.displayName = 'DatePickerField';
 
 export { DatePickerField };
+export type { DatePickerProps };

@@ -1,22 +1,27 @@
-import { FC } from 'react';
+import React from 'react';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import {
   Text,
   InputField,
   RadioGroupField,
-  RadioGroupFieldItem,
   SelectField,
   SelectContent,
   SelectTrigger,
   SelectValue,
   SelectItem,
-  utils,
+  cn,
+  Field,
   SwitchField,
+  Input,
 } from '@ds3/react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DatePickerField } from '../components/DatePickerField';
 import { Dayjs } from 'dayjs';
 import { supportedChains as chains } from '../utils/chainUtils';
+import ChainAvatar from "../web3/ChainAvatar.tsx";
+import { View } from 'react-native';
+import AddressAvatar from "../web3/AddressAvatar.tsx";
+import { isAddress } from 'viem';
 
 export type FormData = {
   chain: { value: string; label: string } | null;
@@ -24,7 +29,7 @@ export type FormData = {
   amount: string;
   recipient: string;
   startDate: Dayjs | undefined;
-  numMonths: string;
+  duration: string;
   firstPayment: 'atStart' | 'endFirstMonth';
   transferability: boolean;
 };
@@ -33,7 +38,7 @@ interface FormProps {
   form: UseFormReturn<FormData>; // React Hook Form's `useForm` return type
 }
 
-const SablierForm: FC<FormProps> = ({ form }) => {
+const SablierForm: React.FC<FormProps> = ({ form }) => {
   const {
     control,
     formState: { errors },
@@ -49,8 +54,8 @@ const SablierForm: FC<FormProps> = ({ form }) => {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <div className="flex flex-col gap-4">
+    <View className="grid grid-cols-2 gap-4">
+      <View className="flex flex-col gap-4">
         <Controller
           control={control}
           name="chain"
@@ -68,7 +73,7 @@ const SablierForm: FC<FormProps> = ({ form }) => {
             >
               <SelectTrigger>
                 <SelectValue
-                  className={utils.cn(
+                  className={cn(
                     'text-sm native:text-lg',
                     value ? 'text-foreground' : 'text-muted-foreground'
                   )}
@@ -78,11 +83,19 @@ const SablierForm: FC<FormProps> = ({ form }) => {
 
               <SelectContent insets={contentInsets} className="p-0">
                 {chains.map((chain) => (
-                  // @ts-expect-error SelectItem value should also support numbers not only strings
-                  <SelectItem key={chain.id} label={chain.name} value={chain.id}>
-                    <Text>{chain.name}</Text>
-                  </SelectItem>
-                ))}
+                  <SelectItem
+                      key={chain.id}
+                      // @ts-expect-error Select item value should support ReactNode
+                      label={
+                        <View className="flex flex-row items-center">
+                          <ChainAvatar className="mr-2" chainId={chain.id}/>
+                          <Text>{chain.name}</Text>
+                        </View>
+                      }
+                      // @ts-expect-error SelectItem value should also support numbers not only strings
+                      value={chain.id}
+                  />
+              ))}
               </SelectContent>
             </SelectField>
           )}
@@ -126,19 +139,27 @@ const SablierForm: FC<FormProps> = ({ form }) => {
           name="recipient"
           rules={{
             required: 'Recipient is required',
+            validate: (value) => isAddress(value) || 'Invalid Ethereum address'
           }}
-          render={({ field }) => (
-            <InputField
-              label="Recipient"
-              placeholder="Input address"
-              error={errors?.recipient?.message as string}
-              {...field}
-            />
-          )}
+          render={({ field }) => {
+            return (
+              <InputField
+                label="Recipient"
+                placeholder="Input address"
+                error={errors?.recipient?.message as string}
+                {...field}
+              >
+                {isAddress(field.value) &&
+                  <AddressAvatar address={field.value} className="w-6 h-6" />
+                }
+                <Input.Field />
+              </InputField>
+            );
+          }}
         />
-      </div>
+      </View>
 
-      <div className="flex flex-col gap-4">
+      <View className="flex flex-col gap-4">
         <Controller
           control={control}
           name="startDate"
@@ -156,7 +177,7 @@ const SablierForm: FC<FormProps> = ({ form }) => {
         />
         <Controller
           control={control}
-          name="numMonths"
+          name="duration"
           rules={{
             required: 'Number of months is required',
           }}
@@ -164,7 +185,7 @@ const SablierForm: FC<FormProps> = ({ form }) => {
             <InputField
               label="Number of Months"
               placeholder="Number of months"
-              error={errors?.numMonths?.message as string}
+              error={errors?.duration?.message as string}
               {...field}
             />
           )}
@@ -182,12 +203,13 @@ const SablierForm: FC<FormProps> = ({ form }) => {
               error={errors?.firstPayment?.message as string}
               value={value}
               onValueChange={onChange}
-              className='flex-col gap-3'
               label="First Payment"
               {...otherProps}
             >
-              <RadioGroupFieldItem label='At Start' value='atStart' onLabelPress={() => onChange('atStart')}/>
-              <RadioGroupFieldItem label='End of First Month' value='endFirstMonth' onLabelPress={() => onChange('endFirstMonth')}/>
+              <Field.Row>
+                <RadioGroupField.Item label='At Start' value='atStart' onLabelPress={() => onChange('atStart')}/>
+                <RadioGroupField.Item label='End of First Month' value='endFirstMonth' onLabelPress={() => onChange('endFirstMonth')}/>
+              </Field.Row>
             </RadioGroupField>
           )}
         />
@@ -206,8 +228,8 @@ const SablierForm: FC<FormProps> = ({ form }) => {
             />
           )}
         />
-      </div>
-    </div>
+      </View>
+    </View>
   );
 };
 

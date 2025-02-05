@@ -8,13 +8,20 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Router from './Router';
 import { config } from './wagmi.config'
 import './index.css'
+import { Buffer } from 'buffer';
+
+// Required for Veramo libraries
+// Make Buffer available globally
+window.Buffer = Buffer;
+// Polyfill global Buffer
+globalThis.Buffer = Buffer;
 
 const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <SafeAreaProvider>
-      <ThemeProvider className="bg-neutral-1 color-neutral-12" config={import.meta.env.DS3}>
+      <ThemeProvider config={import.meta.env.DS3}>
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
