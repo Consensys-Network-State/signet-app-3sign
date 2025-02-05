@@ -44,30 +44,32 @@ const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, Date
   const { mode } = useTheme();
 
   const textColor = mode === COLOR_MODES.Dark ? '#FFFFFF' : '#000000';
+  const bgColor = mode === COLOR_MODES.Dark ? '#222' : '#FFF'
   const style = {
-    // headerContainerStyle: {
-    //   backgroundColor: '#222',
-    // },
+    headerContainerStyle: {
+      backgroundColor: bgColor,
+      borderRadius: '4px'
+    },
     // headerTextContainerStyle?: ViewStyle;
     headerTextStyle: {
       color: textColor
     },
     // headerButtonStyle?: ViewStyle;
-    // dayContainerStyle: {
-    //   backgroundColor: '#222',
-    // },
+    dayContainerStyle: {
+      backgroundColor: bgColor,
+    },
     // todayContainerStyle: {
     //   backgroundColor: '#200',
     // },
     todayTextStyle: {
       color: textColor
     },
-    // monthContainerStyle: {
-    //   backgroundColor: '#222',
-    // },
-    // yearContainerStyle: {
-    //   backgroundColor: '#222',
-    // },
+    monthContainerStyle: {
+      backgroundColor: bgColor,
+    },
+    yearContainerStyle: {
+      backgroundColor: bgColor,
+    },
     // weekDaysContainerStyle?: ViewStyle;
     weekDaysTextStyle: {
       color: textColor
@@ -132,17 +134,15 @@ const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, Date
           <Text className="text-muted-foreground text-sm">{placeholder || "Select a date"}</Text>
         }
       </SelectTrigger>
-      <SelectContent insets={contentInsets} style={{ width: triggerWidth }} className="p-0">
-        <View className={mode === COLOR_MODES.Dark ? "bg-neutral-11" : ""}>
-          <DateTimePicker
-            mode="single"
-            {...style}
-            date={value || dayjs()}
-            onChange={onSelectDate}
-            buttonNextIcon={<Icons.ChevronRight />}
-            buttonPrevIcon={<Icons.ChevronLeft />}
-          />
-        </View>
+      <SelectContent insets={contentInsets} style={{ width: triggerWidth, backgroundColor: mode === COLOR_MODES.Dark ? '#353535' : '#FFF' }} className={`p-0 border-none`} >
+        <DateTimePicker
+          mode="single"
+          {...style}
+          date={value || dayjs()}
+          onChange={onSelectDate}
+          buttonNextIcon={<Icons.ChevronRight />}
+          buttonPrevIcon={<Icons.ChevronLeft />}
+        />
       </SelectContent>
     </Select>
   );
