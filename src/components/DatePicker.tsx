@@ -10,7 +10,6 @@ import {
   Icons,
   useTheme,
 } from "@ds3/react";
-import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootProps as SelectProps } from '@rn-primitives/select';
 import {COLOR_MODES} from "@ds3/config";
