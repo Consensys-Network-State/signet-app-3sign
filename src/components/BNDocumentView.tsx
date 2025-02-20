@@ -168,6 +168,18 @@ const WalletAddressButton = () => {
   );
 };
 
+// Add this function near the top of the file
+const handleAddressInsert = (editor: typeof schema.BlockNoteEditor, address: string = "") => {
+  editor.insertInlineContent([
+    {
+      type: "walletAddress",
+      props: {
+        address,
+      },
+    },
+  ]);
+};
+
 const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...props }) => {
   const { mode } = useTheme();
   const { editState, setEditState } = useEditStore();
@@ -374,10 +386,30 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
       >
         <>
           <SuggestionMenuController
-            triggerCharacter={"/"}
+            triggerCharacter="@"
+            getItems={async (query) => {
+              // You can customize this to show recent addresses or other suggestions
+              return [{
+                title: "Insert Address",
+                onItemClick: () => {
+                  handleAddressInsert(editor);
+                  // This will insert a default address and immediately open the edit dialog
+                  // The dialog opening will be handled by the click handler in the inline component
+                },
+                icon: <Icon icon={Wallet} size={16} />,
+              }];
+            }}
+          />
+
+          <SuggestionMenuController
+            triggerCharacter="/"
             getItems={async (query) =>
               filterSuggestionItems(
-                [...getDefaultReactSlashMenuItems(editor), insertSablier(editor), insertSignature(editor)],
+                [
+                  ...getDefaultReactSlashMenuItems(editor),
+                  insertSablier(editor),
+                  insertSignature(editor),
+                ],
                 query
               )
             }

@@ -19,6 +19,19 @@ import { BlockNoteMode, useBlockNoteStore } from "../store/blockNoteStore.ts";
 import { View } from 'react-native';
 import truncateEthAddress from 'truncate-eth-address';
 import { Wallet } from 'lucide-react-native';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  InputField,
+} from '@ds3/react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AddressAvatar from "../web3/AddressAvatar";
+import Address from "../web3/Address";
+import { isAddress } from 'viem';
+import * as React from 'react';
 
 export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof schema.inlineContentSchema, typeof schema.styleSchema>(
   {
@@ -132,11 +145,63 @@ const WalletAddressInline = createReactInlineContentSpec(
   } as const,
   {
     render: (props) => {
-      const address = props.inlineContent.props.address;
+      const { editor } = useBlockNoteStore();
+      const [isOpen, setIsOpen] = React.useState(false);
+      const [inputValue, setInputValue] = React.useState(props.inlineContent.props.address || "");
+      const insets = useSafeAreaInsets();
+      
+      const contentInsets = {
+        top: insets.top,
+        bottom: insets.bottom,
+        left: 12,
+        right: 12,
+      };
+
+      const handleAddressUpdate = (newAddress: string) => {
+        setInputValue(newAddress);
+        if (isAddress(newAddress)) {
+          editor.updateInlineContentProps(props.inlineContent, {
+            address: newAddress,
+          });
+          setIsOpen(false);
+        }
+      };
+
+      const address = props.inlineContent.props.address || inputValue;
+      const isValidAddress = isAddress(address);
+
       return (
-        <span className="inline-flex items-center gap-1 bg-neutral-2 px-1.5 py-0.5 rounded text-sm">
-          <Icon size={14} icon={Wallet} />
-          {address ? truncateEthAddress(address) : "Invalid Address"}
+        <span className="inline-block">
+          <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+            <DropdownMenuTrigger>
+              <span className="inline-flex items-center gap-1 bg-neutral-2 px-1.5 py-0.5 rounded text-sm cursor-pointer hover:bg-neutral-3">
+                {isValidAddress ? (
+                  <>
+                    <AddressAvatar address={address as `0x${string}`} className="w-4 h-4" />
+                    <Address address={address as `0x${string}`} truncate />
+                  </>
+                ) : (
+                  <>
+                    <Icon icon={Wallet} size={14} />
+                    <Text>Insert Address</Text>
+                  </>
+                )}
+              </span>
+            </DropdownMenuTrigger>
+            
+            <DropdownMenuContent insets={contentInsets} className="w-72">
+              <DropdownMenuLabel>Enter Ethereum Address</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <View className="p-2">
+                <InputField
+                  placeholder="0x..."
+                  error={inputValue && !isAddress(inputValue) ? "Invalid address" : undefined}
+                  value={inputValue}
+                  onChangeText={handleAddressUpdate}
+                />
+              </View>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </span>
       );
     },
