@@ -1,7 +1,7 @@
 import "@blocknote/core/fonts/inter.css";
 import {BlockNoteView} from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
-import {getDefaultReactSlashMenuItems, SuggestionMenuController, useCreateBlockNote} from "@blocknote/react";
+import {getDefaultReactSlashMenuItems, SuggestionMenuController, useCreateBlockNote, useBlockNoteContext} from "@blocknote/react";
 import {filterSuggestionItems, insertOrUpdateBlock,} from '@blocknote/core';
 import {
   Button,
@@ -15,6 +15,7 @@ import {
   DialogTrigger,
   Icons,
   Text,
+  Icon,
   useTheme,
 } from '@ds3/react';
 import SablierIcon from "../assets/sablier.svg?react";
@@ -22,7 +23,7 @@ import {BlockNoteMode, useBlockNoteStore} from '../store/blockNoteStore';
 import {Block, schema} from "../blocks/BlockNoteSchema.tsx";
 import EthSignDialog from "./EthSignDialog.tsx";
 import ExportDialog from "./ExportDialog.tsx";
-import newAgreement from '../templates/new-agreement.json';
+import newAgreement from '../templates/grant-agreement.json';
 import {DocumentPayload} from "../types";
 import * as React from "react";
 import ViewSignatureDialog from "./ViewSignatureDialog.tsx";
@@ -38,6 +39,17 @@ import {useEditStore} from "../store/editorStore.ts";
 import { useAccount, useSwitchChain } from "wagmi";
 import { mainnet } from 'viem/chains';
 import ChainAvatar from "../web3/ChainAvatar.tsx";
+import { Wallet } from 'lucide-react-native';
+import {
+  BasicTextStyleButton,
+  BlockTypeSelect,
+  ColorStyleButton,
+  CreateLinkButton,
+  FormattingToolbar,
+  FormattingToolbarController,
+  TextAlignButton,
+} from "@blocknote/react";
+import { isAddress } from 'viem';
 
 // Slash menu item to insert an Alert block
 const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
@@ -70,6 +82,25 @@ const insertSignature = (editor: typeof schema.BlockNoteEditor) => ({
   icon: <Icons.Signature className="w-5 h-5" />,
 });
 
+// Add this new slash menu item
+const insertWalletAddress = (editor: typeof schema.BlockNoteEditor) => ({
+  title: "Wallet Address",
+  subtext: "Insert an Ethereum address",
+  onItemClick: () => {
+    editor.insertInlineContent([
+      {
+        type: "walletAddress",
+        props: {
+          address: "0x0000000000000000000000000000000000000000", // Default address
+        },
+      },
+    ]);
+  },
+  aliases: ["wallet", "address", "eth"],
+  group: "Inline Content",
+  icon: <Icon className="w-5 h-5" icon={Wallet} />,
+});
+
 export enum DocumentStatus {
   UNDEFINED,
   SIGNED,
@@ -81,6 +112,61 @@ interface BNDocumentViewProps {
   // Add other properties of `props` if necessary
   [key: string]: unknown; // Optional: For additional props
 }
+
+// Updated WalletAddressButton component
+const WalletAddressButton = () => {
+  const { editor } = useBlockNoteContext();
+  
+  const handleClick = () => {
+    const selection = editor.getSelection();
+    if (selection) {
+      const selectedText = editor.getSelectedText();
+      // Check if selected text is a valid Ethereum address
+      if (selectedText && isAddress(selectedText)) {
+        // Replace the selected text with wallet address inline content
+        editor.insertInlineContent([
+          {
+            type: "walletAddress",
+            props: {
+              address: selectedText,
+            },
+          },
+        ]);
+      } else {
+        // If selected text is not a valid address, insert default address
+        editor.insertInlineContent([
+          {
+            type: "walletAddress",
+            props: {
+              address: "0x0000000000000000000000000000000000000000",
+            },
+          },
+        ]);
+      }
+    } else {
+      // If no text is selected, insert default address
+      editor.insertInlineContent([
+        {
+          type: "walletAddress",
+          props: {
+            address: "0x0000000000000000000000000000000000000000",
+          },
+        },
+      ]);
+    }
+  };
+
+  return (
+    <Button 
+      variant="ghost" 
+      size="sm"
+      onPress={handleClick}
+      className="flex h-8 w-8 items-center justify-center"
+    >
+      <Icon icon={Wallet} size={16} />
+    </Button>
+  );
+};
 
 const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...props }) => {
   const { mode } = useTheme();
@@ -208,7 +294,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
     }
 
     return undefined;
-  }, [currentEditorMode, isWrongChain]) as {
+  }, [editorMode, switchChain, currentEditorMode, isWrongChain]) as {
     message: string;
     type?: 'warning' | 'info' | 'error';
     actions?: React.ReactNode;
@@ -283,31 +369,39 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
         editable={editorMode === BlockNoteMode.EDIT}
         slashMenu={false}
         theme={mode || 'light'}
+        formattingToolbar={false}
         {...props}
       >
-        <SuggestionMenuController
-          triggerCharacter={"/"}
-          getItems={async (query) =>
-            filterSuggestionItems(
-              [...getDefaultReactSlashMenuItems(editor), insertSablier(editor), insertSignature(editor)],
-              query
-            )
-          }
-        />
+        <>
+          <SuggestionMenuController
+            triggerCharacter={"/"}
+            getItems={async (query) =>
+              filterSuggestionItems(
+                [...getDefaultReactSlashMenuItems(editor), insertSablier(editor), insertSignature(editor)],
+                query
+              )
+            }
+          />
+
+          <FormattingToolbarController
+            formattingToolbar={() => (
+              <FormattingToolbar>
+                <BlockTypeSelect />
+                <BasicTextStyleButton basicTextStyle="bold" />
+                <BasicTextStyleButton basicTextStyle="italic" />
+                <BasicTextStyleButton basicTextStyle="underline" />
+                <BasicTextStyleButton basicTextStyle="strike" />
+                <TextAlignButton textAlignment="left" />
+                <TextAlignButton textAlignment="center" />
+                <TextAlignButton textAlignment="right" />
+                <ColorStyleButton />
+                <CreateLinkButton />
+                <WalletAddressButton />
+              </FormattingToolbar>
+            )}
+          />
+        </>
       </BlockNoteView>
-      {/*{ currentEditorMode === BlockNoteMode.SIGNATURE &&*/}
-      {/*  <EthSignDialog*/}
-      {/*    editor={editor}*/}
-      {/*    documentPayload={documentPayload!}*/}
-      {/*    onSuccessfulSignature={onSuccessfulSignature}*/}
-      {/*    triggerProps={{*/}
-      {/*      color: 'primary',*/}
-      {/*      variant: 'soft',*/}
-      {/*      size: 'lg',*/}
-      {/*      className: 'mt-4 w-full'*/}
-      {/*    }}*/}
-      {/*  />*/}
-      {/*}*/}
     </Layout>
   </>
 }

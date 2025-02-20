@@ -3,9 +3,10 @@ import {
   defaultBlockSpecs,
   defaultProps,
   CustomBlockConfig,
+  defaultInlineContentSpecs,
 } from '@blocknote/core';
-import { createReactBlockSpec } from "@blocknote/react";
-import { Icons, Card, CardContent, CardTitle, CardHeader, Text } from "@ds3/react";
+import { createReactBlockSpec, createReactInlineContentSpec } from "@blocknote/react";
+import { Icons, Card, CardContent, CardTitle, CardHeader, Text, Icon } from "@ds3/react";
 import SablierIcon from "../assets/sablier.svg?react";
 import MonthlyIcon from "../assets/monthly.svg?react";
 import LineaIcon from "../assets/linea.svg?react";
@@ -17,6 +18,7 @@ import SignatureDialog from "./SignatureDialog";
 import { BlockNoteMode, useBlockNoteStore } from "../store/blockNoteStore.ts";
 import { View } from 'react-native';
 import truncateEthAddress from 'truncate-eth-address';
+import { Wallet } from 'lucide-react-native';
 
 export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof schema.inlineContentSchema, typeof schema.styleSchema>(
   {
@@ -118,13 +120,38 @@ const SignatureBlock: any = createReactBlockSpec<CustomBlockConfig, typeof schem
   }
 );
 
-
+const WalletAddressInline = createReactInlineContentSpec(
+  {
+    type: "walletAddress",
+    propSchema: {
+      address: {
+        default: "",
+      },
+    },
+    content: "none",
+  } as const,
+  {
+    render: (props) => {
+      const address = props.inlineContent.props.address;
+      return (
+        <span className="inline-flex items-center gap-1 bg-neutral-2 px-1.5 py-0.5 rounded text-sm">
+          <Icon size={14} icon={Wallet} />
+          {address ? truncateEthAddress(address) : "Invalid Address"}
+        </span>
+      );
+    },
+  }
+);
 
 export const schema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
     sablier: SablierBlock,
     signature: SignatureBlock
+  },
+  inlineContentSpecs: {
+    ...defaultInlineContentSpecs,
+    walletAddress: WalletAddressInline,
   },
 });
 
