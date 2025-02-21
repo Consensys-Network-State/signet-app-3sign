@@ -13,9 +13,10 @@ interface LayoutProps {
     type?: 'warning' | 'info' | 'error';
     actions?: React.ReactNode;
   };
+  rightMenu?: React.ReactNode;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
+const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, rightMenu = true }) => {
   const getStatusBackgroundColor = (type?: 'warning' | 'info' | 'error') => {
     switch (type) {
       case 'warning':
@@ -62,8 +63,17 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
 
         {/* Main Content */}
         <View className="flex-1 flex-grow overflow-y-auto">
-          <View className="mx-auto w-full max-w-[1200px] p-8 m-12 rounded-4">
-            {children}
+          <View className={`mx-auto w-full ${rightMenu ? 'max-w-[1520px]' : 'max-w-[1200px]'} p-8 m-12 rounded-4`}>
+            <View className="flex flex-row gap-8">
+              <View className="flex-1">
+                {children}
+              </View>
+              {rightMenu && (
+                <View className="w-80 bg-neutral-2 rounded-4 p-4">
+                  {rightMenu}
+                </View>
+              )}
+            </View>
           </View>
         </View>
       </View>
