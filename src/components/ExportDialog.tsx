@@ -54,8 +54,8 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor, disabled = false })
       if (!address) throw new Error('Not signed in');
       setError("");
       setIsLoading(true);
-      const document = await createDocumentVC(address, data.signatories.split(',') as `0x${string}`[], editor.document);
-      mutation.mutate(document, {
+      const { stringVC, encryptionKey } = await createDocumentVC(address, data.signatories.split(',') as `0x${string}`[], editor.document);
+      mutation.mutate(stringVC, {
         onError: (error) => {
           setIsLoading(false);
           setError(error.message);
@@ -64,7 +64,7 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor, disabled = false })
           setIsLoading(false);
           if (data) {
             const { processId } = data.data || {};
-            navigate(`/${processId}`, { state: { showModal: true } })
+            navigate(`/${processId}?key=${encryptionKey}`, { state: { showModal: true } })
           }
         },
       });
@@ -93,7 +93,6 @@ const ExportDialog: React.FC<ExportDialogProps> = ({ editor, disabled = false })
                 This will create a verifiable claim of this agreement and your signature, that will be stored on AO.
                 This action is immutable and irreversible.
               </Text>
-
               <Text className="block pt-4">
                 Set the address of the Signatory you wish to co-sign this document:
               </Text>

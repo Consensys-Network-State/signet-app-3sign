@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router";
 import * as React from 'react';
 import { useParams, useLocation } from "react-router";
 import {
@@ -26,6 +27,8 @@ import DisconnectButton from "../web3/DisconnectButton.tsx";
 
 const Document = () => {
   const location = useLocation();
+  const [ searchParams ] = useSearchParams();
+  const encryptionKey = searchParams.get('key');
   const { documentId } = useParams(); // Extracts :username from the URL
   const { isPending, isError, data, error } = useQuery({ queryKey: ['documents', documentId], queryFn: () => getDocument(documentId!) });
   const { setEditorMode } = useBlockNoteStore();
@@ -37,10 +40,9 @@ const Document = () => {
   React.useEffect(() => {
     const queryHandler = async () => {
       if (!address) return;
-      if (!isPending && !isError && data) {
-        const processedDocument = await validateAndProcessDocumentVC(JSON.parse(data.data.Document));
+      if (!isPending && !isError && data && encryptionKey) {
+        const processedDocument = await validateAndProcessDocumentVC(JSON.parse(data.data.Document), encryptionKey);
         setDocument(processedDocument.document);
-
         if (address.toLowerCase() === data.data.DocumentOwner) { // If you are the owner
           setEditorMode(BlockNoteMode.VIEW);
         } else if (data.data.Signatories.find((a: string) => a === address.toLowerCase())) { // If you are a signer ...
@@ -54,7 +56,7 @@ const Document = () => {
       }
     }
     queryHandler();
-  }, [isPending, isError, data, address, setEditorMode])
+  }, [isPending, isError, data, address, setEditorMode, encryptionKey])
 
   const isAuthorized = React.useMemo(() => {
     if (!address) return false;
@@ -93,7 +95,7 @@ const Document = () => {
             </DialogDescription>
           </DialogHeader>
           <InputClipboard
-            value={`${window.location.origin}${location.pathname}`}
+            value={`${window.location.origin}${location.pathname}?key=${encryptionKey}`}
           />
           <DialogFooter>
             <Button variant='soft' color="primary" onPress={() => setIsModalOpen(false)}>
