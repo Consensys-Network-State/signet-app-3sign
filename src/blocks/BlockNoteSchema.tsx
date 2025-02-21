@@ -368,6 +368,7 @@ const DateTimeInline = createReactInlineContentSpec(
                         field.onChange(value);
                         updateProps('date', value.toISOString());
                       }}
+                      showTime={props.inlineContent.props.showTime}
                     />
                   )}
                 />

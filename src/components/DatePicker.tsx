@@ -27,6 +27,7 @@ interface DatePickerProps extends Omit<SelectProps, 'value'> {
   value?: Dayjs;
   onChange?: (date: Dayjs) => void;
   placeholder?: string;
+  showTime?: boolean;
 }
 
 const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, DatePickerProps>((props, ref) => {
@@ -34,6 +35,7 @@ const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, Date
     value,
     onChange,
     placeholder,
+    showTime,
     ...otherProps
   } = props;
 
@@ -129,8 +131,12 @@ const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, Date
     <Select {...otherProps}>
       <SelectTrigger ref={triggerRef} onLayout={handleTriggerLayout}>
         {value ?
-          <Text className="text-sm">{value.format('MMMM D, YYYY')}</Text> :
-          <Text className="text-muted-foreground text-sm">{placeholder || "Select a date"}</Text>
+          <Text className="text-sm">
+            {value.format(showTime ? 'MMMM D, YYYY h:mm A' : 'MMMM D, YYYY')}
+          </Text> :
+          <Text className="text-muted-foreground text-sm">
+            {placeholder || (showTime ? "Select date & time" : "Select date")}
+          </Text>
         }
       </SelectTrigger>
       <SelectContent insets={contentInsets} style={{ width: triggerWidth, backgroundColor: mode === COLOR_MODES.Dark ? '#353535' : '#FFF' }} className={`p-0 border-none`} >
@@ -141,6 +147,7 @@ const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, Date
           onChange={onSelectDate}
           buttonNextIcon={<Icons.ChevronRight />}
           buttonPrevIcon={<Icons.ChevronLeft />}
+          timePicker={showTime}
         />
       </SelectContent>
     </Select>

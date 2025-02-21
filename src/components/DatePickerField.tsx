@@ -14,6 +14,7 @@ interface DatePickerProps extends Omit<SelectProps, 'value'> {
   description?: string;
   children?: React.ReactNode;
   required?: boolean;
+  showTime?: boolean;
 }
 
 const DatePickerField = React.forwardRef<React.ElementRef<typeof DatePicker>, DatePickerProps>(
