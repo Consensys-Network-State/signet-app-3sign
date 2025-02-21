@@ -4,6 +4,8 @@ import {Icon, ModeToggle, Text} from "@ds3/react";
 import Account from "../web3/Account.tsx";
 import { H4 } from "@ds3/react/src/components/Heading.tsx";
 import { Info } from 'lucide-react-native';
+import { useSearchParams } from "react-router";
+import Drawer from "./Drawer.tsx";
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -17,6 +19,9 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, rightMenu = true }) => {
+  const [searchParams] = useSearchParams();
+  const showDrawer = searchParams.get("drawer") === "true";
+
   const getStatusBackgroundColor = (type?: 'warning' | 'info' | 'error') => {
     switch (type) {
       case 'warning':
@@ -63,15 +68,15 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, rightMen
 
         {/* Main Content */}
         <View className="flex-1 flex-grow overflow-y-auto">
-          <View className={`mx-auto w-full ${rightMenu ? 'max-w-[1520px]' : 'max-w-[1200px]'} p-8 m-12 rounded-4`}>
+          <View className={`mx-auto w-full ${showDrawer ? 'max-w-[1520px]' : 'max-w-[1200px]'} p-8 m-12 rounded-4`}>
             <View className="flex flex-row gap-8">
               <View className="flex-1">
                 {children}
               </View>
-              {rightMenu && (
-                <View className="w-80 bg-neutral-2 rounded-4 p-4">
+              {showDrawer && rightMenu && (
+                <Drawer>
                   {rightMenu}
-                </View>
+                </Drawer>
               )}
             </View>
           </View>
