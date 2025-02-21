@@ -145,7 +145,6 @@ const WalletAddressInline = createReactInlineContentSpec(
   } as const,
   {
     render: (props) => {
-      const { editor } = useBlockNoteStore();
       const [isOpen, setIsOpen] = React.useState(false);
       const [inputValue, setInputValue] = React.useState(props.inlineContent.props.address || "");
       const insets = useSafeAreaInsets();
@@ -160,8 +159,11 @@ const WalletAddressInline = createReactInlineContentSpec(
       const handleAddressUpdate = (newAddress: string) => {
         setInputValue(newAddress);
         if (isAddress(newAddress)) {
-          editor.updateInlineContentProps(props.inlineContent, {
-            address: newAddress,
+          props.updateInlineContent({
+            ...props.inlineContent,
+            props: {
+              address: newAddress,
+            }
           });
           setIsOpen(false);
         }

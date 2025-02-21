@@ -51,7 +51,6 @@ import {
 } from "@blocknote/react";
 import { isAddress } from 'viem';
 
-// Slash menu item to insert an Alert block
 const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
   title: "Sablier",
   subtext: "Unlock assets on the same day each month",
@@ -82,25 +81,6 @@ const insertSignature = (editor: typeof schema.BlockNoteEditor) => ({
   icon: <Icons.Signature className="w-5 h-5" />,
 });
 
-// Add this new slash menu item
-const insertWalletAddress = (editor: typeof schema.BlockNoteEditor) => ({
-  title: "Wallet Address",
-  subtext: "Insert an Ethereum address",
-  onItemClick: () => {
-    editor.insertInlineContent([
-      {
-        type: "walletAddress",
-        props: {
-          address: "0x0000000000000000000000000000000000000000", // Default address
-        },
-      },
-    ]);
-  },
-  aliases: ["wallet", "address", "eth"],
-  group: "Inline Content",
-  icon: <Icon className="w-5 h-5" icon={Wallet} />,
-});
-
 export enum DocumentStatus {
   UNDEFINED,
   SIGNED,
@@ -113,9 +93,8 @@ interface BNDocumentViewProps {
   [key: string]: unknown; // Optional: For additional props
 }
 
-// Updated WalletAddressButton component
 const WalletAddressButton = () => {
-  const { editor } = useBlockNoteContext();
+  const { editor } = useBlockNoteContext() as { editor: typeof schema.BlockNoteEditor };
   
   const handleClick = () => {
     const selection = editor.getSelection();
@@ -168,7 +147,6 @@ const WalletAddressButton = () => {
   );
 };
 
-// Add this function near the top of the file
 const handleAddressInsert = (editor: typeof schema.BlockNoteEditor, address: string = "") => {
   editor.insertInlineContent([
     {
