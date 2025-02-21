@@ -9,5 +9,19 @@ export default {
     './node_modules/@ds3/react/**/*.{js,jsx,ts,tsx}',
     '!node_modules/**/*.{js,ts,jsx,tsx}',
   ],
-  presets: [ds3Preset(ds3Config)]
+  presets: [ds3Preset(ds3Config)],
+  theme: {
+    extend: {
+      fontFamily: {
+        cursive: [
+          'Brush Script MT',
+          'Brush Script Std',
+          'Lucida Calligraphy',
+          'Lucida Handwriting',
+          'Apple Chancery',
+          'cursive'
+        ],
+      },
+    }
+  }
 }

@@ -1,22 +1,26 @@
 import { create } from 'zustand';
-import { combine, devtools } from 'zustand/middleware';
+import { combine, devtools, persist } from 'zustand/middleware';
+import {Block} from "../blocks/BlockNoteSchema.tsx";
 
-export enum BlockEditorMode {
-    EDITOR = "EDITOR",
-    SIMULATOR = "SIMULATOR",
-    LOG = "LOG"
+interface EditSlice {
+  editState: Block[] | null;
 }
 
-export const useEditorStore = create(
+export const useEditStore = create(
+  persist(
     devtools(
-        combine(
-            {
-                editorMode: BlockEditorMode.EDITOR,
-            }, // Initial state
-            (set) => ({
-                setEditorMode: (editorMode: BlockEditorMode) =>
-                    set(() => ({ editorMode }), undefined, 'editorStore/updateEditorMode'),
-            })
-        ),
-    )
+      combine(
+        {
+          editState: null,
+        } as EditSlice, // Initial state
+        (set) => ({
+          setEditState: (editState: Block[]) =>
+            set(() => ({ editState }), undefined, 'editStore/setEditState'),
+        })
+      ),
+    ),
+    {
+      name: 'edit-state', // this is the only required option - it sets the localStorage key
+    }
+  )
 );

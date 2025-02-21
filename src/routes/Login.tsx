@@ -1,28 +1,31 @@
-import React from "react";
-import { ModeToggle } from "@ds3/react";
-import { Connect } from "../web3/Connect.tsx";
+import * as React from "react";
+import { Text } from "@ds3/react";
+import { useLocation, useNavigate } from "react-router";
+import { useAccount } from "wagmi";
+import { View } from 'react-native';
+import MetaMaskLogin from "../web3/MetaMaskLogin.tsx";
+import AuthenticationLayout from "../layouts/AuthenticationLayout.tsx";
 
 const Login: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isConnected } = useAccount();
+
+  // Redirect to where you were trying to go
+  React.useEffect(() => {
+    if (isConnected) {
+      navigate(location.state?.redirect || '/');
+    }
+  }, [isConnected, navigate, location]);
+
   return (
-    <div className="h-screen">
-      <div className="flex items-center justify-center h-full w-full">
-        <div
-          className="flex items-center justify-center bg-no-repeat w-full max-w-[612px] min-w-[300px] h-full"
-          // style={{backgroundImage: 'url("./tie.png")'}}
-        >
-          <div className="bg-neutral-1 p-6 rounded shadow-md text-center">
-            <div>
-              <h1 className="color-neutral-12 text-heading-12">APOC</h1>
-              <p className="color-neutral-12">An onchain agreements proof of concept</p>
-              <Connect/>
-              <p>Putting blockchain power into the 'Power Suit'*</p>
-              <p>*Suit and tie remain optional in crypto</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <ModeToggle className="absolute top-2 right-2 px-4 py-2" />
-    </div>
+    <AuthenticationLayout>
+      <View className="mb-12 w-full">
+        <MetaMaskLogin />
+      </View>
+      <Text className="font-bold">Putting blockchain power into the 'Power Suit'*</Text>
+      <Text className="text-neutral-11">*Suit and tie remain optional in crypto</Text>
+    </AuthenticationLayout>
   );
 }
 

@@ -1,6 +1,6 @@
+import * as React from 'react';
 import DateTimePicker, { DateType } from 'react-native-ui-datepicker';
 import dayjs, { Dayjs } from 'dayjs';
-import { ComponentRef, useImperativeHandle, useState, forwardRef, useRef, ElementRef } from 'react';
 import { Platform, LayoutChangeEvent } from 'react-native';
 import {
   Text,
@@ -8,9 +8,18 @@ import {
   SelectTrigger,
   SelectContent,
   Icons,
+  useTheme,
 } from "@ds3/react";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootProps as SelectProps } from '@rn-primitives/select';
+import {COLOR_MODES} from "@ds3/config";
+
+// TODO: There's a weird issue where you get the error: React is not defined when using the DateTimePicker Component
+//  from react-native-ui-datepicker. Setting window.React = React fixes it.
+//  Should Investigate why this is required for the production environment
+// Claudes Answer: The root cause is that the library probably assumes React is globally available
+//  (common in React Native) but in a Vite production build, it's not. The dev server handles this differently than the production build.
+window.React = React;
 
 type SingleChange = { date: DateType };
 
@@ -20,7 +29,7 @@ interface DatePickerProps extends Omit<SelectProps, 'value'> {
   placeholder?: string;
 }
 
-const DatePicker = forwardRef<ElementRef<typeof SelectTrigger>, DatePickerProps>((props, ref) => {
+const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, DatePickerProps>((props, ref) => {
   const {
     value,
     onChange,
@@ -28,19 +37,67 @@ const DatePicker = forwardRef<ElementRef<typeof SelectTrigger>, DatePickerProps>
     ...otherProps
   } = props;
 
-  const [triggerWidth, setTriggerWidth] = useState(0);
+  const [triggerWidth, setTriggerWidth] = React.useState(0);
   const insets = useSafeAreaInsets();
-  const triggerRef = useRef<ElementRef<typeof SelectTrigger>>(null);
+  const triggerRef = React.useRef<React.ElementRef<typeof SelectTrigger>>(null);
+  const { mode } = useTheme();
 
-  useImperativeHandle(
+  const textColor = mode === COLOR_MODES.Dark ? '#FFFFFF' : '#000000';
+  const bgColor = mode === COLOR_MODES.Dark ? '#222' : '#FFF'
+  const style = {
+    headerContainerStyle: {
+      backgroundColor: bgColor,
+      borderRadius: '4px'
+    },
+    // headerTextContainerStyle?: ViewStyle;
+    headerTextStyle: {
+      color: textColor
+    },
+    // headerButtonStyle?: ViewStyle;
+    dayContainerStyle: {
+      backgroundColor: bgColor,
+    },
+    // todayContainerStyle: {
+    //   backgroundColor: '#200',
+    // },
+    todayTextStyle: {
+      color: textColor
+    },
+    monthContainerStyle: {
+      backgroundColor: bgColor,
+    },
+    yearContainerStyle: {
+      backgroundColor: bgColor,
+    },
+    // weekDaysContainerStyle?: ViewStyle;
+    weekDaysTextStyle: {
+      color: textColor
+    },
+    calendarTextStyle: {
+      color: textColor
+    },
+    selectedTextStyle: {
+      color: textColor
+    },
+    // selectedItemColor: {
+    //   backGroundColor: '#000000',
+    // },
+    // timePickerContainerStyle?: ViewStyle;
+    timePickerTextStyle: {
+      color: textColor
+    },
+    // timePickerIndicatorStyle?: ViewStyle;
+  }
+
+  React.useImperativeHandle(
     ref,
     () => {
       if (!triggerRef.current) {
-        return {} as ComponentRef<typeof DatePicker>;
+        return {} as React.ComponentRef<typeof DatePicker>;
       }
       return triggerRef.current;
     },
-    [triggerRef.current]
+    []
   );
 
   const contentInsets = {
@@ -76,9 +133,10 @@ const DatePicker = forwardRef<ElementRef<typeof SelectTrigger>, DatePickerProps>
           <Text className="text-muted-foreground text-sm">{placeholder || "Select a date"}</Text>
         }
       </SelectTrigger>
-      <SelectContent insets={contentInsets} style={{ width: triggerWidth }} className="p-0">
+      <SelectContent insets={contentInsets} style={{ width: triggerWidth, backgroundColor: mode === COLOR_MODES.Dark ? '#353535' : '#FFF' }} className={`p-0 border-none`} >
         <DateTimePicker
           mode="single"
+          {...style}
           date={value || dayjs()}
           onChange={onSelectDate}
           buttonNextIcon={<Icons.ChevronRight />}
