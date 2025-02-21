@@ -31,7 +31,7 @@ import Layout from "../layouts/Layout.tsx";
 import {View} from "react-native";
 import {COLOR_MODES} from "@ds3/config";
 import AddressCard from "../web3/AddressCard.tsx";
-import {Share2, ShieldCheck} from 'lucide-react-native';
+import {Share2, ShieldCheck, Calendar} from 'lucide-react-native';
 import {InputClipboard} from "./InputClipboard.tsx";
 import {constructBNDocumentFromDocumentPayload} from "../utils/documentUtils.ts";
 import ClearAllDialog from "./ClearAllDialog.tsx";
@@ -153,6 +153,18 @@ const handleAddressInsert = (editor: typeof schema.BlockNoteEditor, address: str
       type: "walletAddress",
       props: {
         address,
+      },
+    },
+  ]);
+};
+
+const handleDateTimeInsert = (editor: typeof schema.BlockNoteEditor) => {
+  editor.insertInlineContent([
+    {
+      type: "dateTime",
+      props: {
+        date: "",
+        showTime: false
       },
     },
   ]);
@@ -366,16 +378,22 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
           <SuggestionMenuController
             triggerCharacter="@"
             getItems={async (query) => {
-              // You can customize this to show recent addresses or other suggestions
-              return [{
-                title: "Insert Address",
-                onItemClick: () => {
-                  handleAddressInsert(editor);
-                  // This will insert a default address and immediately open the edit dialog
-                  // The dialog opening will be handled by the click handler in the inline component
+              return [
+                {
+                  title: "Insert Address",
+                  onItemClick: () => {
+                    handleAddressInsert(editor);
+                  },
+                  icon: <Icon icon={Wallet} size={16} />,
                 },
-                icon: <Icon icon={Wallet} size={16} />,
-              }];
+                {
+                  title: "Insert Date",
+                  onItemClick: () => {
+                    handleDateTimeInsert(editor);
+                  },
+                  icon: <Icon icon={Calendar} size={16} />,
+                }
+              ];
             }}
           />
 
