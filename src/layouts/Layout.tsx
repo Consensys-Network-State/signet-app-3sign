@@ -5,7 +5,8 @@ import Account from "../web3/Account.tsx";
 import { H4 } from "@ds3/react/src/components/Heading.tsx";
 import { Info } from 'lucide-react-native';
 import { useSearchParams } from "react-router";
-import Drawer from "./Drawer.tsx";
+import Drawer from "./Drawer";
+import type { schema } from "../blocks/BlockNoteSchema";
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -16,9 +17,10 @@ interface LayoutProps {
     actions?: React.ReactNode;
   };
   rightMenu?: React.ReactNode;
+  editor?: typeof schema.BlockNoteEditor;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, rightMenu = true }) => {
+const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, rightMenu = true, editor }) => {
   const [searchParams] = useSearchParams();
   const showDrawer = searchParams.get("drawer") === "true";
 
@@ -83,7 +85,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, rightMen
                     ? 'w-[320px] opacity-100 visible' 
                     : 'w-0 opacity-0 invisible'
                 }`}>
-                  <Drawer>
+                  <Drawer editor={editor}>
                     {rightMenu}
                   </Drawer>
                 </View>

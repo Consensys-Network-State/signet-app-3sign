@@ -12,7 +12,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   Icons,
   Text,
   Icon,
@@ -330,6 +329,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
     <Layout
       rightHeader={headerButtons}
       status={statusBar}
+      editor={editor}
     >
       { (editorMode === BlockNoteMode.VIEW || editorMode === BlockNoteMode.SIGNATURE) &&
         <View className="grid grid-cols-2 gap-4 mb-4">
