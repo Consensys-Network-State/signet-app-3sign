@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { useSearchParams } from 'react-router';
 import SablierDrawer from "../blocks/SablierDrawer";
 import type { schema } from "../blocks/BlockNoteSchema";
+import { useDrawer } from "../hooks/useDrawer";
 
 interface DrawerProps {
   children?: React.ReactNode;
@@ -11,13 +12,23 @@ interface DrawerProps {
 
 const Drawer: React.FC<DrawerProps> = ({ children, editor }) => {
   const [searchParams] = useSearchParams();
-  const blockType = searchParams.get('blockType');
+  const { closeDrawer } = useDrawer();
   const blockId = searchParams.get('blockId');
+
+  React.useEffect(() => {
+    if (blockId && editor) {
+      const block = editor.getBlock(blockId);
+      if (!block) {
+        closeDrawer();
+      }
+    }
+  }, [blockId, editor, closeDrawer]);
+
   const block = blockId && editor ? editor.getBlock(blockId) : null;
 
   return (
     <View className="w-[320px] bg-white shadow-lg p-4">
-      {blockType === 'sablier' && blockId && editor ? (
+      {block?.type === 'sablier' && blockId && editor ? (
         <SablierDrawer
           block={block as any}
           editor={editor}

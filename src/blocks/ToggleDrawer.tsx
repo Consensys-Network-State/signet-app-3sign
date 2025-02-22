@@ -20,7 +20,7 @@ const ToggleDrawer: FC<ToggleDrawerProps> = (props) => {
     if (isOpen) {
       closeDrawer();
     } else {
-      openDrawer(block.id, block.type);
+      openDrawer(block.id);
     }
   };
 
