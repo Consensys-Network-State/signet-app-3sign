@@ -7,8 +7,9 @@ interface DrawerProps {
 
 const Drawer: React.FC<DrawerProps> = ({ children }) => {
   return (
-    <View className="w-80 bg-neutral-2 rounded-4 p-4">
+    <View className="w-80 bg-neutral-4 rounded-4 p-4">
       {children}
+      Some test content
     </View>
   );
 };
