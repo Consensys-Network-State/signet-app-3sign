@@ -11,7 +11,6 @@ import SablierIcon from "../assets/sablier.svg?react";
 import MonthlyIcon from "../assets/monthly.svg?react";
 import LineaIcon from "../assets/linea.svg?react";
 import TokenIcon from "../assets/token.svg?react";
-import SablierDialog from "./SablierDialog.tsx";
 import { supportedChains, getChainById } from "../utils/chainUtils";
 import Signature from "./Signature.tsx";
 import SignatureDialog from "./SignatureDialog";
@@ -37,6 +36,7 @@ import { useForm, Controller } from 'react-hook-form';
 import dayjs from 'dayjs';
 import { Calendar } from 'lucide-react-native';
 import { DatePickerField } from '../components/DatePickerField';
+import ToggleDrawer from "./ToggleDrawer.tsx";
 
 export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof schema.inlineContentSchema, typeof schema.styleSchema>(
   {
@@ -88,7 +88,7 @@ export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof 
               <Text className="flex items-center mr-auto">
                 <SablierIcon className="w-8 h-8" /> Sablier Stream
               </Text>
-              <SablierDialog block={props.block} editor={props.editor} disabled={currentEditorMode !== BlockNoteMode.EDIT}/>
+              <ToggleDrawer block={props.block} editor={props.editor} disabled={currentEditorMode !== BlockNoteMode.EDIT} />
             </CardTitle>
           </CardHeader>
           <CardContent>
