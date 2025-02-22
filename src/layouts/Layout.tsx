@@ -69,7 +69,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, rightMen
         {/* Main Content */}
         <View className="flex-1 flex-grow overflow-y-auto">
           <View className={`mx-auto w-full transition-all duration-300 ease-in-out ${showDrawer ? 'max-w-[1520px]' : 'max-w-[1200px]'} p-8 m-12 rounded-4`}>
-            <View className="flex flex-row gap-8">
+            <View className="flex flex-row gap-2">
 
               {/* Content */}
               <View className="flex-1">
@@ -78,7 +78,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, rightMen
 
               {/* Drawer */}
               {rightMenu && (
-                <View className={`sticky top-0 self-start max-h-screen overflow-y-auto transition-all duration-300 ease-in-out ${
+                <View className={`sticky top-0 self-start max-h-screen overflow-visible transition-all duration-300 ease-in-out px-4 pb-4 ${
                   showDrawer 
                     ? 'w-[320px] opacity-100 visible' 
                     : 'w-0 opacity-0 invisible'
