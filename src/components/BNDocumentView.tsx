@@ -12,6 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
   Icons,
   Text,
   Icon,
@@ -49,21 +50,7 @@ import {
   TextAlignButton,
 } from "@blocknote/react";
 import { isAddress } from 'viem';
-
-const insertSablier = (editor: typeof schema.BlockNoteEditor) => ({
-  title: "Sablier",
-  subtext: "Unlock assets on the same day each month",
-  onItemClick: () => {
-    insertOrUpdateBlock(editor, {
-      type: "sablier",
-    });
-  },
-  aliases: [
-    "sablier",
-  ],
-  group: "Contract Blocks",
-  icon: <SablierIcon className="w-5 h-5" />,
-});
+import { useDrawer } from "../hooks/useDrawer";
 
 const insertSignature = (editor: typeof schema.BlockNoteEditor) => ({
   title: "Signature",
@@ -174,6 +161,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
   const { editState, setEditState } = useEditStore();
   const [editorMode, setEditorMode] = React.useState<BlockNoteMode | null>(null);
   const { editorMode: currentEditorMode } = useBlockNoteStore();
+  const { openDrawer } = useDrawer();
 
   const editor = useCreateBlockNote({
     schema,
@@ -306,6 +294,26 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
       setEditState(editor.document);
     }
   }
+
+  const insertSablier = React.useCallback((editor: typeof schema.BlockNoteEditor) => ({
+    title: "Sablier",
+    subtext: "Unlock assets on the same day each month",
+    onItemClick: () => {
+      const block = insertOrUpdateBlock(editor, {
+        type: "sablier",
+      });
+
+      // Open the drawer for the newly inserted block
+      if (block) {
+        openDrawer(block.id, block.type);
+      }
+    },
+    aliases: [
+      "sablier",
+    ],
+    group: "Contract Blocks",
+    icon: <SablierIcon className="w-5 h-5" />,
+  }), [openDrawer]);
 
   return <>
     <Dialog open={isSuccessDialogOpen}>

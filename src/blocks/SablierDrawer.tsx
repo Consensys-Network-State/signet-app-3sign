@@ -10,8 +10,8 @@ import { useForm } from 'react-hook-form';
 import SablierIcon from "../assets/sablier.svg?react";
 import { FC } from "react";
 import type { SablierBlock } from './BlockNoteSchema';
-import { useSearchParams } from 'react-router';
 import dayjs from 'dayjs';
+import { useDrawer } from '../hooks/useDrawer';
 
 interface SablierDrawerProps {
   block: SablierBlock;
@@ -19,7 +19,8 @@ interface SablierDrawerProps {
 }
 
 const SablierDrawer: FC<SablierDrawerProps> = ({ block, editor }) => {
-  const [, setSearchParams] = useSearchParams();
+  const { closeDrawer } = useDrawer();
+
   const form = useForm<FormData>({
     defaultValues: {
       chain: { value: block.props.chain, label: block.props.chain },
@@ -47,11 +48,11 @@ const SablierDrawer: FC<SablierDrawerProps> = ({ block, editor }) => {
         transferability: data.transferability,
       },
     });
-    setSearchParams({});
+    closeDrawer();
   };
 
   const handleCancel = () => {
-    setSearchParams({});
+    closeDrawer();
   };
 
   return (
