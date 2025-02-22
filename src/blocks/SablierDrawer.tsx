@@ -8,7 +8,7 @@ import {
 import SablierForm, { FormData } from "./SablierForm";
 import { useForm } from 'react-hook-form';
 import SablierIcon from "../assets/sablier.svg?react";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import type { SablierBlock } from './BlockNoteSchema';
 import dayjs from 'dayjs';
 import { useDrawer } from '../hooks/useDrawer';
@@ -33,6 +33,20 @@ const SablierDrawer: FC<SablierDrawerProps> = ({ block, editor }) => {
       transferability: block.props.transferability
     }
   });
+
+  // Reset form when block changes
+  useEffect(() => {
+    form.reset({
+      chain: { value: block.props.chain, label: block.props.chain },
+      token: block.props.token,
+      amount: block.props.amount,
+      recipient: block.props.recipient,
+      startDate: block.props.startDate ? dayjs(block.props.startDate, 'MMM D, YYYY') : undefined,
+      duration: block.props.duration,
+      firstPayment: block.props.firstPayment,
+      transferability: block.props.transferability
+    });
+  }, [block.id]); // Add block.id as dependency
 
   const onSubmit = (data: FormData) => {
     editor.updateBlock(block, {
