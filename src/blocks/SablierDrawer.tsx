@@ -11,41 +11,38 @@ import SablierIcon from "../assets/sablier.svg?react";
 import { FC } from "react";
 import type { SablierBlock } from './BlockNoteSchema';
 import { useSearchParams } from 'react-router';
+import dayjs from 'dayjs';
 
 interface SablierDrawerProps {
   block: SablierBlock;
   editor: any;
 }
 
-const SablierDrawer: FC<SablierDrawerProps> = (props) => {
+const SablierDrawer: FC<SablierDrawerProps> = ({ block, editor }) => {
   const [, setSearchParams] = useSearchParams();
   const form = useForm<FormData>({
     defaultValues: {
-      chain: { value: props.block.props.chain, label: props.block.props.chain },
-      token: props.block.props.token,
-      amount: props.block.props.amount,
-      recipient: props.block.props.recipient,
-      startDate: props.block.props.startDate,
-      duration: props.block.props.duration,
-      firstPayment: props.block.props.firstPayment,
-      transferability: props.block.props.transferability
+      chain: { value: block.props.chain, label: block.props.chain },
+      token: block.props.token,
+      amount: block.props.amount,
+      recipient: block.props.recipient,
+      startDate: block.props.startDate ? dayjs(block.props.startDate, 'MMM D, YYYY') : undefined,
+      duration: block.props.duration,
+      firstPayment: block.props.firstPayment,
+      transferability: block.props.transferability
     }
   });
 
-  const {
-    handleSubmit,
-    formState: { isValid },
-  } = form;
-
   const onSubmit = (data: FormData) => {
-    props.editor.updateBlock(props.block, {
+    editor.updateBlock(block, {
       props: {
-        chain: (data.chain!).value,
+        ...block.props,
+        chain: parseInt(data.chain!.value),
         token: data.token,
         amount: data.amount,
         recipient: data.recipient,
         startDate: data.startDate?.format('MMM D, YYYY'),
-        duration: data.duration,
+        duration: parseInt(data.duration),
         firstPayment: data.firstPayment,
         transferability: data.transferability,
       },
@@ -83,8 +80,7 @@ const SablierDrawer: FC<SablierDrawerProps> = (props) => {
         <Button
           variant="soft"
           color="primary"
-          onPress={handleSubmit(onSubmit)}
-          disabled={!isValid}
+          onPress={form.handleSubmit(onSubmit)}
         >
           <Text>Save</Text>
         </Button>
