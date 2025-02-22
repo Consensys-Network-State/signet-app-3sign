@@ -21,6 +21,15 @@ const ToggleDrawer: FC<ToggleDrawerProps> = (props) => {
       closeDrawer();
     } else {
       openDrawer(block.id);
+
+      // Find the DOM element for this block and scroll to it
+      const blockElement = document.querySelector(`[data-id="${block.id}"]`);
+      if (blockElement) {
+        blockElement.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
     }
   };
 

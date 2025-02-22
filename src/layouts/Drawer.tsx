@@ -20,6 +20,15 @@ const Drawer: React.FC<DrawerProps> = ({ children, editor }) => {
       const block = editor.getBlock(blockId);
       if (!block) {
         closeDrawer();
+      } else {
+        // Scroll to block when drawer opens
+        const blockElement = document.querySelector(`[data-id="${blockId}"]`);
+        if (blockElement) {
+          blockElement.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
       }
     }
   }, [blockId, editor, closeDrawer]);
