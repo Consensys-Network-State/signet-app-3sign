@@ -85,26 +85,70 @@ export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof 
         <Card className='w-full max-w-md'>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Text className="flex items-center mr-auto">
-                <SablierIcon className="w-8 h-8" /> Sablier Stream
-              </Text>
+              
+              <View className="flex flex-row items-center mr-auto">
+                <SablierIcon className="w-8 h-8" />
+                <Text>Sablier Stream</Text>
+              </View>
               <ToggleDrawer block={props.block} editor={props.editor} disabled={currentEditorMode !== BlockNoteMode.EDIT} />
             </CardTitle>
           </CardHeader>
           <CardContent>
             <View className="grid grid-cols-3 gap-1">
-              <View className="col-span-1 color-neutral-10">Shape</View>
-              <View className="col-span-2 flex flex-row items-center gap-2"><MonthlyIcon /> Monthly unlocks</View>
-              <View className="col-span-1 color-neutral-10">Chain</View>
-              <View className="col-span-2 flex flex-row items-center gap-2">{props.block.props.chain && <><LineaIcon />{getChainById(props.block.props.chain)?.name}<Icons.SquareArrowOutUpRight size={18} /></>}</View>
-              <View className="col-span-1 color-neutral-10">Token</View>
-              <View className="col-span-2 flex flex-row items-center gap-2">{props.block.props.token && <><TokenIcon /> {truncateEthAddress(props.block.props.token)} <Icons.SquareArrowOutUpRight size={18} /></>}</View>
-              <View className="col-span-1 color-neutral-10">Amount</View>
-              <View className="col-span-2">{props.block.props.amount}</View>
-              <View className="col-span-1 color-neutral-10">Duration</View>
-              <View className="col-span-2"> {props.block.props.duration}{/** 3 months <Text className="color-neutral-10 text-3">(Sept 1, 2024 - Jan 1, 2024)</Text> */} </View>
-              <View className="col-span-1 color-neutral-10">First Unlock</View>
-              <View className="col-span-2">{props.block.props.startDate}{/** Oct 1, 2024 */}</View>
+              <View className="col-span-1">
+                <Text className="color-neutral-10">Shape</Text>
+              </View>
+              <View className="col-span-2 flex flex-row items-center gap-2">
+                <MonthlyIcon />
+                <Text>Monthly unlocks</Text>
+              </View>
+              
+              <View className="col-span-1">
+                <Text className="color-neutral-10">Chain</Text>
+              </View>
+              <View className="col-span-2 flex flex-row items-center gap-2">
+                {props.block.props.chain && (
+                  <>
+                    <LineaIcon />
+                    <Text>{getChainById(props.block.props.chain)?.name}</Text>
+                    <Icons.SquareArrowOutUpRight size={18} />
+                  </>
+                )}
+              </View>
+              
+              <View className="col-span-1">
+                <Text className="color-neutral-10">Token</Text>
+              </View>
+              <View className="col-span-2 flex flex-row items-center gap-2">
+                {props.block.props.token && (
+                  <>
+                    <TokenIcon />
+                    <Text>{truncateEthAddress(props.block.props.token)}</Text>
+                    <Icons.SquareArrowOutUpRight size={18} />
+                  </>
+                )}
+              </View>
+              
+              <View className="col-span-1">
+                <Text className="color-neutral-10">Amount</Text>
+              </View>
+              <View className="col-span-2">
+                <Text>{props.block.props.amount}</Text>
+              </View>
+              
+              <View className="col-span-1">
+                <Text className="color-neutral-10">Duration</Text>
+              </View>
+              <View className="col-span-2">
+                <Text>{props.block.props.duration}</Text>
+              </View>
+              
+              <View className="col-span-1">
+                <Text className="color-neutral-10">First Unlock</Text>
+              </View>
+              <View className="col-span-2">
+                <Text>{props.block.props.startDate}</Text>
+              </View>
             </View>
           </CardContent>
         </Card>
