@@ -12,6 +12,8 @@ import { FC, useEffect } from "react";
 import type { SablierBlock } from './BlockNoteSchema';
 import dayjs from 'dayjs';
 import { useDrawer } from '../hooks/useDrawer';
+import { useVariablesStore } from '../store/variablesStore';
+import * as React from 'react';
 
 interface SablierDrawerProps {
   block: SablierBlock;
@@ -20,6 +22,7 @@ interface SablierDrawerProps {
 
 const SablierDrawer: FC<SablierDrawerProps> = ({ block, editor }) => {
   const { closeDrawer } = useDrawer();
+  const { addVariable } = useVariablesStore();
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -33,6 +36,23 @@ const SablierDrawer: FC<SablierDrawerProps> = ({ block, editor }) => {
       transferability: block.props.transferability
     }
   });
+
+  // Watch for form changes
+  React.useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name && value[name as keyof FormData] !== undefined) {
+        addVariable({
+          id: `${block.id}-${name}`,
+          blockId: block.id,
+          blockType: 'sablier',
+          propName: name,
+          value: value[name as keyof FormData],
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, block.id, addVariable]);
 
   // Reset form when block changes
   useEffect(() => {
