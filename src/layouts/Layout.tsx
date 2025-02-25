@@ -22,7 +22,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, rightMenu = true, editor }) => {
   const [searchParams] = useSearchParams();
-  const showDrawer = !!searchParams.get("blockId");
+  const showDrawer = !!searchParams.get("blockId") || !!searchParams.get("variables");
 
   const getStatusBackgroundColor = (type?: 'warning' | 'info' | 'error') => {
     switch (type) {

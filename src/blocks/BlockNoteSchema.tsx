@@ -6,7 +6,7 @@ import {
   defaultInlineContentSpecs,
 } from '@blocknote/core';
 import { createReactBlockSpec, createReactInlineContentSpec } from "@blocknote/react";
-import { Icons, Card, CardContent, CardTitle, CardHeader, Text, Icon } from "@ds3/react";
+import { Icons, Card, CardContent, CardTitle, CardHeader, Text, Icon, IconButton } from "@ds3/react";
 import SablierIcon from "../assets/sablier.svg?react";
 import MonthlyIcon from "../assets/monthly.svg?react";
 import LineaIcon from "../assets/linea.svg?react";
@@ -17,7 +17,7 @@ import SignatureDialog from "./SignatureDialog";
 import { BlockNoteMode, useBlockNoteStore } from "../store/blockNoteStore.ts";
 import { View } from 'react-native';
 import truncateEthAddress from 'truncate-eth-address';
-import { Wallet } from 'lucide-react-native';
+import { Wallet, Variable } from 'lucide-react-native';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +37,7 @@ import dayjs from 'dayjs';
 import { Calendar } from 'lucide-react-native';
 import { DatePickerField } from '../components/DatePickerField';
 import ToggleDrawer from "./ToggleDrawer.tsx";
+import { useDrawer } from '../hooks/useDrawer';
 
 export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof schema.inlineContentSchema, typeof schema.styleSchema>(
   {
@@ -80,17 +81,24 @@ export const SablierBlock: any = createReactBlockSpec<CustomBlockConfig, typeof 
   {
     render: (props) => {
       const { editorMode: currentEditorMode } = useBlockNoteStore();
+      const { openDrawer } = useDrawer();
 
       return (
         <Card className='w-full max-w-md'>
           <CardHeader>
             <CardTitle className="flex items-center">
-              
               <View className="flex flex-row items-center mr-auto">
                 <SablierIcon className="w-8 h-8" />
                 <Text>Sablier Stream</Text>
               </View>
-              <ToggleDrawer block={props.block} editor={props.editor} disabled={currentEditorMode !== BlockNoteMode.EDIT} />
+              <View className="flex flex-row gap-2">
+                <IconButton
+                  icon={Variable} 
+                  variant="ghost" 
+                  onPress={() => openDrawer('variables')}
+                />
+                <ToggleDrawer block={props.block} editor={props.editor} disabled={currentEditorMode !== BlockNoteMode.EDIT} />
+              </View>
             </CardTitle>
           </CardHeader>
           <CardContent>

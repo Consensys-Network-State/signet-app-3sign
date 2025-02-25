@@ -2,6 +2,7 @@ import * as React from "react";
 import { View } from "react-native";
 import { useSearchParams } from 'react-router';
 import SablierDrawer from "../blocks/SablierDrawer";
+import VariablesDrawer from "../blocks/VariablesDrawer";
 import type { schema } from "../blocks/BlockNoteSchema";
 import { useDrawer } from "../hooks/useDrawer";
 
@@ -14,6 +15,7 @@ const Drawer: React.FC<DrawerProps> = ({ children, editor }) => {
   const [searchParams] = useSearchParams();
   const { closeDrawer } = useDrawer();
   const blockId = searchParams.get('blockId');
+  const showVariables = searchParams.get('variables') === 'true';
 
   React.useEffect(() => {
     if (blockId && editor) {
@@ -34,6 +36,14 @@ const Drawer: React.FC<DrawerProps> = ({ children, editor }) => {
   }, [blockId, editor, closeDrawer]);
 
   const block = blockId && editor ? editor.getBlock(blockId) : null;
+
+  if (showVariables) {
+    return (
+      <View className="w-[320px] bg-white shadow-lg p-4">
+        <VariablesDrawer />
+      </View>
+    );
+  }
 
   return (
     <View className="w-[320px] bg-white shadow-lg p-4">
