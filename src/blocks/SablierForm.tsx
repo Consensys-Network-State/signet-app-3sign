@@ -22,6 +22,8 @@ import ChainAvatar from "../web3/ChainAvatar.tsx";
 import { View } from 'react-native';
 import AddressAvatar from "../web3/AddressAvatar.tsx";
 import { isAddress } from 'viem';
+import { useVariablesStore } from '../store/variablesStore';
+import { resolveVariableReference, isVariableReference } from '../utils/variableUtils';
 
 export type FormData = {
   chain: { value: string; label: string } | null;
@@ -43,6 +45,16 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
     control,
     formState: { errors },
   } = form;
+
+  const { variables } = useVariablesStore();
+  
+  // Transform the form values for display
+  const transformValueForDisplay = (value: any) => {
+    if (typeof value === 'string' && isVariableReference(value)) {
+      return resolveVariableReference(value, variables);
+    }
+    return value;
+  };
 
   // select stuff
   const insets = useSafeAreaInsets();
@@ -138,17 +150,21 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
         name="recipient"
         rules={{
           required: 'Recipient is required',
-          validate: (value) => isAddress(value) || 'Invalid Ethereum address'
+          validate: (value) => {
+            const resolvedValue = transformValueForDisplay(value);
+            return isAddress(resolvedValue) || 'Invalid Ethereum address';
+          }
         }}
         render={({ field }) => (
           <InputField
             label="Recipient"
             placeholder="Input address"
             error={errors?.recipient?.message as string}
-            {...field}
+            value={transformValueForDisplay(field.value)}
+            onChangeText={field.onChange}
           >
-            {isAddress(field.value) &&
-              <AddressAvatar address={field.value} className="w-6 h-6" />
+            {isAddress(transformValueForDisplay(field.value)) &&
+              <AddressAvatar address={transformValueForDisplay(field.value)} className="w-6 h-6" />
             }
             <Input.Field />
           </InputField>

@@ -14,6 +14,7 @@ import dayjs from 'dayjs';
 import { useDrawer } from '../hooks/useDrawer';
 import { useVariablesStore } from '../store/variablesStore';
 import * as React from 'react';
+import { toVariableReference } from '../utils/variableUtils';
 
 interface SablierDrawerProps {
   block: SablierBlock;
@@ -22,7 +23,7 @@ interface SablierDrawerProps {
 
 const SablierDrawer: FC<SablierDrawerProps> = ({ block, editor }) => {
   const { closeDrawer } = useDrawer();
-  const { addVariable } = useVariablesStore();
+  const { variables, addVariable } = useVariablesStore();
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -69,13 +70,16 @@ const SablierDrawer: FC<SablierDrawerProps> = ({ block, editor }) => {
   }, [block.id]); // Add block.id as dependency
 
   const onSubmit = (data: FormData) => {
+    // Check if recipient is an address and should be converted to a variable reference
+    const recipientRef = toVariableReference(data.recipient, variables);
+    
     editor.updateBlock(block, {
       props: {
         ...block.props,
         chain: parseInt(data.chain!.value),
         token: data.token,
         amount: data.amount,
-        recipient: data.recipient,
+        recipient: recipientRef || data.recipient, // Use variable reference if available
         startDate: data.startDate?.format('MMM D, YYYY'),
         duration: parseInt(data.duration),
         firstPayment: data.firstPayment,
