@@ -2,6 +2,7 @@ import { FC } from "react";
 import { View, ScrollView } from 'react-native';
 import { Text, Card, CardContent, CardHeader } from '@ds3/react';
 import { useVariablesStore } from '../store/variablesStore';
+import AddressAvatar from "../web3/AddressAvatar";
 
 const VariablesDrawer: FC = () => {
   const { variables } = useVariablesStore();
@@ -23,30 +24,57 @@ const VariablesDrawer: FC = () => {
       <Text className="text-lg font-semibold mb-4">Variables</Text>
       
       <ScrollView className="flex-1">
-        {Object.entries(groupedByBlock).map(([blockId, { blockType, variables }]) => (
-          <Card key={blockId} className="mb-4">
+        {/* Show global wallet addresses first */}
+        {groupedByBlock['global'] && (
+          <Card className="mb-4">
             <CardHeader>
               <Text className="text-sm font-medium text-muted-foreground capitalize">
-                {blockType} Block
-              </Text>
-              <Text className="text-xs text-muted-foreground">
-                ID: {blockId}
+                Global Variables
               </Text>
             </CardHeader>
             <CardContent>
-              {variables.map((variable) => (
+              {groupedByBlock['global'].variables.map((variable) => (
                 <View key={variable.id} className="mb-2 py-2 border-b border-neutral-6 last:border-0">
                   <Text className="text-sm font-medium">{variable.propName}</Text>
-                  <Text className="text-sm text-muted-foreground">
-                    {typeof variable.value === 'object' 
-                      ? JSON.stringify(variable.value)
-                      : String(variable.value)}
-                  </Text>
+                  <View className="flex flex-row items-center mt-1">
+                    <AddressAvatar address={variable.value} className="w-6 h-6 mr-2" />
+                    <Text className="text-sm text-muted-foreground">
+                      {variable.value}
+                    </Text>
+                  </View>
                 </View>
               ))}
             </CardContent>
           </Card>
-        ))}
+        )}
+
+        {/* Show other block variables */}
+        {Object.entries(groupedByBlock)
+          .filter(([blockId]) => blockId !== 'global')
+          .map(([blockId, { blockType, variables }]) => (
+            <Card key={blockId} className="mb-4">
+              <CardHeader>
+                <Text className="text-sm font-medium text-muted-foreground capitalize">
+                  {blockType} Block
+                </Text>
+                <Text className="text-xs text-muted-foreground">
+                  ID: {blockId}
+                </Text>
+              </CardHeader>
+              <CardContent>
+                {variables.map((variable) => (
+                  <View key={variable.id} className="mb-2 py-2 border-b border-neutral-6 last:border-0">
+                    <Text className="text-sm font-medium">{variable.propName}</Text>
+                    <Text className="text-sm text-muted-foreground">
+                      {typeof variable.value === 'object' 
+                        ? JSON.stringify(variable.value)
+                        : String(variable.value)}
+                    </Text>
+                  </View>
+                ))}
+              </CardContent>
+            </Card>
+          ))}
       </ScrollView>
     </View>
   );
