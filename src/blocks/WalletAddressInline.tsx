@@ -1,6 +1,6 @@
 import { createReactInlineContentSpec } from "@blocknote/react";
 import { View } from 'react-native';
-import { Text, Icon, DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, InputField, Input, SwitchField } from '@ds3/react';
+import { Text, Icon, DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, InputField, Input, SwitchField, Button } from '@ds3/react';
 import { Wallet } from 'lucide-react-native';
 import { isAddress } from 'viem';
 import * as React from 'react';
@@ -8,6 +8,19 @@ import { useForm, Controller } from 'react-hook-form';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AddressAvatar from "../web3/AddressAvatar";
 import Address from "../web3/Address";
+import { schema } from './BlockNoteSchema';
+import { useBlockNoteContext } from "@blocknote/react";
+
+export const handleAddressInsert = (editor: typeof schema.BlockNoteEditor, address: string = "") => {
+  editor.insertInlineContent([
+    {
+      type: "walletAddress",
+      props: {
+        address,
+      },
+    },
+  ]);
+};
 
 export const WalletAddressInline = createReactInlineContentSpec(
   {
@@ -156,4 +169,37 @@ export const WalletAddressInline = createReactInlineContentSpec(
       );
     },
   }
-); 
+);
+
+export const WalletAddressButton = () => {
+  const { editor } = useBlockNoteContext() as { editor: typeof schema.BlockNoteEditor };
+  
+  const handleClick = () => {
+    const selection = editor.getSelection();
+    if (selection) {
+      const selectedText = editor.getSelectedText();
+      // Check if selected text is a valid Ethereum address
+      if (selectedText && isAddress(selectedText)) {
+        // Replace the selected text with wallet address inline content
+        handleAddressInsert(editor, selectedText);
+      } else {
+        // If selected text is not a valid address, insert default address
+        handleAddressInsert(editor, "0x0000000000000000000000000000000000000000");
+      }
+    } else {
+      // If no text is selected, insert default address
+      handleAddressInsert(editor, "0x0000000000000000000000000000000000000000");
+    }
+  };
+
+  return (
+    <Button 
+      variant="ghost" 
+      size="sm"
+      onPress={handleClick}
+      className="flex h-8 w-8 items-center justify-center"
+    >
+      <Icon icon={Wallet} size={16} />
+    </Button>
+  );
+}; 

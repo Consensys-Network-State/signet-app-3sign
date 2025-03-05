@@ -15,6 +15,19 @@ import {
   SwitchField,
 } from '@ds3/react';
 import { DatePickerField } from '../components/DatePickerField';
+import { schema } from './BlockNoteSchema';
+
+export const handleDateTimeInsert = (editor: typeof schema.BlockNoteEditor) => {
+  editor.insertInlineContent([
+    {
+      type: "dateTime",
+      props: {
+        date: "",
+        showTime: false
+      },
+    },
+  ]);
+};
 
 export const DateTimeInline = createReactInlineContentSpec(
   {
@@ -123,4 +136,4 @@ export const DateTimeInline = createReactInlineContentSpec(
       );
     },
   }
-); 
+);

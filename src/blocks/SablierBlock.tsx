@@ -13,6 +13,25 @@ import { Variable } from 'lucide-react-native';
 import ToggleDrawer from "./ToggleDrawer";
 import { useDrawer } from '../hooks/useDrawer';
 import { schema } from './BlockNoteSchema';
+import { insertOrUpdateBlock } from '@blocknote/core';
+
+export const insertSablier = (editor: typeof schema.BlockNoteEditor, openDrawer: (id: string, type: string) => void) => ({
+  title: "Sablier",
+  subtext: "Unlock assets on the same day each month",
+  onItemClick: () => {
+    const block = insertOrUpdateBlock(editor, {
+      type: "sablier",
+    });
+
+    // Open the drawer for the newly inserted block
+    if (block) {
+      openDrawer(block.id, block.type);
+    }
+  },
+  aliases: ["sablier"],
+  group: "Contract Blocks",
+  icon: <SablierIcon className="w-5 h-5" />,
+});
 
 export const SablierBlock = createReactBlockSpec<CustomBlockConfig, typeof schema.inlineContentSchema, typeof schema.styleSchema>(
   {

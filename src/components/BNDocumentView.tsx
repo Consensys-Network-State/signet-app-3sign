@@ -1,8 +1,8 @@
 import "@blocknote/core/fonts/inter.css";
 import {BlockNoteView} from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
-import {getDefaultReactSlashMenuItems, SuggestionMenuController, useCreateBlockNote, useBlockNoteContext} from "@blocknote/react";
-import {filterSuggestionItems, insertOrUpdateBlock,} from '@blocknote/core';
+import {getDefaultReactSlashMenuItems, SuggestionMenuController, useCreateBlockNote} from "@blocknote/react";
+import {filterSuggestionItems} from '@blocknote/core';
 import {
   Button,
   Dialog,
@@ -18,7 +18,6 @@ import {
   Icon,
   useTheme,
 } from '@ds3/react';
-import SablierIcon from "../assets/sablier.svg?react";
 import {BlockNoteMode, useBlockNoteStore} from '../store/blockNoteStore';
 import {Block, schema} from "../blocks/BlockNoteSchema.tsx";
 import EthSignDialog from "./EthSignDialog.tsx";
@@ -49,23 +48,12 @@ import {
   FormattingToolbarController,
   TextAlignButton,
 } from "@blocknote/react";
-import { isAddress } from 'viem';
 import { useDrawer } from "../hooks/useDrawer";
-
-const insertSignature = (editor: typeof schema.BlockNoteEditor) => ({
-  title: "Signature",
-  subtext: "Collects user signature",
-  onItemClick: () => {
-    insertOrUpdateBlock(editor, {
-      type: "signature",
-    });
-  },
-  aliases: [
-    "signature",
-  ],
-  group: "Signature Blocks",
-  icon: <Icons.Signature className="w-5 h-5" />,
-});
+import { insertSablier } from '../blocks/SablierBlock';
+import { insertSignature } from '../blocks/SignatureBlock';
+import { handleAddressInsert } from '../blocks/WalletAddressInline';
+import { handleDateTimeInsert } from '../blocks/DateTimeInline';
+import { WalletAddressButton } from '../blocks/WalletAddressInline';
 
 export enum DocumentStatus {
   UNDEFINED,
@@ -78,83 +66,6 @@ interface BNDocumentViewProps {
   // Add other properties of `props` if necessary
   [key: string]: unknown; // Optional: For additional props
 }
-
-const WalletAddressButton = () => {
-  const { editor } = useBlockNoteContext() as { editor: typeof schema.BlockNoteEditor };
-  
-  const handleClick = () => {
-    const selection = editor.getSelection();
-    if (selection) {
-      const selectedText = editor.getSelectedText();
-      // Check if selected text is a valid Ethereum address
-      if (selectedText && isAddress(selectedText)) {
-        // Replace the selected text with wallet address inline content
-        editor.insertInlineContent([
-          {
-            type: "walletAddress",
-            props: {
-              address: selectedText,
-            },
-          },
-        ]);
-      } else {
-        // If selected text is not a valid address, insert default address
-        editor.insertInlineContent([
-          {
-            type: "walletAddress",
-            props: {
-              address: "0x0000000000000000000000000000000000000000",
-            },
-          },
-        ]);
-      }
-    } else {
-      // If no text is selected, insert default address
-      editor.insertInlineContent([
-        {
-          type: "walletAddress",
-          props: {
-            address: "0x0000000000000000000000000000000000000000",
-          },
-        },
-      ]);
-    }
-  };
-
-  return (
-    <Button 
-      variant="ghost" 
-      size="sm"
-      onPress={handleClick}
-      className="flex h-8 w-8 items-center justify-center"
-    >
-      <Icon icon={Wallet} size={16} />
-    </Button>
-  );
-};
-
-const handleAddressInsert = (editor: typeof schema.BlockNoteEditor, address: string = "") => {
-  editor.insertInlineContent([
-    {
-      type: "walletAddress",
-      props: {
-        address,
-      },
-    },
-  ]);
-};
-
-const handleDateTimeInsert = (editor: typeof schema.BlockNoteEditor) => {
-  editor.insertInlineContent([
-    {
-      type: "dateTime",
-      props: {
-        date: "",
-        showTime: false
-      },
-    },
-  ]);
-};
 
 const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...props }) => {
   const { mode } = useTheme();
@@ -295,26 +206,6 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
     }
   }
 
-  const insertSablier = React.useCallback((editor: typeof schema.BlockNoteEditor) => ({
-    title: "Sablier",
-    subtext: "Unlock assets on the same day each month",
-    onItemClick: () => {
-      const block = insertOrUpdateBlock(editor, {
-        type: "sablier",
-      });
-
-      // Open the drawer for the newly inserted block
-      if (block) {
-        openDrawer(block.id, block.type);
-      }
-    },
-    aliases: [
-      "sablier",
-    ],
-    group: "Contract Blocks",
-    icon: <SablierIcon className="w-5 h-5" />,
-  }), [openDrawer]);
-
   return <>
     <Dialog open={isSuccessDialogOpen}>
       <DialogContent className='w-[520px] max-w-[520px]'>
@@ -385,7 +276,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
         <>
           <SuggestionMenuController
             triggerCharacter="@"
-            getItems={async (query) => {
+            getItems={async () => {
               return [
                 {
                   title: "Insert Address",
@@ -411,7 +302,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
               filterSuggestionItems(
                 [
                   ...getDefaultReactSlashMenuItems(editor),
-                  insertSablier(editor),
+                  insertSablier(editor, openDrawer),
                   insertSignature(editor),
                 ],
                 query
