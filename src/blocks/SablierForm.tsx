@@ -24,6 +24,7 @@ import AddressAvatar from "../web3/AddressAvatar.tsx";
 import { isAddress } from 'viem';
 import { useVariablesStore } from '../store/variablesStore';
 import { resolveVariableReference, isVariableReference } from '../utils/variableUtils';
+import { LinkVariable } from '../components/LinkVariable.tsx';
 
 export type FormData = {
   chain: { value: string; label: string } | null;
@@ -39,6 +40,15 @@ export type FormData = {
 interface FormProps {
   form: UseFormReturn<FormData>; // React Hook Form's `useForm` return type
 }
+
+const FormLabel: React.FC<{ label: string, onClick: () => void }> = ({ label, onClick }) => {
+  return (
+    <View className="flex flex-row items-center w-full">
+      <Text className="mr-auto">{label}</Text>
+      <LinkVariable onClick={onClick} />
+    </View>
+  );
+};
 
 const SablierForm: React.FC<FormProps> = ({ form }) => {
   const {
@@ -120,7 +130,7 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
         }}
         render={({ field }) => (
           <InputField
-            label="Token"
+            label={<FormLabel label="Token" onClick={() => {}} />}
             placeholder="Input token address"
             error={errors?.token?.message as string}
             {...field}
@@ -157,7 +167,8 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
         }}
         render={({ field }) => (
           <InputField
-            label="Recipient"
+            label={<FormLabel label="Recipient" onClick={() => {}} />}
+            description="This field is linked to 'recipient' variable"
             placeholder="Input address"
             error={errors?.recipient?.message as string}
             value={transformValueForDisplay(field.value)}
@@ -179,7 +190,7 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
         }}
         render={({field}) => (
           <DatePickerField
-            label="Start Date"
+            label={<FormLabel label="Start Date" onClick={() => {}} />}
             placeholder="Select date"
             error={errors?.startDate?.message as string}
             {...field}
