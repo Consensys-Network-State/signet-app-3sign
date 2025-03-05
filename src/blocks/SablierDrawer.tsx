@@ -12,9 +12,8 @@ import { FC, useEffect } from "react";
 import type { SablierBlock } from './BlockNoteSchema';
 import dayjs from 'dayjs';
 import { useDrawer } from '../hooks/useDrawer';
-import { useVariablesStore } from '../store/variablesStore';
 import * as React from 'react';
-import { toVariableReference } from '../utils/variableUtils';
+import { isVariableReference } from '../utils/variableUtils';
 
 interface SablierDrawerProps {
   block: SablierBlock;
@@ -23,7 +22,6 @@ interface SablierDrawerProps {
 
 const SablierDrawer: FC<SablierDrawerProps> = ({ block, editor }) => {
   const { closeDrawer } = useDrawer();
-  const { variables, addVariable } = useVariablesStore();
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -38,23 +36,6 @@ const SablierDrawer: FC<SablierDrawerProps> = ({ block, editor }) => {
     }
   });
 
-  // Watch for form changes
-  React.useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name && value[name as keyof FormData] !== undefined) {
-        addVariable({
-          id: `${block.id}-${name}`,
-          blockId: block.id,
-          blockType: 'sablier',
-          propName: name,
-          value: value[name as keyof FormData],
-        });
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [form, block.id, addVariable]);
-
   // Reset form when block changes
   useEffect(() => {
     form.reset({
@@ -67,31 +48,30 @@ const SablierDrawer: FC<SablierDrawerProps> = ({ block, editor }) => {
       firstPayment: block.props.firstPayment,
       transferability: block.props.transferability
     });
-  }, [block.id]); // Add block.id as dependency
+  }, [block.id]);
 
-  const onSubmit = (data: FormData) => {
-    // Check if recipient is an address and should be converted to a variable reference
-    const recipientRef = toVariableReference(data.recipient, variables);
-    
-    editor.updateBlock(block, {
-      props: {
-        ...block.props,
-        chain: parseInt(data.chain!.value),
-        token: data.token,
-        amount: data.amount,
-        recipient: recipientRef || data.recipient, // Use variable reference if available
-        startDate: data.startDate?.format('MMM D, YYYY'),
-        duration: parseInt(data.duration),
-        firstPayment: data.firstPayment,
-        transferability: data.transferability,
-      },
+  // Watch for form changes and update block
+  useEffect(() => {
+    const subscription = form.watch((data) => {
+      if (data.chain?.value) {  // Only update if we have valid data
+        editor.updateBlock(block, {
+          props: {
+            ...block.props,
+            chain: parseInt(data.chain.value),
+            token: data.token,
+            amount: data.amount,
+            recipient: isVariableReference(data.recipient) ? data.recipient : data.recipient,
+            startDate: data.startDate?.format('MMM D, YYYY'),
+            duration: parseInt(data.duration),
+            firstPayment: data.firstPayment,
+            transferability: data.transferability,
+          },
+        });
+      }
     });
-    closeDrawer();
-  };
 
-  const handleCancel = () => {
-    closeDrawer();
-  };
+    return () => subscription.unsubscribe();
+  }, [block, editor, form]);
 
   return (
     <View className="flex flex-col h-full">
@@ -112,16 +92,8 @@ const SablierDrawer: FC<SablierDrawerProps> = ({ block, editor }) => {
       </View>
 
       <View className="flex flex-row justify-end gap-2 mt-4 pt-4 border-t border-neutral-6">
-        <Button variant="ghost" onPress={handleCancel}>
-          <Text>Cancel</Text>
-        </Button>
-
-        <Button
-          variant="soft"
-          color="primary"
-          onPress={form.handleSubmit(onSubmit)}
-        >
-          <Text>Save</Text>
+        <Button variant="ghost" onPress={closeDrawer}>
+          <Text>Close</Text>
         </Button>
       </View>
     </View>

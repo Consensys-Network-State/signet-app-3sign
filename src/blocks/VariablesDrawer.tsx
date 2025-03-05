@@ -1,80 +1,66 @@
 import { FC } from "react";
 import { View, ScrollView } from 'react-native';
-import { Text, Card, CardContent, CardHeader } from '@ds3/react';
+import { Text, Card, CardContent } from '@ds3/react';
 import { useVariablesStore } from '../store/variablesStore';
 import AddressAvatar from "../web3/AddressAvatar";
+import dayjs from 'dayjs';
+import { isAddress } from 'viem';
 
 const VariablesDrawer: FC = () => {
   const { variables } = useVariablesStore();
 
-  // Group variables by blockId first
-  const groupedByBlock = Object.values(variables).reduce((acc, variable) => {
-    if (!acc[variable.blockId]) {
-      acc[variable.blockId] = {
-        blockType: variable.blockType,
-        variables: [],
-      };
+  const renderVariableValue = (type: string, value: any) => {
+    switch (type) {
+      case 'address':
+        if (!value || !isAddress(value)) {
+          return (
+            <Text className="text-sm text-muted-foreground">
+              Not set
+            </Text>
+          );
+        }
+        return (
+          <View className="flex flex-row items-center mt-1">
+            <AddressAvatar address={value} className="w-6 h-6 mr-2" />
+            <Text className="text-sm text-muted-foreground">{value}</Text>
+          </View>
+        );
+      case 'date':
+        return (
+          <Text className="text-sm text-muted-foreground">
+            {value ? dayjs(value).format('MMM D, YYYY') : 'Not set'}
+          </Text>
+        );
+      case 'boolean':
+        return (
+          <Text className="text-sm text-muted-foreground">
+            {value ? 'Yes' : 'No'}
+          </Text>
+        );
+      default:
+        return (
+          <Text className="text-sm text-muted-foreground">
+            {value || 'Not set'}
+          </Text>
+        );
     }
-    acc[variable.blockId].variables.push(variable);
-    return acc;
-  }, {} as Record<string, { blockType: string; variables: typeof variables[keyof typeof variables][] }>);
+  };
 
   return (
     <View className="flex flex-col h-full">
       <Text className="text-lg font-semibold mb-4">Variables</Text>
       
       <ScrollView className="flex-1">
-        {/* Show global wallet addresses first */}
-        {groupedByBlock['global'] && (
-          <Card className="mb-4">
-            <CardHeader>
-              <Text className="text-sm font-medium text-muted-foreground capitalize">
-                Global Variables
-              </Text>
-            </CardHeader>
-            <CardContent>
-              {groupedByBlock['global'].variables.map((variable) => (
-                <View key={variable.id} className="mb-2 py-2 border-b border-neutral-6 last:border-0">
-                  <Text className="text-sm font-medium">{variable.propName}</Text>
-                  <View className="flex flex-row items-center mt-1">
-                    <AddressAvatar address={variable.value} className="w-6 h-6 mr-2" />
-                    <Text className="text-sm text-muted-foreground">
-                      {variable.value}
-                    </Text>
-                  </View>
-                </View>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Show other block variables */}
-        {Object.entries(groupedByBlock)
-          .filter(([blockId]) => blockId !== 'global')
-          .map(([blockId, { blockType, variables }]) => (
-            <Card key={blockId} className="mb-4">
-              <CardHeader>
-                <Text className="text-sm font-medium text-muted-foreground capitalize">
-                  {blockType} Block
-                </Text>
-                <Text className="text-xs text-muted-foreground">
-                  ID: {blockId}
-                </Text>
-              </CardHeader>
-              <CardContent>
-                {variables.map((variable) => (
-                  <View key={variable.id} className="mb-2 py-2 border-b border-neutral-6 last:border-0">
-                    <Text className="text-sm font-medium">{variable.propName}</Text>
-                    <Text className="text-sm text-muted-foreground">
-                      {typeof variable.value === 'object' 
-                        ? JSON.stringify(variable.value)
-                        : String(variable.value)}
-                    </Text>
-                  </View>
-                ))}
-              </CardContent>
-            </Card>
-          ))}
+        <Card className="mb-4">
+          <CardContent>
+            {Object.values(variables).map((variable) => (
+              <View key={variable.name} className="mb-2 py-2 border-b border-neutral-6 last:border-0">
+                <Text className="text-sm font-medium">{variable.name}</Text>
+                {renderVariableValue(variable.type, variable.value)}
+              </View>
+            ))}
+          </CardContent>
+        </Card>
       </ScrollView>
     </View>
   );

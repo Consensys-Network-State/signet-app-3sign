@@ -23,8 +23,13 @@ import { View } from 'react-native';
 import AddressAvatar from "../web3/AddressAvatar.tsx";
 import { isAddress } from 'viem';
 import { useVariablesStore } from '../store/variablesStore';
-import { resolveVariableReference, isVariableReference } from '../utils/variableUtils';
 import { LinkVariable } from '../components/LinkVariable.tsx';
+import { 
+  isVariableReference, 
+  getVariableNameFromReference, 
+  toVariableReference,
+  resolveVariableReference
+} from '../utils/variableUtils';
 
 export type FormData = {
   chain: { value: string; label: string } | null;
@@ -38,33 +43,47 @@ export type FormData = {
 };
 
 interface FormProps {
-  form: UseFormReturn<FormData>; // React Hook Form's `useForm` return type
+  form: UseFormReturn<FormData>;
 }
 
-const FormLabel: React.FC<{ label: string, onClick: () => void }> = ({ label, onClick }) => {
-  return (
-    <View className="flex flex-row items-center w-full">
-      <Text className="mr-auto">{label}</Text>
-      <LinkVariable onClick={onClick} />
-    </View>
-  );
+const toCamelCase = (str: string): string => {
+  return str.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
 };
 
 const SablierForm: React.FC<FormProps> = ({ form }) => {
   const {
     control,
     formState: { errors },
+    watch,
   } = form;
 
-  const { variables } = useVariablesStore();
-  
-  // Transform the form values for display
-  const transformValueForDisplay = (value: any) => {
+  const { variables, addVariable } = useVariablesStore();
+
+  // Helper function to handle variable linking for any field
+  const handleLinkVariable = (label: string, type: VariableType, value: any) => {
+    const name = toCamelCase(label);
+    addVariable(name, type, value);
+    
+    // Update the form field to use the variable reference
+    const fieldName = label.toLowerCase().replace(/\s+/g, '') as keyof FormData;
+    form.setValue(fieldName, toVariableReference(name));
+  };
+
+  // Function to check if a field is linked to a variable
+  const isFieldLinked = (value: any): boolean => {
+    return typeof value === 'string' && isVariableReference(value);
+  };
+
+  // Function to resolve value from variable if needed
+  const resolveValue = (value: any): any => {
     if (typeof value === 'string' && isVariableReference(value)) {
       return resolveVariableReference(value, variables);
     }
     return value;
   };
+
+  // Watch all form values
+  const formValues = watch();
 
   // select stuff
   const insets = useSafeAreaInsets();
@@ -86,10 +105,16 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
         render={({ field: { onChange, value, ...otherProps } }) => (
           <SelectField
             error={errors?.chain?.message as string}
-            value={value ? { label: value?.label ?? '', value: value?.value ?? '' } : undefined}
+            value={value}
             onValueChange={onChange}
             className='flex-col gap-3'
-            label="Chain"
+            label={
+              <View className="flex flex-row items-center w-full">
+                <Text className="mr-auto">Chain</Text>
+                <LinkVariable onClick={() => handleLinkVariable('Chain', 'number', value?.value)} />
+              </View>
+            }
+            description={isFieldLinked(value?.value) ? `This field is linked to '${getVariableNameFromReference(value?.value)}' variable` : undefined}
             {...otherProps}
           >
             <SelectTrigger>
@@ -106,14 +131,12 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
               {chains.map((chain) => (
                 <SelectItem
                   key={chain.id}
-                  // @ts-expect-error Select item value should support ReactNode
                   label={
                     <View className="flex flex-row items-center">
                       <ChainAvatar className="mr-2" chainId={chain.id}/>
                       <Text>{chain.name}</Text>
                     </View>
                   }
-                  // @ts-expect-error SelectItem value should also support numbers not only strings
                   value={chain.id}
                 />
               ))}
@@ -130,10 +153,17 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
         }}
         render={({ field }) => (
           <InputField
-            label={<FormLabel label="Token" onClick={() => {}} />}
+            label={
+              <View className="flex flex-row items-center w-full">
+                <Text className="mr-auto">Token</Text>
+                <LinkVariable onClick={() => handleLinkVariable('Token', 'address', field.value)} />
+              </View>
+            }
+            description={isFieldLinked(field.value) ? `This field is linked to '${getVariableNameFromReference(field.value)}' variable` : undefined}
             placeholder="Input token address"
             error={errors?.token?.message as string}
-            {...field}
+            value={resolveValue(field.value)}
+            onChangeText={field.onChange}
           />
         )}
       />
@@ -146,11 +176,18 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
         }}
         render={({ field }) => (
           <InputField
-            label="Amount"
+            label={
+              <View className="flex flex-row items-center w-full">
+                <Text className="mr-auto">Amount</Text>
+                <LinkVariable onClick={() => handleLinkVariable('Amount', 'number', field.value)} />
+              </View>
+            }
+            description={isFieldLinked(field.value) ? `This field is linked to '${getVariableNameFromReference(field.value)}' variable` : undefined}
             placeholder="Input token amount"
             error={errors?.amount?.message as string}
+            value={resolveValue(field.value)}
+            onChangeText={field.onChange}
             keyboardType="numeric"
-            {...field}
           />
         )}
       />
@@ -161,25 +198,34 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
         rules={{
           required: 'Recipient is required',
           validate: (value) => {
-            const resolvedValue = transformValueForDisplay(value);
+            const resolvedValue = resolveValue(value);
             return isAddress(resolvedValue) || 'Invalid Ethereum address';
           }
         }}
-        render={({ field }) => (
-          <InputField
-            label={<FormLabel label="Recipient" onClick={() => {}} />}
-            description="This field is linked to 'recipient' variable"
-            placeholder="Input address"
-            error={errors?.recipient?.message as string}
-            value={transformValueForDisplay(field.value)}
-            onChangeText={field.onChange}
-          >
-            {isAddress(transformValueForDisplay(field.value)) &&
-              <AddressAvatar address={transformValueForDisplay(field.value)} className="w-6 h-6" />
-            }
-            <Input.Field />
-          </InputField>
-        )}
+        render={({ field }) => {
+          const resolvedValue = resolveValue(field.value);
+          
+          return (
+            <InputField
+              label={
+                <View className="flex flex-row items-center w-full">
+                  <Text className="mr-auto">Recipient</Text>
+                  <LinkVariable onClick={() => handleLinkVariable('Recipient', 'address', resolvedValue)} />
+                </View>
+              }
+              description={isFieldLinked(field.value) ? `This field is linked to '${getVariableNameFromReference(field.value)}' variable` : undefined}
+              placeholder="Input address"
+              error={errors?.recipient?.message as string}
+              value={resolvedValue}
+              onChangeText={(text) => field.onChange(text)}
+            >
+              {isAddress(resolvedValue) &&
+                <AddressAvatar address={resolvedValue} className="w-6 h-6" />
+              }
+              <Input.Field />
+            </InputField>
+          );
+        }}
       />
 
       <Controller
@@ -190,10 +236,17 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
         }}
         render={({field}) => (
           <DatePickerField
-            label={<FormLabel label="Start Date" onClick={() => {}} />}
+            label={
+              <View className="flex flex-row items-center w-full">
+                <Text className="mr-auto">Start Date</Text>
+                <LinkVariable onClick={() => handleLinkVariable('StartDate', 'date', field.value)} />
+              </View>
+            }
+            description={isFieldLinked(field.value) ? `This field is linked to '${getVariableNameFromReference(field.value)}' variable` : undefined}
             placeholder="Select date"
             error={errors?.startDate?.message as string}
-            {...field}
+            value={resolveValue(field.value)}
+            onChange={field.onChange}
           />
         )}
       />
@@ -206,10 +259,17 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
         }}
         render={({field}) => (
           <InputField
-            label="Number of Months"
+            label={
+              <View className="flex flex-row items-center w-full">
+                <Text className="mr-auto">Number of Months</Text>
+                <LinkVariable onClick={() => handleLinkVariable('Duration', 'number', field.value)} />
+              </View>
+            }
+            description={isFieldLinked(field.value) ? `This field is linked to '${getVariableNameFromReference(field.value)}' variable` : undefined}
             placeholder="Number of months"
             error={errors?.duration?.message as string}
-            {...field}
+            value={resolveValue(field.value)}
+            onChangeText={field.onChange}
           />
         )}
       />
@@ -226,7 +286,13 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
             error={errors?.firstPayment?.message as string}
             value={value}
             onValueChange={onChange}
-            label="First Payment"
+            label={
+              <View className="flex flex-row items-center w-full">
+                <Text className="mr-auto">First Payment</Text>
+                <LinkVariable onClick={() => handleLinkVariable('FirstPayment', 'text', value)} />
+              </View>
+            }
+            description={isFieldLinked(value) ? `This field is linked to '${getVariableNameFromReference(value)}' variable` : undefined}
             {...otherProps}
           >
             <Field.Row>
@@ -246,7 +312,13 @@ const SablierForm: React.FC<FormProps> = ({ form }) => {
             error={errors?.transferability?.message as string}
             onCheckedChange={onChange}
             checked={value}
-            label="Transferability"
+            label={
+              <View className="flex flex-row items-center w-full">
+                <Text className="mr-auto">Transferability</Text>
+                <LinkVariable onClick={() => handleLinkVariable('Transferability', 'boolean', value)} />
+              </View>
+            }
+            description={isFieldLinked(value) ? `This field is linked to '${getVariableNameFromReference(value)}' variable` : undefined}
             {...otherProps}
           />
         )}

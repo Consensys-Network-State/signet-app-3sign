@@ -12,7 +12,7 @@ export function LinkVariable({ onClick, className }: LinkVariableProps) {
       icon={Link}
       variant="ghost"
       size="sm"
-      onClick={onClick}
+      onPress={onClick}
       aria-label="Link variable"
       className={className}
     />
