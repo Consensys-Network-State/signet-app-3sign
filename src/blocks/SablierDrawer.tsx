@@ -5,7 +5,7 @@ import {
   Card,
   CardContent,
 } from '@ds3/react';
-import SablierForm, { FormData } from "./SablierForm";
+import SablierForm, { FormData } from "./SablierFormDrawer";
 import { useForm } from 'react-hook-form';
 import SablierIcon from "../assets/sablier.svg?react";
 import { FC, useEffect } from "react";
