@@ -3,6 +3,11 @@ import { View } from 'react-native';
 import { Button, Text, Card, CardContent, Dialog, DialogContent, DialogFooter } from '@ds3/react';
 import AddressAvatar from '../web3/AddressAvatar';
 import { useNavigate } from 'react-router';
+import { useEditStore } from '../store/editorStore';
+import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
+import newAgreement from '../templates/new-agreement.json';
+import grantAgreement from '../templates/grant-agreement.json';
+import { Block } from '../blocks/BlockNoteSchema';
 
 interface CreateAgreementModalProps {
   open: boolean;
@@ -29,8 +34,8 @@ const TEMPLATE_OPTIONS = [
     selected: true,
   },
   {
-    id: 'bounty',
-    title: 'Bounty Agreement',
+    id: 'empty',
+    title: 'Empty Template',
     selected: false,
   }
 ];
@@ -46,19 +51,19 @@ const TEMPLATE_CONTENT: Record<string, TemplateContent> = {
       name: 'Sabler',
       address: '0x1234567890123456789012345678901234567890',
     },
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    description: 'A comprehensive template for grant agreements, including monthly unlock schedules and standard legal clauses.',
   },
-  bounty: {
-    title: 'Bounty Agreement',
+  empty: {
+    title: 'Empty Template',
     author: {
       name: 'Legal Team',
       address: '0x1234567890123456789012345678901234567890',
     },
     smartContracts: {
-      name: 'Bounty Protocol',
+      name: 'None',
       address: '0x1234567890123456789012345678901234567890',
     },
-    description: 'A bounty agreement template for rewarding contributors who complete specific tasks or achieve predetermined milestones.',
+    description: 'Start with a blank template to create your own custom agreement from scratch.',
   },
 };
 
@@ -66,11 +71,18 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
   const [selectedTemplate, setSelectedTemplate] = React.useState('grants');
   const content = TEMPLATE_CONTENT[selectedTemplate];
   const navigate = useNavigate();
+  const { createDraft } = useEditStore();
+  const { setEditorMode } = useBlockNoteStore();
 
   const handleCreate = React.useCallback(() => {
+    const template = selectedTemplate === 'grants' 
+      ? grantAgreement as unknown as Block[]
+      : newAgreement as unknown as Block[];
+    const draftId = createDraft(content.title, template);
+    setEditorMode(BlockNoteMode.EDIT);
     onClose();
     navigate('/edit');
-  }, [onClose, navigate]);
+  }, [onClose, navigate, createDraft, content.title, setEditorMode, selectedTemplate]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

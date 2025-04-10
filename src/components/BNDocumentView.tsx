@@ -84,7 +84,7 @@ interface BNDocumentViewProps {
 
 const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...props }) => {
   const { mode } = useTheme();
-  const { editState, setEditState } = useEditStore();
+  const { getCurrentDraft, updateDraft } = useEditStore();
   const [editorMode, setEditorMode] = React.useState<BlockNoteMode | null>(null);
   const { editorMode: currentEditorMode } = useBlockNoteStore();
 
@@ -92,9 +92,7 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
     schema,
     initialContent: documentPayload ?
       constructBNDocumentFromDocumentPayload(documentPayload) :
-        editState && currentEditorMode === BlockNoteMode.EDIT ?
-          editState as Block[]:
-          newAgreement as Block[]
+        getCurrentDraft()?.content || newAgreement as Block[]
   })
 
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = React.useState(false);
@@ -216,7 +214,10 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
 
   const onEdit = () => {
     if (editorMode === BlockNoteMode.EDIT) {
-      setEditState(editor.document);
+      const currentDraft = getCurrentDraft();
+      if (currentDraft) {
+        updateDraft(currentDraft.id, editor.document);
+      }
     }
   }
 
@@ -295,19 +296,6 @@ const BNDocumentView: React.FC<BNDocumentViewProps> = ({ documentPayload, ...pro
           }
         />
       </BlockNoteView>
-      {/*{ currentEditorMode === BlockNoteMode.SIGNATURE &&*/}
-      {/*  <EthSignDialog*/}
-      {/*    editor={editor}*/}
-      {/*    documentPayload={documentPayload!}*/}
-      {/*    onSuccessfulSignature={onSuccessfulSignature}*/}
-      {/*    triggerProps={{*/}
-      {/*      color: 'primary',*/}
-      {/*      variant: 'soft',*/}
-      {/*      size: 'lg',*/}
-      {/*      className: 'mt-4 w-full'*/}
-      {/*    }}*/}
-      {/*  />*/}
-      {/*}*/}
     </Layout>
   </>
 }
