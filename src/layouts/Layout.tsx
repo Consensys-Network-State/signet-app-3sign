@@ -1,9 +1,10 @@
 import * as React from "react";
 import { View } from "react-native";
-import {Icon, ModeToggle, Text} from "@ds3/react";
+import {Icon, ModeToggle, Text, Button} from "@ds3/react";
 import Account from "../web3/Account.tsx";
 import { H4 } from "@ds3/react/src/components/Heading.tsx";
 import { Info } from 'lucide-react-native';
+import { useNavigate } from 'react-router';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -16,6 +17,8 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
+  const navigate = useNavigate();
+  
   const getStatusBackgroundColor = (type?: 'warning' | 'info' | 'error') => {
     switch (type) {
       case 'warning':
@@ -50,7 +53,13 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
           )}
 
           <View className="flex flex-row items-center justify-between px-8 py-6">
-            <H4 className="text-primary-12">APOC</H4>
+            <Button
+              variant="ghost"
+              onPress={() => navigate('/')}
+              className="p-0"
+            >
+              <H4 className="text-primary-12">Agreements</H4>
+            </Button>
 
             <View className="flex flex-row items-center px-4 gap-2">
               {rightHeader}
