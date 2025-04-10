@@ -1,10 +1,11 @@
 import * as React from "react";
 import { View } from "react-native";
-import {Icon, ModeToggle, Text, Button} from "@ds3/react";
+import {Icon, ModeToggle, Text, Button, Input} from "@ds3/react";
 import Account from "../web3/Account.tsx";
 import { H4 } from "@ds3/react/src/components/Heading.tsx";
-import { Info } from 'lucide-react-native';
-import { useNavigate } from 'react-router';
+import { Info, ChevronLeft } from 'lucide-react-native';
+import { useNavigate, useLocation } from 'react-router';
+import { useEditStore } from '../store/editorStore';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -18,7 +19,18 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { getCurrentDraft, updateDraftTitle } = useEditStore();
+  const isEditMode = location.pathname === '/edit';
+  const currentDraft = isEditMode ? getCurrentDraft() : null;
+  const [title, setTitle] = React.useState(currentDraft?.title || 'Untitled Agreement');
   
+  React.useEffect(() => {
+    if (currentDraft) {
+      setTitle(currentDraft.title);
+    }
+  }, [currentDraft]);
+
   const getStatusBackgroundColor = (type?: 'warning' | 'info' | 'error') => {
     switch (type) {
       case 'warning':
@@ -28,6 +40,13 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
       case 'info':
       default:
         return 'bg-primary-3';
+    }
+  };
+
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    if (currentDraft) {
+      updateDraftTitle(currentDraft.id, newTitle);
     }
   };
 
@@ -53,13 +72,33 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
           )}
 
           <View className="flex flex-row items-center justify-between px-8 py-6">
-            <Button
-              variant="ghost"
-              onPress={() => navigate('/')}
-              className="p-0"
-            >
-              <H4 className="text-primary-12">Agreements</H4>
-            </Button>
+            {isEditMode ? (
+              <View className="flex flex-row items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onPress={() => navigate('/')}
+                  className="flex items-center justify-center h-10"
+                >
+                  <Button.Icon icon={ChevronLeft} />
+                </Button>
+                <Input
+                  value={title}
+                  variant="ghost"
+                  className="text-primary-12 text-xl font-semibold h-10"
+                  {...{ onChangeText: handleTitleChange }}
+                >
+                  <Input.Field />
+                </Input>
+              </View>
+            ) : (
+              <Button
+                variant="ghost"
+                onPress={() => navigate('/')}
+                className="p-0"
+              >
+                <H4 className="text-primary-12">Agreements</H4>
+              </Button>
+            )}
 
             <View className="flex flex-row items-center px-4 gap-2">
               {rightHeader}

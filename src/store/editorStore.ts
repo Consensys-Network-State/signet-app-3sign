@@ -57,6 +57,19 @@ export const useEditStore = create(
               'editStore/updateDraft'
             );
           },
+          updateDraftTitle: (id: string, title: string) => {
+            set(
+              (state) => ({
+                drafts: state.drafts.map(draft =>
+                  draft.id === id
+                    ? { ...draft, title, updatedAt: new Date().toISOString() }
+                    : draft
+                )
+              }),
+              undefined,
+              'editStore/updateDraftTitle'
+            );
+          },
           deleteDraft: (id: string) => {
             set(
               (state) => ({
