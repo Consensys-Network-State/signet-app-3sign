@@ -81,14 +81,19 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
                 >
                   <Button.Icon icon={ChevronLeft} />
                 </Button>
-                <Input
-                  value={title}
-                  variant="ghost"
-                  className="text-primary-12 text-xl font-semibold h-10"
-                  {...{ onChangeText: handleTitleChange }}
-                >
-                  <Input.Field />
-                </Input>
+                <View className="flex flex-row items-center gap-2">
+                  <Input
+                    value={title}
+                    variant="ghost"
+                    className="text-primary-12 text-xl font-semibold h-10"
+                    {...{ onChangeText: handleTitleChange }}
+                  >
+                    <Input.Field />
+                  </Input>
+                  <Text className="px-2 py-1 rounded-full text-sm bg-neutral-3 text-neutral-11">
+                    Draft
+                  </Text>
+                </View>
               </View>
             ) : (
               <Button

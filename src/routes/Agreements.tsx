@@ -48,7 +48,11 @@ const AgreementCard: React.FC<{
         </View>
         <View className="flex flex-row items-center gap-2">
           <Text 
-            className={status === 'signed' ? 'text-success-11' : 'text-neutral-11'}
+            className={`px-2 py-1 rounded-full text-sm ${
+              status === 'signed' 
+                ? 'bg-success-3 text-success-11' 
+                : 'bg-neutral-3 text-neutral-11'
+            }`}
           >
             {status === 'signed' ? 'Signed' : 'Draft'}
           </Text>
