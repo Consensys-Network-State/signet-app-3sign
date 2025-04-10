@@ -8,6 +8,7 @@ import Layout from '../layouts/Layout';
 import { Plus, Trash2 } from 'lucide-react-native';
 import AddressAvatar from '../web3/AddressAvatar';
 import CreateAgreementModal from '../components/CreateAgreementModal';
+import StatusLabel from '../components/StatusLabel';
 import { useAccount } from 'wagmi';
 import { GestureResponderEvent } from 'react-native';
 
@@ -47,15 +48,7 @@ const AgreementCard: React.FC<{
           )}
         </View>
         <View className="flex flex-row items-center gap-2">
-          <Text 
-            className={`px-2 py-1 rounded-full text-sm ${
-              status === 'signed' 
-                ? 'bg-success-3 text-success-11' 
-                : 'bg-neutral-3 text-neutral-11'
-            }`}
-          >
-            {status === 'signed' ? 'Signed' : 'Draft'}
-          </Text>
+          <StatusLabel status={status} />
           {onDelete && (
             <Button
               variant="ghost"

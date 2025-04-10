@@ -6,6 +6,7 @@ import { H4 } from "@ds3/react/src/components/Heading.tsx";
 import { Info, ChevronLeft } from 'lucide-react-native';
 import { useNavigate, useLocation } from 'react-router';
 import { useEditStore } from '../store/editorStore';
+import StatusLabel from '../components/StatusLabel';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -90,9 +91,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
                   >
                     <Input.Field />
                   </Input>
-                  <Text className="px-2 py-1 rounded-full text-sm bg-neutral-3 text-neutral-11">
-                    Draft
-                  </Text>
+                  <StatusLabel status="draft" />
                 </View>
               </View>
             ) : (
