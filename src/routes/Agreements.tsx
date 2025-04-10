@@ -7,6 +7,7 @@ import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import Layout from '../layouts/Layout';
 import { Plus } from 'lucide-react-native';
 import AddressAvatar from '../web3/AddressAvatar';
+import CreateAgreementModal from '../components/CreateAgreementModal';
 
 type EthereumAddress = `0x${string}`;
 
@@ -58,6 +59,7 @@ const Agreements: React.FC = () => {
   const { editState } = useEditStore();
   const { setEditorMode } = useBlockNoteStore();
   const navigate = useNavigate();
+  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
 
   const handleDraftClick = () => {
     setEditorMode(BlockNoteMode.EDIT);
@@ -69,8 +71,7 @@ const Agreements: React.FC = () => {
   };
 
   const handleCreateNew = () => {
-    setEditorMode(BlockNoteMode.EDIT);
-    navigate('/edit');
+    setIsCreateModalOpen(true);
   };
 
   return (
@@ -106,6 +107,11 @@ const Agreements: React.FC = () => {
           <Text className="text-neutral-11">No agreements found</Text>
         )}
       </View>
+
+      <CreateAgreementModal 
+        open={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </Layout>
   );
 };
