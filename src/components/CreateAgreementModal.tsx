@@ -5,8 +5,10 @@ import AddressAvatar from '../web3/AddressAvatar';
 import { useNavigate } from 'react-router';
 import { useEditStore } from '../store/editorStore';
 import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
+import { useDocumentStore } from '../store/documentStore';
 import newAgreement from '../templates/new-agreement.json';
 import grantAgreement from '../templates/grant-agreement.json';
+import mouTemplate from '../templates/mou-template.json';
 import { Block } from '../blocks/BlockNoteSchema';
 
 interface CreateAgreementModalProps {
@@ -32,11 +34,19 @@ const TEMPLATE_OPTIONS = [
     id: 'grants',
     title: 'Grants Agreement',
     selected: true,
+    type: 'blocknote'
   },
   {
     id: 'empty',
     title: 'Empty Template',
     selected: false,
+    type: 'blocknote'
+  },
+  {
+    id: 'mou',
+    title: 'Memorandum of Understanding',
+    selected: false,
+    type: 'markdown'
   }
 ];
 
@@ -65,6 +75,18 @@ const TEMPLATE_CONTENT: Record<string, TemplateContent> = {
     },
     description: 'Start with a blank template to create your own custom agreement from scratch.',
   },
+  mou: {
+    title: 'Memorandum of Understanding',
+    author: {
+      name: 'Agreements Protocol',
+      address: '0x1234567890123456789012345678901234567890',
+    },
+    smartContracts: {
+      name: 'None',
+      address: '0x1234567890123456789012345678901234567890',
+    },
+    description: 'A template for non-binding memorandum of understanding between two parties, with support for variable interpolation and markdown formatting.',
+  },
 };
 
 const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClose }) => {
@@ -73,16 +95,42 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
   const navigate = useNavigate();
   const { createDraft } = useEditStore();
   const { setEditorMode } = useBlockNoteStore();
+  const { createDraft: createMarkdownDraft } = useDocumentStore();
 
   const handleCreate = React.useCallback(() => {
-    const template = selectedTemplate === 'grants' 
-      ? grantAgreement as unknown as Block[]
-      : newAgreement as unknown as Block[];
-    const draftId = createDraft(content.title, template);
-    setEditorMode(BlockNoteMode.EDIT);
-    onClose();
-    navigate('/edit');
-  }, [onClose, navigate, createDraft, content.title, setEditorMode, selectedTemplate]);
+    const selectedOption = TEMPLATE_OPTIONS.find(opt => opt.id === selectedTemplate);
+    
+    if (selectedOption?.type === 'markdown') {
+      // Create a markdown draft using documentStore
+      const draftId = createMarkdownDraft(
+        content.title,
+        mouTemplate.content.data,
+        Object.entries(mouTemplate.variables).reduce((acc, [key, value]) => ({
+          ...acc,
+          [key]: {
+            ...value,
+            id: key
+          }
+        }), {})
+      );
+      onClose();
+      navigate('/markdown-editor', { 
+        state: { 
+          draftId,
+          title: content.title
+        }
+      });
+    } else {
+      // For Blocknote templates, use existing flow
+      const template = selectedTemplate === 'grants' 
+        ? grantAgreement as unknown as Block[]
+        : newAgreement as unknown as Block[];
+      const draftId = createDraft(content.title, template);
+      setEditorMode(BlockNoteMode.EDIT);
+      onClose();
+      navigate('/edit');
+    }
+  }, [onClose, navigate, createDraft, createMarkdownDraft, content.title, setEditorMode, selectedTemplate]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

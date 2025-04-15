@@ -6,6 +6,7 @@ import Agreements from "./routes/Agreements.tsx";
 import { Routes, Route } from 'react-router';
 import { useAccount } from "wagmi";
 import { Navigate, useLocation } from 'react-router';
+import MarkdownDocumentView from "./components/markdown/MarkdownDocumentView.tsx";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isConnected } = useAccount();
@@ -29,6 +30,11 @@ const Router: React.FC = () => {
       <Route path="/edit" element={
         <ProtectedRoute>
           <Home />
+        </ProtectedRoute>
+      } />
+      <Route path="/markdown-editor" element={
+        <ProtectedRoute>
+          <MarkdownDocumentView />
         </ProtectedRoute>
       } />
       <Route path="/:documentId" element={

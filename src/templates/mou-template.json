@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "id": "did:example:mou-v1",
+    "templateId": "did:template:mou-v1",
+    "version": "1.0.0",
+    "createdAt": "2024-03-20T12:00:00Z",
+    "name": "Memorandum of Understanding",
+    "author": "Agreements Protocol",
+    "description": "Template for non-binding memorandum of understanding between two parties"
+  },
+  "variables": {
+    "partyAEthAddress": {
+      "id": "partyAEthAddress",
+      "type": "address",
+      "name": "Party A Ethereum Address",
+      "description": "Ethereum address of the first party",
+      "validation": {
+        "required": true,
+        "pattern": "^0x[a-fA-F0-9]{40}$"
+      }
+    },
+    "partyAName": {
+      "type": "string",
+      "name": "Party A Name",
+      "description": "Legal name of the first party",
+      "validation": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    "partyBEthAddress": {
+      "type": "address",
+      "name": "Party B Ethereum Address",
+      "description": "Ethereum address of the second party",
+      "validation": {
+        "required": true,
+        "pattern": "^0x[a-fA-F0-9]{40}$"
+      }
+    },
+    "partyBName": {
+      "type": "string",
+      "name": "Party A Name",
+      "description": "Legal name of the second party",
+      "validation": {
+        "required": true,
+        "minLength": 1
+      }
+    },
+    "effectiveDate": {
+      "type": "dateTime",
+      "name": "Effective Date",
+      "description": "The date when this MOU becomes effective",
+      "validation": {
+        "required": true
+      }
+    }
+  },
+  "content": {
+    "type": "md",
+    "data": "# MEMORANDUM OF UNDERSTANDING\n\nBETWEEN:\n\n**${variables.partyAName}\n\n${variables.partyAEthAddress}\n\nAND:\n\n${variables.partyBName}\n\n${variables.partyBEthAddress}\n\nEFFECTIVE DATE:** ${variables.effectiveDate}\n\n## 1. INTRODUCTION\n\nThis Memorandum of Understanding (\"MOU\") is entered into by and between ${variables.partyAName} and ${variables.partyBName} (collectively referred to as the \"Parties\" and individually as a \"Party\")."
+  }
+} 

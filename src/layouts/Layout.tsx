@@ -6,6 +6,7 @@ import { H4 } from "@ds3/react/src/components/Heading.tsx";
 import { Info, ChevronLeft } from 'lucide-react-native';
 import { useNavigate, useLocation } from 'react-router';
 import { useEditStore } from '../store/editorStore';
+import { useDocumentStore } from '../store/documentStore';
 import StatusLabel from '../components/StatusLabel';
 
 interface LayoutProps {
@@ -22,15 +23,26 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { getCurrentDraft, updateDraftTitle } = useEditStore();
+  const { getCurrentDraft: getCurrentMarkdownDraft, updateDraftTitle: updateMarkdownDraftTitle } = useDocumentStore();
   const isEditMode = location.pathname === '/edit';
-  const currentDraft = isEditMode ? getCurrentDraft() : null;
-  const [title, setTitle] = React.useState(currentDraft?.title || 'Untitled Agreement');
+  const isMarkdownMode = location.pathname === '/markdown-editor';
+  
+  const blockNoteDraft = isEditMode ? getCurrentDraft() : null;
+  const markdownDraft = isMarkdownMode ? getCurrentMarkdownDraft() : null;
+  
+  const [title, setTitle] = React.useState(
+    blockNoteDraft?.title || 
+    markdownDraft?.metadata.name || 
+    'Untitled Agreement'
+  );
   
   React.useEffect(() => {
-    if (currentDraft) {
-      setTitle(currentDraft.title);
+    if (blockNoteDraft) {
+      setTitle(blockNoteDraft.title);
+    } else if (markdownDraft) {
+      setTitle(markdownDraft.metadata.name);
     }
-  }, [currentDraft]);
+  }, [blockNoteDraft, markdownDraft]);
 
   const getStatusBackgroundColor = (type?: 'warning' | 'info' | 'error') => {
     switch (type) {
@@ -46,8 +58,10 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
 
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
-    if (currentDraft) {
-      updateDraftTitle(currentDraft.id, newTitle);
+    if (blockNoteDraft) {
+      updateDraftTitle(blockNoteDraft.id, newTitle);
+    } else if (markdownDraft) {
+      updateMarkdownDraftTitle(markdownDraft.id, newTitle);
     }
   };
 
@@ -73,7 +87,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
           )}
 
           <View className="flex flex-row items-center justify-between px-8 py-6">
-            {isEditMode ? (
+            {(isEditMode || isMarkdownMode) ? (
               <View className="flex flex-row items-center gap-2">
                 <Button
                   variant="ghost"

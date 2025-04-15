@@ -2,6 +2,7 @@ import * as React from 'react';
 import { View, Pressable } from 'react-native';
 import { Text, Button, Card } from '@ds3/react';
 import { useEditStore } from '../store/editorStore';
+import { useDocumentStore } from '../store/documentStore';
 import { useNavigate } from 'react-router';
 import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import Layout from '../layouts/Layout';
@@ -69,16 +70,27 @@ const AgreementCard: React.FC<{
 );
 
 const Agreements: React.FC = () => {
-  const { drafts, setCurrentDraft, deleteDraft } = useEditStore();
+  const { drafts: blockNoteDrafts, setCurrentDraft: setCurrentBlockNoteDraft, deleteDraft: deleteBlockNoteDraft } = useEditStore();
+  const { drafts: markdownDrafts, setCurrentDraft: setCurrentMarkdownDraft, deleteDraft: deleteMarkdownDraft } = useDocumentStore();
   const { setEditorMode } = useBlockNoteStore();
   const navigate = useNavigate();
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
   const { address } = useAccount();
 
-  const handleDraftClick = (draftId: string) => {
-    setCurrentDraft(draftId);
+  const handleBlockNoteDraftClick = (draftId: string) => {
+    setCurrentBlockNoteDraft(draftId);
     setEditorMode(BlockNoteMode.EDIT);
     navigate('/edit');
+  };
+
+  const handleMarkdownDraftClick = (draftId: string) => {
+    setCurrentMarkdownDraft(draftId);
+    navigate('/markdown-editor', { 
+      state: { 
+        draftId,
+        title: markdownDrafts.find(d => d.id === draftId)?.metadata.name || ''
+      }
+    });
   };
 
   const handlePublishedClick = (id: string) => {
@@ -89,8 +101,12 @@ const Agreements: React.FC = () => {
     setIsCreateModalOpen(true);
   };
 
-  const handleDeleteDraft = (draftId: string) => {
-    deleteDraft(draftId);
+  const handleDeleteBlockNoteDraft = (draftId: string) => {
+    deleteBlockNoteDraft(draftId);
+  };
+
+  const handleDeleteMarkdownDraft = (draftId: string) => {
+    deleteMarkdownDraft(draftId);
   };
 
   return (
@@ -103,17 +119,28 @@ const Agreements: React.FC = () => {
       }
     >
       <View className="flex flex-col gap-4">
-        {drafts.length > 0 && (
+        {(blockNoteDrafts.length > 0 || markdownDrafts.length > 0) && (
           <>
             <Text className="text-lg font-semibold">Drafts</Text>
-            {drafts.map(draft => (
+            {blockNoteDrafts.map(draft => (
               <AgreementCard
                 key={draft.id}
                 title={draft.title}
                 status="draft"
                 owner={address as EthereumAddress}
-                onClick={() => handleDraftClick(draft.id)}
-                onDelete={() => handleDeleteDraft(draft.id)}
+                onClick={() => handleBlockNoteDraftClick(draft.id)}
+                onDelete={() => handleDeleteBlockNoteDraft(draft.id)}
+                updatedAt={draft.updatedAt}
+              />
+            ))}
+            {markdownDrafts.map(draft => (
+              <AgreementCard
+                key={draft.id}
+                title={draft.metadata.name}
+                status="draft"
+                owner={address as EthereumAddress}
+                onClick={() => handleMarkdownDraftClick(draft.id)}
+                onDelete={() => handleDeleteMarkdownDraft(draft.id)}
                 updatedAt={draft.updatedAt}
               />
             ))}
@@ -135,7 +162,7 @@ const Agreements: React.FC = () => {
           </>
         )}
 
-        {drafts.length === 0 && MOCK_PUBLISHED.length === 0 && (
+        {blockNoteDrafts.length === 0 && markdownDrafts.length === 0 && MOCK_PUBLISHED.length === 0 && (
           <Text className="text-neutral-11">No agreements found</Text>
         )}
       </View>
