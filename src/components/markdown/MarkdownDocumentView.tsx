@@ -163,8 +163,7 @@ const MarkdownDocumentView: React.FC = () => {
     handleSubmit,
     formState: { errors },
     control,
-    watch,
-    trigger
+    watch
   } = form;
 
   // Watch form values and update localStorage
@@ -302,10 +301,26 @@ const MarkdownDocumentView: React.FC = () => {
 
     const processedContent = markdownContent.replace(
       /\$\{variables\.([^}]+)\}/g,
-      (match, variableName) => {
-        const variable = draft.variables[variableName];
-        if (!variable) return match;
+      (match, variablePath) => {
+        // Split the path into parts (e.g. "partyAName.name" -> ["partyAName", "name"])
+        const parts = variablePath.split('.');
+        const variableName = parts[0];
+        
+        // If there are sub-properties, try to access them directly
+        if (parts.length > 1) {
+          const variable = draft.variables[variableName];
+          if (!variable) return match;
+          
+          // Traverse the object to get the nested value
+          let nestedValue: any = variable;
+          for (let i = 1; i < parts.length; i++) {
+            nestedValue = nestedValue[parts[i]];
+            if (nestedValue === undefined) return match;
+          }
+          return String(nestedValue);
+        }
 
+        // For top-level variables, render as input field
         return `<span class="variable-input" data-name="${variableName}"></span>`;
       }
     );
