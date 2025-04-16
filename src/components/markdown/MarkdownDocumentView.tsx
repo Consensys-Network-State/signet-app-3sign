@@ -242,7 +242,7 @@ const MarkdownDocumentView: React.FC = () => {
       }
       return <Text className={className}>{children}</Text>;
     }
-  }), [draft, control, errors]);
+  }), [draft?.variables, control, errors]);
 
   const renderContent = React.useCallback(() => {
     let markdownContent: string;
@@ -279,7 +279,7 @@ const MarkdownDocumentView: React.FC = () => {
         </ReactMarkdown>
       </View>
     );
-  }, [draft, components]);
+  }, [draft.content, draft.variables, components]);
 
   return (
     <Layout rightHeader={rightHeader}>
