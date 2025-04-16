@@ -19,77 +19,67 @@ interface LocationState {
   title: string;
 }
 
-interface InlineInputProps {
-  name: string;
-  variable: any;
-  control: any;
-  errors: any;
-}
-
-const InlineInput: React.FC<InlineInputProps> = ({ name, variable, control, errors }) => {
-  const rules: any = {
-    required: variable.validation?.required ? `${variable.name} is required` : false,
-  };
-
-  // Add address-specific validation if the variable is of type 'address'
-  if (variable.type === 'address') {
-    rules.validate = (value: string) => isAddress(value) || 'Invalid Ethereum address';
-  } else {
-    // Add other validation rules for non-address types
-    rules.minLength = variable.validation?.minLength ? {
-      value: variable.validation.minLength,
-      message: `${variable.name} must be at least ${variable.validation.minLength} characters`
-    } : undefined;
-    rules.maxLength = variable.validation?.maxLength ? {
-      value: variable.validation.maxLength,
-      message: `${variable.name} must be at most ${variable.validation.maxLength} characters`
-    } : undefined;
-    rules.pattern = variable.validation?.pattern ? {
-      value: new RegExp(variable.validation.pattern),
-      message: `Invalid ${variable.name} format`
-    } : undefined;
-  }
-
-  return (
-    <Controller
-      control={control}
-      name={name}
-      rules={rules}
-      render={({ field }) => {
-        if (variable.type === 'address') {
-          return (
-            <InputField
-              {...field}
-              variant="underline"
-              placeholder={variable.name}
-              error={errors[name]?.message}
-            >
-              {isAddress(field.value) && (
-                <AddressAvatar address={field.value} className="w-6 h-6" />
-              )}
-              <Input.Field />
-            </InputField>
-          );
-        }
-        
-        return (
-          <InputField
-            {...field}
-            variant="underline"
-            placeholder={variable.name}
-            error={errors[name]?.message}
-          />
-        );
-      }}
-    />
-  );
-};
-
 interface SpanProps {
   className?: string;
   children?: React.ReactNode;
   'data-name'?: string;
 }
+
+// Create a completely isolated input component
+const VariableInput = React.memo(({ 
+  name, 
+  variable, 
+  value, 
+  onChange, 
+  error 
+}: { 
+  name: string;
+  variable: DocumentVariable;
+  value: string;
+  onChange: (value: string) => void;
+  error?: { message?: string } | string | undefined;
+}) => {
+  const handleChange = React.useCallback((newValue: string) => {
+    onChange(newValue);
+  }, [onChange]);
+
+  const errorMessage = typeof error === 'string' ? error : error?.message;
+
+  if (variable.type === 'address') {
+    return (
+      <InputField
+        value={value}
+        onChangeText={handleChange}
+        variant="underline"
+        placeholder={variable.name}
+        error={errorMessage}
+      >
+        {isAddress(value) && (
+          <AddressAvatar address={value} className="w-6 h-6" />
+        )}
+        <Input.Field />
+      </InputField>
+    );
+  }
+
+  return (
+    <InputField
+      value={value}
+      onChangeText={handleChange}
+      variant="underline"
+      placeholder={variable.name}
+      error={errorMessage}
+    />
+  );
+}, (prevProps, nextProps) => {
+  const prevError = typeof prevProps.error === 'string' ? prevProps.error : prevProps.error?.message;
+  const nextError = typeof nextProps.error === 'string' ? nextProps.error : nextProps.error?.message;
+  
+  return (
+    prevProps.value === nextProps.value &&
+    prevError === nextError
+  );
+});
 
 const MarkdownDocumentView: React.FC = () => {
   const location = useLocation();
@@ -105,38 +95,67 @@ const MarkdownDocumentView: React.FC = () => {
     return null;
   }
 
-  const form = useForm({
-    defaultValues: Object.entries(draft.variables).reduce((acc, [key, variable]) => ({
+  // Get initial values from localStorage or draft
+  const getInitialValues = React.useCallback(() => {
+    const storedValues = localStorage.getItem(`draft_${draftId}_values`);
+    if (storedValues) {
+      return JSON.parse(storedValues);
+    }
+    return Object.entries(draft.variables).reduce((acc, [key, variable]) => ({
       ...acc,
       [key]: variable.value || ''
-    }), {} as Record<string, string>)
+    }), {} as Record<string, string>);
+  }, [draftId, draft.variables]);
+
+  const form = useForm({
+    defaultValues: getInitialValues(),
+    mode: 'onChange'
   });
 
   const {
     handleSubmit,
     formState: { errors },
     control,
+    watch,
   } = form;
 
-  const onSubmit = (data: Record<string, string>) => {
+  // Watch form values and update localStorage
+  React.useEffect(() => {
+    const subscription = watch((values) => {
+      if (!values) return;
+      localStorage.setItem(`draft_${draftId}_values`, JSON.stringify(values));
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, draftId]);
+
+  // Only update draft on submit
+  const onSubmit = React.useCallback((values: Record<string, string>) => {
+    if (!draft) return;
+
     const updatedVariables = Object.entries(draft.variables).reduce((acc, [key, variable]) => ({
       ...acc,
       [key]: {
         ...variable,
-        value: data[key]
+        value: values[key] || ''
       }
     }), {} as Record<string, DocumentVariable>);
 
     updateDraft(draftId, draft.content.data as string, updatedVariables);
-  };
+  }, [draft, draftId, updateDraft]);
 
   const rightHeader = (
-    <Button variant="soft" color="primary" onPress={handleSubmit(onSubmit)}>
+    <Button 
+      variant="soft" 
+      color="primary" 
+      onPress={handleSubmit(onSubmit)}
+    >
       <Button.Text>Save</Button.Text>
     </Button>
   );
 
-  const components: Components = {
+  // Create stable components
+  const components = React.useMemo<Components>(() => ({
     h1: ({ children }) => <Text className="text-4xl font-bold mb-4">{children}</Text>,
     h2: ({ children }) => <Text className="text-3xl font-bold mb-3">{children}</Text>,
     h3: ({ children }) => <Text className="text-2xl font-bold mb-2">{children}</Text>,
@@ -189,27 +208,42 @@ const MarkdownDocumentView: React.FC = () => {
     strong: ({ children }) => <Text className="font-bold">{children}</Text>,
     em: ({ children }) => <Text className="italic">{children}</Text>,
     u: ({ children }) => <Text className="underline">{children}</Text>,
-    // Add a custom component to handle our variable inputs using a standard HTML element
     span: ({ className, children, ...props }: SpanProps) => {
       if (className === 'variable-input' && props['data-name']) {
         const variableName = props['data-name'];
         const variable = draft?.variables[variableName];
         if (variable) {
           return (
-            <InlineInput
-              name={variableName}
-              variable={variable}
+            <Controller
               control={control}
-              errors={errors}
+              name={variableName}
+              rules={{
+                required: variable.validation?.required ? `${variable.name} is required` : false,
+                validate: (value) => {
+                  if (variable.type === 'address' && value && !isAddress(value)) {
+                    return 'Invalid Ethereum address';
+                  }
+                  return true;
+                }
+              }}
+              render={({ field }) => (
+                <VariableInput
+                  name={variableName}
+                  variable={variable}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors[variableName]}
+                />
+              )}
             />
           );
         }
       }
       return <Text className={className}>{children}</Text>;
     }
-  };
+  }), [draft, control, errors]);
 
-  const renderContent = () => {
+  const renderContent = React.useCallback(() => {
     let markdownContent: string;
 
     if (draft.content.type === 'md') {
@@ -224,14 +258,12 @@ const MarkdownDocumentView: React.FC = () => {
       return null;
     }
 
-    // Pre-process the content to replace variables with React components
     const processedContent = markdownContent.replace(
       /\$\{variables\.([^}]+)\}/g,
       (match, variableName) => {
         const variable = draft.variables[variableName];
         if (!variable) return match;
 
-        // Use a standard span element with our custom class and data attribute
         return `<span class="variable-input" data-name="${variableName}"></span>`;
       }
     );
@@ -246,7 +278,7 @@ const MarkdownDocumentView: React.FC = () => {
         </ReactMarkdown>
       </View>
     );
-  };
+  }, [draft, components]);
 
   return (
     <Layout rightHeader={rightHeader}>
