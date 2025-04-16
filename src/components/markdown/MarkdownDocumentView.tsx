@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { View } from 'react-native';
 import { Button, Text, InputField, Input } from '@ds3/react';
 import Layout from '../../layouts/Layout';
@@ -82,16 +82,17 @@ const VariableInput = React.memo(({
 });
 
 const MarkdownDocumentView: React.FC = () => {
-  const location = useLocation();
-  const { draftId, title } = location.state as LocationState;
+  const { draftId } = useParams<{ draftId: string }>();
   const { getCurrentDraft, setCurrentDraft, updateDraft } = useDocumentStore();
   
   React.useEffect(() => {
-    setCurrentDraft(draftId);
+    if (draftId) {
+      setCurrentDraft(draftId);
+    }
   }, [draftId, setCurrentDraft]);
 
   const draft = getCurrentDraft();
-  if (!draft) {
+  if (!draftId || !draft) {
     return null;
   }
 

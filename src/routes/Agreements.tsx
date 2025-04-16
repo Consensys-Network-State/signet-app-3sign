@@ -85,12 +85,7 @@ const Agreements: React.FC = () => {
 
   const handleMarkdownDraftClick = (draftId: string) => {
     setCurrentMarkdownDraft(draftId);
-    navigate('/markdown-editor', { 
-      state: { 
-        draftId,
-        title: markdownDrafts.find(d => d.id === draftId)?.metadata.name || ''
-      }
-    });
+    navigate(`/drafts/${draftId}`);
   };
 
   const handlePublishedClick = (id: string) => {

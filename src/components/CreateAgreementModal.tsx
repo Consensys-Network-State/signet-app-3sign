@@ -114,12 +114,7 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
         }), {})
       );
       onClose();
-      navigate('/markdown-editor', { 
-        state: { 
-          draftId,
-          title: content.title
-        }
-      });
+      navigate(`/drafts/${draftId}`);
     } else {
       // For Blocknote templates, use existing flow
       const template = selectedTemplate === 'grants' 

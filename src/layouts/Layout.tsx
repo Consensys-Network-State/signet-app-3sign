@@ -25,10 +25,10 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
   const { getCurrentDraft, updateDraftTitle } = useEditStore();
   const { getCurrentDraft: getCurrentMarkdownDraft, updateDraftTitle: updateMarkdownDraftTitle } = useDocumentStore();
   const isEditMode = location.pathname === '/edit';
-  const isMarkdownMode = location.pathname === '/markdown-editor';
+  const isDraftMode = location.pathname.startsWith('/drafts/');
   
   const blockNoteDraft = isEditMode ? getCurrentDraft() : null;
-  const markdownDraft = isMarkdownMode ? getCurrentMarkdownDraft() : null;
+  const markdownDraft = isDraftMode ? getCurrentMarkdownDraft() : null;
   
   const [title, setTitle] = React.useState(
     blockNoteDraft?.title || 
@@ -87,7 +87,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
           )}
 
           <View className="flex flex-row items-center justify-between px-8 py-6">
-            {(isEditMode || isMarkdownMode) ? (
+            {(isEditMode || isDraftMode) ? (
               <View className="flex flex-row items-center gap-2">
                 <Button
                   variant="ghost"

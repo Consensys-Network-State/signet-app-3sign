@@ -32,7 +32,7 @@ const Router: React.FC = () => {
           <Home />
         </ProtectedRoute>
       } />
-      <Route path="/markdown-editor" element={
+      <Route path="/drafts/:draftId" element={
         <ProtectedRoute>
           <MarkdownDocumentView />
         </ProtectedRoute>
