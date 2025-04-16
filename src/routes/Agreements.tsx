@@ -6,12 +6,13 @@ import { useDocumentStore } from '../store/documentStore';
 import { useNavigate } from 'react-router';
 import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import Layout from '../layouts/Layout';
-import { Plus, Trash2 } from 'lucide-react-native';
+import { Plus } from 'lucide-react-native';
 import AddressAvatar from '../web3/AddressAvatar';
 import CreateAgreementModal from '../components/CreateAgreementModal';
 import StatusLabel from '../components/StatusLabel';
 import { useAccount } from 'wagmi';
 import { GestureResponderEvent } from 'react-native';
+import DeleteDraftDialog from '../components/DeleteDraftDialog';
 
 type EthereumAddress = `0x${string}`;
 
@@ -51,17 +52,7 @@ const AgreementCard: React.FC<{
         <View className="flex flex-row items-center gap-2">
           <StatusLabel status={status} />
           {onDelete && (
-            <Button
-              variant="ghost"
-              color="error"
-              onPress={(e: GestureResponderEvent) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              accessibilityLabel="Delete draft"
-            >
-              <Button.Icon icon={Trash2} />
-            </Button>
+            <DeleteDraftDialog onDelete={onDelete} />
           )}
         </View>
       </View>
