@@ -13,6 +13,8 @@ import type { Components } from 'react-markdown';
 import { useForm, Controller } from 'react-hook-form';
 import { isAddress } from 'viem';
 import AddressAvatar from "../../web3/AddressAvatar.tsx";
+import { DatePickerField } from '../../components/DatePickerField';
+import dayjs from 'dayjs';
 
 interface LocationState {
   draftId: string;
@@ -55,6 +57,9 @@ const VariableInput = React.memo(({
     if (variable.type === 'address' && newValue && !isAddress(newValue)) {
       return 'Invalid Ethereum address';
     }
+    if (variable.type === 'dateTime' && newValue && !dayjs(newValue).isValid()) {
+      return 'Invalid date';
+    }
     return undefined;
   }, [variable]);
 
@@ -83,6 +88,18 @@ const VariableInput = React.memo(({
         )}
         <Input.Field />
       </InputField>
+    );
+  }
+
+  if (variable.type === 'dateTime') {
+    return (
+      <DatePickerField
+        value={localValue ? dayjs(localValue) : undefined}
+        onChange={(date) => handleChange(date ? date.format() : '')}
+        placeholder="Select date"
+        error={errorMessage}
+        className="w-[300px]"
+      />
     );
   }
 
