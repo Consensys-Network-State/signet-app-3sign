@@ -2,10 +2,10 @@ import { create } from 'zustand';
 import { combine, devtools, persist } from 'zustand/middleware';
 
 export interface DocumentVariable {
-  id: string;
-  type: 'string' | 'number' | 'address' | 'dateTime';
+  id?: string;
+  type: 'string' | 'number' | 'boolean' | 'address' | 'dateTime';
   name: string;
-  description: string;
+  description?: string;
   value?: string;
   validation?: {
     required?: boolean;
@@ -14,6 +14,7 @@ export interface DocumentVariable {
     min?: number;
     max?: number;
     pattern?: string;
+    enum?: string[];
   };
 }
 

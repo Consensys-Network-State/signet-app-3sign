@@ -27,40 +27,81 @@ interface SpanProps {
   'data-name'?: string;
 }
 
+// Create a shared validation function
+const createValidationRules = (variable: DocumentVariable) => {
+  const rules: Record<string, any> = {
+    required: variable.validation?.required ? `${variable.name} is required` : false,
+  };
+
+  rules.validate = (value: string) => {
+    if (!value) {
+      return rules.required || true;
+    }
+
+    const { validation } = variable;
+    if (!validation) return true;
+
+    if (validation.pattern && !new RegExp(validation.pattern).test(value)) {
+      return `Invalid ${variable.name.toLowerCase()} format`;
+    }
+
+    if (validation.minLength && value.length < validation.minLength) {
+      return `${variable.name} must be at least ${validation.minLength} characters`;
+    }
+
+    if (validation.min) {
+      const numValue = Number(value);
+      if (!isNaN(numValue) && numValue < validation.min) {
+        return `${variable.name} must be at least ${validation.min}`;
+      }
+    }
+
+    if (validation.enum && !validation.enum.includes(value)) {
+      return `${variable.name} must be one of: ${validation.enum.join(', ')}`;
+    }
+
+    if (variable.type === 'address' && !isAddress(value)) {
+      return 'Invalid Ethereum address';
+    }
+
+    if (variable.type === 'dateTime' && !dayjs(value).isValid()) {
+      return 'Invalid date';
+    }
+
+    return true;
+  };
+
+  return rules;
+};
+
 // Create a completely isolated input component
 const VariableInput = React.memo(({ 
   name, 
   variable, 
   value, 
   onChange, 
+  onBlur,
   error
 }: { 
   name: string;
   variable: DocumentVariable;
   value: string;
   onChange: (value: string) => void;
+  onBlur: () => void;
   error?: { message?: string } | string | undefined;
 }) => {
   const inputRef = React.useRef<TextInput>(null);
   const [localValue, setLocalValue] = React.useState(value);
   const [localError, setLocalError] = React.useState<string | undefined>(undefined);
 
-  // Update local value when prop changes
   React.useEffect(() => {
     setLocalValue(value);
   }, [value]);
 
   const validateValue = React.useCallback((newValue: string) => {
-    if (variable.validation?.required && !newValue) {
-      return `${variable.name} is required`;
-    }
-    if (variable.type === 'address' && newValue && !isAddress(newValue)) {
-      return 'Invalid Ethereum address';
-    }
-    if (variable.type === 'dateTime' && newValue && !dayjs(newValue).isValid()) {
-      return 'Invalid date';
-    }
-    return undefined;
+    const rules = createValidationRules(variable);
+    const result = rules.validate(newValue);
+    return result === true ? undefined : result;
   }, [variable]);
 
   const handleChange = React.useCallback((newValue: string) => {
@@ -155,8 +196,8 @@ const MarkdownDocumentView: React.FC = () => {
 
   const form = useForm({
     defaultValues: getInitialValues(),
-    mode: 'onChange',
-    reValidateMode: 'onChange'
+    mode: 'onBlur',
+    reValidateMode: 'onBlur'
   });
 
   const {
@@ -266,13 +307,14 @@ const MarkdownDocumentView: React.FC = () => {
             <Controller
               control={control}
               name={variableName}
-              rules={{}}
-              render={({ field: { onChange, value } }) => (
+              rules={createValidationRules(variable)}
+              render={({ field: { onChange, value, onBlur } }) => (
                 <VariableInput
                   name={variableName}
                   variable={variable}
                   value={value}
                   onChange={onChange}
+                  onBlur={onBlur}
                   error={errors[variableName]}
                 />
               )}
