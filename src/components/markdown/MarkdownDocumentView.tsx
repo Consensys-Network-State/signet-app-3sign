@@ -82,6 +82,7 @@ const VariableInput = React.memo(({
         variant="underline"
         placeholder={variable.name}
         error={errorMessage}
+        className="w-[300px]"
       >
         {isAddress(localValue) && (
           <AddressAvatar address={localValue} className="w-6 h-6" />
@@ -112,6 +113,7 @@ const VariableInput = React.memo(({
       variant="underline"
       placeholder={variable.name}
       error={errorMessage}
+      className="w-[300px]"
     />
   );
 }, (prevProps, nextProps) => {
