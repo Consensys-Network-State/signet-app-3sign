@@ -6,6 +6,7 @@ export interface DocumentVariable {
   type: 'string' | 'number' | 'address' | 'dateTime';
   name: string;
   description: string;
+  value?: string;
   validation?: {
     required?: boolean;
     minLength?: number;
@@ -201,12 +202,17 @@ export const useDocumentStore = create(
             );
             return id;
           },
-          updateDraft: (id: string, content: string) => {
+          updateDraft: (id: string, content: string, variables?: Record<string, DocumentVariable>) => {
             set(
               (state) => ({
                 drafts: state.drafts.map(draft =>
                   draft.id === id
-                    ? { ...draft, content: { type: 'md', data: content }, updatedAt: new Date().toISOString() }
+                    ? {
+                        ...draft,
+                        content: { type: 'md', data: content },
+                        variables: variables || draft.variables,
+                        updatedAt: new Date().toISOString()
+                      }
                     : draft
                 ),
               }),
