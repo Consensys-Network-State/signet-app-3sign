@@ -143,6 +143,8 @@ const MarkdownDocumentView: React.FC = () => {
     }), {} as Record<string, DocumentVariable>);
 
     updateDraft(draftId, draft.content.data as string, updatedVariables);
+    // Clear localStorage after successful save since values are now persisted in the draft
+    localStorage.removeItem(`draft_${draftId}_values`);
   }, [draft, draftId, updateDraft]);
 
   const rightHeader = (

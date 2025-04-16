@@ -101,6 +101,7 @@ const Agreements: React.FC = () => {
   };
 
   const handleDeleteMarkdownDraft = (draftId: string) => {
+    localStorage.removeItem(`draft_${draftId}_values`);
     deleteMarkdownDraft(draftId);
   };
 
