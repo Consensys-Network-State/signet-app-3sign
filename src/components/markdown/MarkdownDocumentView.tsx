@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
-import { View } from 'react-native';
+import { View, TextInput } from 'react-native';
 import { Button, Text, InputField, Input } from '@ds3/react';
 import Layout from '../../layouts/Layout';
 import { useDocumentStore, DocumentVariable } from '../../store/documentStore';
@@ -31,7 +31,7 @@ const VariableInput = React.memo(({
   variable, 
   value, 
   onChange, 
-  error 
+  error
 }: { 
   name: string;
   variable: DocumentVariable;
@@ -39,23 +39,47 @@ const VariableInput = React.memo(({
   onChange: (value: string) => void;
   error?: { message?: string } | string | undefined;
 }) => {
-  const handleChange = React.useCallback((newValue: string) => {
-    onChange(newValue);
-  }, [onChange]);
+  const inputRef = React.useRef<TextInput>(null);
+  const [localValue, setLocalValue] = React.useState(value);
+  const [localError, setLocalError] = React.useState<string | undefined>(undefined);
 
-  const errorMessage = typeof error === 'string' ? error : error?.message;
+  // Update local value when prop changes
+  React.useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  const validateValue = React.useCallback((newValue: string) => {
+    if (variable.validation?.required && !newValue) {
+      return `${variable.name} is required`;
+    }
+    if (variable.type === 'address' && newValue && !isAddress(newValue)) {
+      return 'Invalid Ethereum address';
+    }
+    return undefined;
+  }, [variable]);
+
+  const handleChange = React.useCallback((newValue: string) => {
+    setLocalValue(newValue);
+    const validationError = validateValue(newValue);
+    setLocalError(validationError);
+    onChange(newValue);
+  }, [onChange, validateValue]);
+
+  const errorMessage = localError || (typeof error === 'string' ? error : error?.message);
 
   if (variable.type === 'address') {
     return (
       <InputField
-        value={value}
+        // @ts-ignore - using RN TextInput interface
+        ref={inputRef}
+        value={localValue}
         onChangeText={handleChange}
         variant="underline"
         placeholder={variable.name}
         error={errorMessage}
       >
-        {isAddress(value) && (
-          <AddressAvatar address={value} className="w-6 h-6" />
+        {isAddress(localValue) && (
+          <AddressAvatar address={localValue} className="w-6 h-6" />
         )}
         <Input.Field />
       </InputField>
@@ -64,7 +88,9 @@ const VariableInput = React.memo(({
 
   return (
     <InputField
-      value={value}
+      // @ts-ignore - using RN TextInput interface
+      ref={inputRef}
+      value={localValue}
       onChangeText={handleChange}
       variant="underline"
       placeholder={variable.name}
@@ -110,7 +136,8 @@ const MarkdownDocumentView: React.FC = () => {
 
   const form = useForm({
     defaultValues: getInitialValues(),
-    mode: 'onChange'
+    mode: 'onChange',
+    reValidateMode: 'onChange'
   });
 
   const {
@@ -118,6 +145,7 @@ const MarkdownDocumentView: React.FC = () => {
     formState: { errors },
     control,
     watch,
+    trigger
   } = form;
 
   // Watch form values and update localStorage
@@ -220,21 +248,13 @@ const MarkdownDocumentView: React.FC = () => {
             <Controller
               control={control}
               name={variableName}
-              rules={{
-                required: variable.validation?.required ? `${variable.name} is required` : false,
-                validate: (value) => {
-                  if (variable.type === 'address' && value && !isAddress(value)) {
-                    return 'Invalid Ethereum address';
-                  }
-                  return true;
-                }
-              }}
-              render={({ field }) => (
+              rules={{}}
+              render={({ field: { onChange, value } }) => (
                 <VariableInput
                   name={variableName}
                   variable={variable}
-                  value={field.value}
-                  onChange={field.onChange}
+                  value={value}
+                  onChange={onChange}
                   error={errors[variableName]}
                 />
               )}
