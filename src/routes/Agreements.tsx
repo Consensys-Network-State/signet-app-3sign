@@ -11,7 +11,6 @@ import AddressAvatar from '../web3/AddressAvatar';
 import CreateAgreementModal from '../components/CreateAgreementModal';
 import StatusLabel from '../components/StatusLabel';
 import { useAccount } from 'wagmi';
-import { GestureResponderEvent } from 'react-native';
 import DeleteDraftDialog from '../components/DeleteDraftDialog';
 
 type EthereumAddress = `0x${string}`;
