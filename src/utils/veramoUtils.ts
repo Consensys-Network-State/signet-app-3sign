@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { setupAgent } from "../veramo";
 import { ethers } from 'ethers';
 import { Block } from "../blocks/BlockNoteSchema.tsx";
+import { Document } from "../store/documentStore";
 import { separateSignaturesFromDocument } from "./documentUtils.ts";
 
 export const encodeObjectToBase64 = (obj: any) => {
@@ -65,6 +66,34 @@ export async function createDocumentVC(address: `0x${string}`, signatories: `0x$
       },
     }
   );
+  return JSON.stringify(vc);
+}
+
+export async function createAgreementInitVC(address: `0x${string}`, agreement: Document, params: Record<string, string>) {
+  const agent = await setupAgent();
+  const did = await agent.didManagerGet({did: `did:pkh:eip155:1:${address}`});
+
+  const credential = {
+    id: uuidv4(),
+    issuer: { id: did.did },
+    '@context': ['https://www.w3.org/2018/credentials/v1'],
+    type: [
+      'VerifiableCredential',
+      'Agreement',
+    ],
+    issuanceDate: new Date().toISOString(),
+    credentialSubject: {
+      id: did.did,
+      agreement: encodeObjectToBase64(agreement),
+      params
+    },
+  }
+  const vc = await agent.createVerifiableCredential({
+    credential,
+    proofFormat: 'EthereumEip712Signature2021',
+  });
+  const verificationResult = await agent.verifyCredential({ credential: vc });
+  if (!verificationResult.verified) throw new Error('Failed to sign with wallet');
   return JSON.stringify(vc);
 }
 

@@ -279,7 +279,8 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
         const draftId = createMarkdownDraft(
           selectedOption.template.metadata.name,
           selectedOption.template.content.data as string,
-          selectedOption.template.variables
+          selectedOption.template.variables,
+          selectedOption.template.execution
         );
         onClose();
         navigate(`/drafts/${draftId}`);
