@@ -1,7 +1,11 @@
 import * as React from "react";
 import { View } from "react-native";
-import { useSearchParams } from 'react-router';
+import { useSearchParams, useParams } from 'react-router';
 import { useDrawer } from "../hooks/useDrawer";
+import { Text, Card, Button, Input, InputField } from "@ds3/react";
+import { useDocumentStore } from "../store/documentStore";
+import { Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 interface DrawerProps {
   children?: React.ReactNode;
@@ -11,6 +15,18 @@ const Drawer: React.FC<DrawerProps> = ({ children }) => {
   const [searchParams] = useSearchParams();
   const { closeDrawer } = useDrawer();
   const showDrawer = searchParams.get('drawer') === 'true';
+  const params = useParams();
+  const { control } = useForm();
+  
+  // Get document ID from any of the possible route parameters
+  const documentId = params.draftId || params.agreementId || params.documentId;
+  
+  // Check both documents and drafts in the store
+  const currentDocument = useDocumentStore(state => {
+    if (!documentId) return null;
+    return state.documents.find(doc => doc.id === documentId) || 
+           state.drafts.find(draft => draft.id === documentId);
+  });
 
   React.useEffect(() => {
     if (!showDrawer) {
@@ -18,13 +34,90 @@ const Drawer: React.FC<DrawerProps> = ({ children }) => {
     }
   }, [showDrawer, closeDrawer]);
 
-  if (!showDrawer) {
+  if (!showDrawer || !currentDocument) {
     return null;
   }
 
+  const executionInputs = currentDocument.execution?.inputs || {};
+
+  // Helper function to extract variable references from a string
+  const extractVariableRefs = (str: string): string[] => {
+    const matches = str.match(/\${variables\.([^}]+)}/g) || [];
+    return matches.map(match => match.replace('${variables.', '').replace('}', ''));
+  };
+
   return (
-    <View className="w-[320px] bg-white shadow-lg p-4">
-      <View className="text-lg">Hello World</View>
+    <View className="w-[320px] bg-white p-4">
+      <View className="flex flex-col gap-4">
+        {Object.entries(executionInputs).map(([key, input]) => (
+          <Card key={key} className="p-4">
+            <View className="flex flex-col gap-2">
+              <Text className="font-semibold">{input.displayName}</Text>
+              <Text className="text-sm text-neutral-11">{input.description}</Text>
+              <View className="flex flex-row items-center gap-2">
+                <Text className="text-xs text-neutral-11">Type:</Text>
+                <Text className="text-xs">{input.type}</Text>
+              </View>
+              
+              {/* Input fields for variable references in data */}
+              {Object.entries(input.data || {}).map(([fieldKey, fieldValue]) => {
+                // Handle nested objects in data
+                if (typeof fieldValue === 'object' && fieldValue !== null) {
+                  return Object.entries(fieldValue).map(([nestedKey, nestedValue]) => {
+                    // Only show inputs for string values that contain variable references
+                    if (typeof nestedValue === 'string' && nestedValue.includes('${variables.')) {
+                      const variableRefs = extractVariableRefs(nestedValue);
+                      return variableRefs.map(variableRef => (
+                        <Controller
+                          key={`${fieldKey}.${nestedKey}.${variableRef}`}
+                          control={control}
+                          name={`${key}.${fieldKey}.${nestedKey}.${variableRef}`}
+                          render={({ field }) => (
+                            <InputField
+                              {...field}
+                              variant="underline"
+                              placeholder={variableRef}
+                              className="w-full"
+                            />
+                          )}
+                        />
+                      ));
+                    }
+                    return null;
+                  });
+                }
+                
+                // Handle simple string values
+                if (typeof fieldValue === 'string' && fieldValue.includes('${variables.')) {
+                  const variableRefs = extractVariableRefs(fieldValue);
+                  return variableRefs.map(variableRef => (
+                    <Controller
+                      key={`${fieldKey}.${variableRef}`}
+                      control={control}
+                      name={`${key}.${fieldKey}.${variableRef}`}
+                      render={({ field }) => (
+                        <InputField
+                          {...field}
+                          variant="underline"
+                          placeholder={variableRef}
+                          className="w-full"
+                        />
+                      )}
+                    />
+                  ));
+                }
+                return null;
+              })}
+
+              <View className="flex flex-row justify-end mt-2">
+                <Button variant="soft" color="primary" size="sm">
+                  <Button.Text>Execute</Button.Text>
+                </Button>
+              </View>
+            </View>
+          </Card>
+        ))}
+      </View>
       {children}
     </View>
   );
