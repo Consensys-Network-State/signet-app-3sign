@@ -4,10 +4,11 @@ import {Icon, ModeToggle, Text, Button, Input} from "@ds3/react";
 import Account from "../web3/Account.tsx";
 import { H4 } from "@ds3/react/src/components/Heading.tsx";
 import { Info, ChevronLeft } from 'lucide-react-native';
-import { useNavigate, useLocation } from 'react-router';
+import { useNavigate, useLocation, useSearchParams } from 'react-router';
 import { useEditStore } from '../store/editorStore';
 import { useDocumentStore } from '../store/documentStore';
 import StatusLabel from '../components/StatusLabel';
+import Drawer from './Drawer';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -22,10 +23,12 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { getCurrentDraft, updateDraftTitle } = useEditStore();
   const { getCurrentDraft: getCurrentMarkdownDraft, updateDraftTitle: updateMarkdownDraftTitle } = useDocumentStore();
   const isEditMode = location.pathname === '/edit';
   const isDraftMode = location.pathname.startsWith('/drafts/');
+  const showDrawer = searchParams.get('drawer') === 'true';
   
   const blockNoteDraft = isEditMode ? getCurrentDraft() : null;
   const markdownDraft = isDraftMode ? getCurrentMarkdownDraft() : null;
@@ -68,7 +71,6 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
   return (
     <View className="h-screen bg-neutral-1">
       <View className="flex flex-col h-full">
-
         {/* Navbar */}
         <View className="bg-neutral-1 shadow-md sticky top-0 z-20">
           {/* Status Message */}
@@ -128,8 +130,22 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
 
         {/* Main Content */}
         <View className="flex-1 flex-grow overflow-y-auto">
-          <View className="mx-auto w-full max-w-[1200px] p-8 m-12 rounded-4">
-            {children}
+          <View className={`mx-auto w-full transition-all duration-300 ease-in-out ${showDrawer ? 'max-w-[1520px]' : 'max-w-[1200px]'} p-8 m-12 rounded-4`}>
+            <View className="flex flex-row gap-2">
+              {/* Content */}
+              <View className="flex-1">
+                {children}
+              </View>
+
+              {/* Drawer */}
+              <View className={`sticky top-0 self-start max-h-screen overflow-visible transition-all duration-300 ease-in-out px-4 pb-4 ${
+                showDrawer 
+                  ? 'w-[320px] opacity-100 visible' 
+                  : 'w-0 opacity-0 invisible'
+              }`}>
+                <Drawer />
+              </View>
+            </View>
           </View>
         </View>
       </View>

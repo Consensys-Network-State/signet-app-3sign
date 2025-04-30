@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, TextInput } from 'react-native';
-import { Text, InputField, Input } from '@ds3/react';
+import { Text, InputField, Input, Button } from '@ds3/react';
 import Layout from '../../layouts/Layout';
 import { DocumentVariable } from '../../store/documentStore';
 import { unified } from 'unified';
@@ -14,6 +14,7 @@ import { isAddress } from 'viem';
 import AddressAvatar from "../../web3/AddressAvatar.tsx";
 import { DatePickerField } from '../../components/DatePickerField';
 import dayjs from 'dayjs';
+import { useDrawer } from '../../hooks/useDrawer';
 
 interface SpanProps {
   className?: string;
@@ -187,6 +188,8 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
   errors = {},
   editableFields = []
 }) => {
+  const { openDrawer } = useDrawer();
+  
   // Create stable components
   const components = React.useMemo<Components>(() => ({
     h1: ({ children }) => <Text className="text-4xl font-bold mb-4">{children}</Text>,
@@ -325,7 +328,14 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
   }, [content, variables, components]);
 
   return (
-    <Layout rightHeader={rightHeader}>
+    <Layout rightHeader={
+      <>
+        {rightHeader}
+        <Button variant="soft" color="primary" onPress={openDrawer}>
+          <Button.Text>Open Drawer</Button.Text>
+        </Button>
+      </>
+    }>
       <View className="flex-1 p-8">
         {renderContent()}
       </View>
