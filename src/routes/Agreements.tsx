@@ -94,7 +94,7 @@ const Agreements: React.FC = () => {
   };
 
   const handlePublishedClick = (id: string) => {
-    navigate(`/${id}`);
+    navigate(`/agreements/${id}`);
   };
 
   const handleCreateNew = () => {

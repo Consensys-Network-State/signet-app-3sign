@@ -27,6 +27,7 @@ interface DatePickerProps extends Omit<SelectProps, 'value'> {
   value?: Dayjs;
   onChange?: (date: Dayjs) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, DatePickerProps>((props, ref) => {
@@ -34,6 +35,7 @@ const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, Date
     value,
     onChange,
     placeholder,
+    disabled,
     ...otherProps
   } = props;
 
@@ -127,7 +129,7 @@ const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, Date
 
   return (
     <Select {...otherProps}>
-      <SelectTrigger ref={triggerRef} onLayout={handleTriggerLayout}>
+      <SelectTrigger ref={triggerRef} onLayout={handleTriggerLayout} disabled={disabled}>
         {value ?
           <Text className="text-sm">{value.format('MMMM D, YYYY')}</Text> :
           <Text className="text-muted-foreground text-sm">{placeholder || "Select a date"}</Text>

@@ -1,30 +1,19 @@
 import * as React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import { View, TextInput } from 'react-native';
-import { Button, Text, InputField, Input } from '@ds3/react';
+import { Text, InputField, Input } from '@ds3/react';
 import Layout from '../../layouts/Layout';
-import { useDocumentStore, DocumentVariable } from '../../store/documentStore';
+import { DocumentVariable } from '../../store/documentStore';
 import { unified } from 'unified';
 import remarkStringify from 'remark-stringify';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import type { Root } from 'mdast';
 import type { Components } from 'react-markdown';
-import { useForm, Controller } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import { isAddress } from 'viem';
 import AddressAvatar from "../../web3/AddressAvatar.tsx";
 import { DatePickerField } from '../../components/DatePickerField';
 import dayjs from 'dayjs';
-import { useAccount } from 'wagmi';
-import { createAgreementInitVC } from '../../utils/veramoUtils.ts';
-import { Document } from "../../store/documentStore";
-import { useMutation } from '@tanstack/react-query';
-import { postAgreement } from '../../api';
-
-interface LocationState {
-  draftId: string;
-  title: string;
-}
 
 interface SpanProps {
   className?: string;
@@ -41,6 +30,14 @@ const createValidationRules = (variable: DocumentVariable) => {
   rules.validate = (value: string) => {
     if (!value) {
       return rules.required || true;
+    }
+
+    if (variable.type === 'address' && !isAddress(value)) {
+      return 'Invalid Ethereum address';
+    }
+
+    if (variable.type === 'dateTime' && !dayjs(value).isValid()) {
+      return 'Invalid date';
     }
 
     const { validation } = variable;
@@ -65,14 +62,6 @@ const createValidationRules = (variable: DocumentVariable) => {
       return `${variable.name} must be one of: ${validation.enum.join(', ')}`;
     }
 
-    if (variable.type === 'address' && !isAddress(value)) {
-      return 'Invalid Ethereum address';
-    }
-
-    if (variable.type === 'dateTime' && !dayjs(value).isValid()) {
-      return 'Invalid date';
-    }
-
     return true;
   };
 
@@ -86,7 +75,8 @@ const VariableInput = React.memo(({
   value, 
   onChange, 
   onBlur,
-  error
+  error,
+  disabled = false,
 }: { 
   name: string;
   variable: DocumentVariable;
@@ -94,6 +84,7 @@ const VariableInput = React.memo(({
   onChange: (value: string) => void;
   onBlur: () => void;
   error?: { message?: string } | string | undefined;
+  disabled?: boolean;
 }) => {
   const inputRef = React.useRef<TextInput>(null);
   const [localValue, setLocalValue] = React.useState(value);
@@ -129,6 +120,7 @@ const VariableInput = React.memo(({
         placeholder={variable.name}
         error={errorMessage}
         className="w-[300px]"
+        disabled={disabled}
       >
         {isAddress(localValue) && (
           <AddressAvatar address={localValue} className="w-6 h-6" />
@@ -146,6 +138,7 @@ const VariableInput = React.memo(({
         placeholder="Select date"
         error={errorMessage}
         className="w-[300px]"
+        disabled={disabled}
       />
     );
   }
@@ -160,6 +153,7 @@ const VariableInput = React.memo(({
       placeholder={variable.name}
       error={errorMessage}
       className="w-[300px]"
+      disabled={disabled}
     />
   );
 }, (prevProps, nextProps) => {
@@ -172,131 +166,27 @@ const VariableInput = React.memo(({
   );
 });
 
-const MarkdownDocumentView: React.FC = () => {
-  const { draftId } = useParams<{ draftId: string }>();
-  const { getCurrentDraft, setCurrentDraft, updateDraft, deleteDraft } = useDocumentStore();
-  const { address } = useAccount();
-  const navigate = useNavigate();
+// Types for the component props
+export interface MarkdownDocumentViewProps {
+  control: any;
+  content: {
+    type: 'md' | 'mdast';
+    data: string | Root;
+  };
+  variables?: Record<string, any>;
+  rightHeader?: React.ReactNode;
+  errors?: Record<string, any>;
+  editableFields?: string[];
+}
 
-  React.useEffect(() => {
-    if (draftId) {
-      setCurrentDraft(draftId);
-    }
-  }, [draftId, setCurrentDraft]);
-
-  const draft = getCurrentDraft();
-  if (!draftId || !draft) {
-    return null;
-  }
-
-  // Get initial values from localStorage or draft
-  const getInitialValues = React.useCallback(() => {
-    const storedValues = localStorage.getItem(`draft_${draftId}_values`);
-    if (storedValues) {
-      return JSON.parse(storedValues);
-    }
-    return Object.entries(draft.variables).reduce((acc, [key, variable]) => ({
-      ...acc,
-      [key]: variable.value || ''
-    }), {} as Record<string, string>);
-  }, [draftId, draft.variables]);
-
-  const form = useForm({
-    defaultValues: getInitialValues(),
-    mode: 'onBlur',
-    reValidateMode: 'onBlur'
-  });
-
-  const {
-    handleSubmit,
-    formState: { errors },
-    control,
-    watch
-  } = form;
-
-  // Watch form values and update localStorage
-  React.useEffect(() => {
-    const subscription = watch((values) => {
-      if (!values) return;
-      localStorage.setItem(`draft_${draftId}_values`, JSON.stringify(values));
-    });
-
-    return () => subscription.unsubscribe();
-  }, [watch, draftId]);
-
-  // Only update draft on submit
-  const onSubmit = React.useCallback((values: Record<string, string>) => {
-    if (!draft) return;
-
-    const updatedVariables = Object.entries(draft.variables).reduce((acc, [key, variable]) => ({
-      ...acc,
-      [key]: {
-        ...variable,
-        value: values[key] || ''
-      }
-    }), {} as Record<string, DocumentVariable>);
-
-    updateDraft(draftId, draft.content.data as string, updatedVariables);
-    // Clear localStorage after successful save since values are now persisted in the draft
-    localStorage.removeItem(`draft_${draftId}_values`);
-  }, [draft, draftId, updateDraft]);
-
-  // Create mutation for publishing agreement
-  const publishMutation = useMutation({
-    mutationFn: async (values: Record<string, string>) => {
-      if (!draft || !address) throw new Error("Draft or address not available");
-      
-      // Create the VC
-      const vc = await createAgreementInitVC(address as `0x${string}`, draft as Document, values);
-      
-      // Call the API to create the agreement
-      return postAgreement(vc);
-    },
-    onSuccess: () => {
-      console.log({
-        title: "Agreement Published",
-        description: "Your agreement has been successfully published",
-        variant: "success",
-      });
-      localStorage.removeItem(`draft_${draftId}_values`);
-      deleteDraft(draftId);
-      // TODO: navigate to home for now until we flesh out the published agreements view
-      navigate(`/`);
-    },
-    onError: (error) => {
-      console.log({
-        title: "Publication Failed",
-        description: error.message || "Failed to publish agreement",
-        variant: "error",
-      });
-    }
-  });
-
-  const onPublish = React.useCallback((values: Record<string, string>) => {
-    publishMutation.mutate(values);
-  }, [publishMutation]);
-
-  const rightHeader = (
-    <>
-    <Button 
-      variant="soft" 
-      color="primary" 
-      onPress={handleSubmit(onSubmit)}
-    >
-      <Button.Text>Save</Button.Text>
-    </Button>
-    <Button 
-      variant="soft" 
-      color="primary" 
-      onPress={handleSubmit(onPublish)}
-      isLoading={publishMutation.isPending}
-      isDisabled={publishMutation.isPending}
-    >
-        <Button.Text>{publishMutation.isPending ? 'Publishing...' : 'Publish'}</Button.Text>
-      </Button>
-    </>
-  );
-
+const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
+  control,
+  content,
+  variables = {},
+  rightHeader,
+  errors = {},
+  editableFields = []
+}) => {
   // Create stable components
   const components = React.useMemo<Components>(() => ({
     h1: ({ children }) => <Text className="text-4xl font-bold mb-4">{children}</Text>,
@@ -354,7 +244,8 @@ const MarkdownDocumentView: React.FC = () => {
     span: ({ className, children, ...props }: SpanProps) => {
       if (className === 'variable-input' && props['data-name']) {
         const variableName = props['data-name'];
-        const variable = draft?.variables[variableName];
+        const variable = variables[variableName];
+        const disabled = !editableFields.find(field => field === variableName);
         if (variable) {
           return (
             <Controller
@@ -369,6 +260,7 @@ const MarkdownDocumentView: React.FC = () => {
                   onChange={onChange}
                   onBlur={onBlur}
                   error={errors[variableName]}
+                  disabled={disabled}
                 />
               )}
             />
@@ -377,18 +269,18 @@ const MarkdownDocumentView: React.FC = () => {
       }
       return <Text className={className}>{children}</Text>;
     }
-  }), [draft?.variables, control, errors]);
+  }), [variables, control, errors, editableFields]);
 
   const renderContent = React.useCallback(() => {
     let markdownContent: string;
 
-    if (draft.content.type === 'md') {
-      markdownContent = draft.content.data as string;
-    } else if (draft.content.type === 'mdast') {
+    if (content.type === 'md') {
+      markdownContent = content.data as string;
+    } else if (content.type === 'mdast') {
       const processor = unified()
         .use(remarkStringify as any);
       
-      const result = processor.stringify(draft.content.data as Root);
+      const result = processor.stringify(content.data as Root);
       markdownContent = typeof result === 'string' ? result : String(result);
     } else {
       return null;
@@ -403,7 +295,7 @@ const MarkdownDocumentView: React.FC = () => {
         
         // If there are sub-properties, try to access them directly
         if (parts.length > 1) {
-          const variable = draft.variables[variableName];
+          const variable = variables[variableName];
           if (!variable) return match;
           
           // Traverse the object to get the nested value
@@ -415,7 +307,7 @@ const MarkdownDocumentView: React.FC = () => {
           return String(nestedValue);
         }
 
-        // For top-level variables, render as input field
+        // For top-level variables in editable mode, render as input field
         return `<span class="variable-input" data-name="${variableName}"></span>`;
       }
     );
@@ -430,7 +322,7 @@ const MarkdownDocumentView: React.FC = () => {
         </ReactMarkdown>
       </View>
     );
-  }, [draft.content, draft.variables, components]);
+  }, [content, variables, components]);
 
   return (
     <Layout rightHeader={rightHeader}>
