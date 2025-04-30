@@ -6,8 +6,8 @@ import Agreements from "./routes/Agreements.tsx";
 import { Routes, Route } from 'react-router';
 import { useAccount } from "wagmi";
 import { Navigate, useLocation } from 'react-router';
-import MarkdownDocumentView from "./components/markdown/MarkdownDocumentView.tsx";
 import Draft from "./components/markdown/Draft.tsx";
+import Agreement from "./components/markdown/Agreement.tsx";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isConnected } = useAccount();
@@ -38,11 +38,11 @@ const Router: React.FC = () => {
           <Draft />
         </ProtectedRoute>
       } />
-      {/* <Route path="/agreements/:agreementId" element={
+      <Route path="/agreements/:agreementId" element={
         <ProtectedRoute>
-          <MarkdownDocumentView />
+          <Agreement />
         </ProtectedRoute>
-      } /> */}
+      } />
       <Route path="/:documentId" element={
         <ProtectedRoute>
             <Document />
