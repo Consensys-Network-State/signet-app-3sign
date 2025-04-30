@@ -2,7 +2,7 @@ import * as React from 'react';
 import { View, Pressable } from 'react-native';
 import { Text, Button, Card } from '@ds3/react';
 import { useEditStore } from '../store/editorStore';
-import { useDocumentStore } from '../store/documentStore';
+import { useDocumentStore, Document } from '../store/documentStore';
 import { useNavigate } from 'react-router';
 import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import Layout from '../layouts/Layout';
@@ -12,6 +12,9 @@ import CreateAgreementModal from '../components/CreateAgreementModal';
 import StatusLabel from '../components/StatusLabel';
 import { useAccount } from 'wagmi';
 import DeleteDraftDialog from '../components/DeleteDraftDialog';
+import { useQuery } from '@tanstack/react-query';
+import { getAgreementByUserId } from '../api';
+import { useEffect } from 'react';
 
 type EthereumAddress = `0x${string}`;
 
@@ -61,11 +64,23 @@ const AgreementCard: React.FC<{
 
 const Agreements: React.FC = () => {
   const { drafts: blockNoteDrafts, setCurrentDraft: setCurrentBlockNoteDraft, deleteDraft: deleteBlockNoteDraft } = useEditStore();
-  const { drafts: markdownDrafts, setCurrentDraft: setCurrentMarkdownDraft, deleteDraft: deleteMarkdownDraft } = useDocumentStore();
+  const { drafts: markdownDrafts, setCurrentDraft: setCurrentMarkdownDraft, deleteDraft: deleteMarkdownDraft, addDocuments, documents: markdownDocuments } = useDocumentStore();
   const { setEditorMode } = useBlockNoteStore();
   const navigate = useNavigate();
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
   const { address } = useAccount();
+
+  const { data: agreements, isLoading: isLoadingAgreements } = useQuery({
+    queryKey: ['agreements', address],
+    queryFn: () => getAgreementByUserId(address as string),
+  });
+
+  useEffect(() => {
+    if (!isLoadingAgreements && agreements) {
+      // TODO: the state is also queried here (agreement.state). Need to determine how we store and display this.
+      addDocuments(agreements.data?.map((agreement: any) => agreement.document))
+    }
+  }, [agreements, isLoadingAgreements, addDocuments])
 
   const handleBlockNoteDraftClick = (draftId: string) => {
     setCurrentBlockNoteDraft(draftId);
@@ -133,15 +148,15 @@ const Agreements: React.FC = () => {
           </>
         )}
 
-        {MOCK_PUBLISHED.length > 0 && (
+        {markdownDocuments.length > 0 && (
           <>
             <Text className="text-lg font-semibold mt-4">Published</Text>
-            {MOCK_PUBLISHED.map(agreement => (
+            {markdownDocuments.map(agreement => (
               <AgreementCard
                 key={agreement.id}
-                title={agreement.title}
+                title={agreement.metadata.name}
                 status="signed"
-                owner={agreement.owner}
+                owner="0x"
                 onClick={() => handlePublishedClick(agreement.id)}
               />
             ))}

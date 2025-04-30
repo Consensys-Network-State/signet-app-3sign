@@ -36,6 +36,7 @@ export interface Document {
     type: 'md' | 'mdast';
     data: string | any;
   };
+  execution: any; // Update this when finalized
   createdAt: string;
   updatedAt: string;
 }
@@ -171,7 +172,7 @@ export const useDocumentStore = create(
             );
             return id;
           },
-          createDraft: (title: string, content: string, variables: Record<string, DocumentVariable> = {}) => {
+          createDraft: (title: string, content: string, variables: Record<string, DocumentVariable> = {}, execution = {}) => {
             const id = crypto.randomUUID();
             const now = new Date().toISOString();
             const draft: Document = {
@@ -190,6 +191,7 @@ export const useDocumentStore = create(
                 type: 'md',
                 data: content,
               },
+              execution,
               createdAt: now,
               updatedAt: now,
             };
@@ -284,6 +286,23 @@ export const useDocumentStore = create(
             );
 
             return document.id;
+          },
+          addDocuments: (documents: Document[]) => {
+            set(
+              (state) => {
+                // Filter out documents that already exist in the store
+                const existingIds = new Set(state.documents.map(doc => doc.id));
+                const newDocuments = documents.filter(doc => !existingIds.has(doc.id));
+                
+                return {
+                  documents: [...state.documents, ...newDocuments],
+                };
+              },
+              undefined,
+              'documentStore/addDocuments'
+            );
+
+            return documents.map(doc => doc.id);
           },
         })
       ),

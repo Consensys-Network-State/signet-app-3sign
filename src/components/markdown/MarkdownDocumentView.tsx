@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { View, TextInput } from 'react-native';
 import { Button, Text, InputField, Input } from '@ds3/react';
 import Layout from '../../layouts/Layout';
@@ -15,6 +15,11 @@ import { isAddress } from 'viem';
 import AddressAvatar from "../../web3/AddressAvatar.tsx";
 import { DatePickerField } from '../../components/DatePickerField';
 import dayjs from 'dayjs';
+import { useAccount } from 'wagmi';
+import { createAgreementInitVC } from '../../utils/veramoUtils.ts';
+import { Document } from "../../store/documentStore";
+import { useMutation } from '@tanstack/react-query';
+import { postAgreement } from '../../api';
 
 interface LocationState {
   draftId: string;
@@ -169,8 +174,10 @@ const VariableInput = React.memo(({
 
 const MarkdownDocumentView: React.FC = () => {
   const { draftId } = useParams<{ draftId: string }>();
-  const { getCurrentDraft, setCurrentDraft, updateDraft } = useDocumentStore();
-  
+  const { getCurrentDraft, setCurrentDraft, updateDraft, deleteDraft } = useDocumentStore();
+  const { address } = useAccount();
+  const navigate = useNavigate();
+
   React.useEffect(() => {
     if (draftId) {
       setCurrentDraft(draftId);
@@ -234,7 +241,43 @@ const MarkdownDocumentView: React.FC = () => {
     localStorage.removeItem(`draft_${draftId}_values`);
   }, [draft, draftId, updateDraft]);
 
+  // Create mutation for publishing agreement
+  const publishMutation = useMutation({
+    mutationFn: async (values: Record<string, string>) => {
+      if (!draft || !address) throw new Error("Draft or address not available");
+      
+      // Create the VC
+      const vc = await createAgreementInitVC(address as `0x${string}`, draft as Document, values);
+      
+      // Call the API to create the agreement
+      return postAgreement(vc);
+    },
+    onSuccess: () => {
+      console.log({
+        title: "Agreement Published",
+        description: "Your agreement has been successfully published",
+        variant: "success",
+      });
+      localStorage.removeItem(`draft_${draftId}_values`);
+      deleteDraft(draftId);
+      // TODO: navigate to home for now until we flesh out the published agreements view
+      navigate(`/`);
+    },
+    onError: (error) => {
+      console.log({
+        title: "Publication Failed",
+        description: error.message || "Failed to publish agreement",
+        variant: "error",
+      });
+    }
+  });
+
+  const onPublish = React.useCallback((values: Record<string, string>) => {
+    publishMutation.mutate(values);
+  }, [publishMutation]);
+
   const rightHeader = (
+    <>
     <Button 
       variant="soft" 
       color="primary" 
@@ -242,6 +285,16 @@ const MarkdownDocumentView: React.FC = () => {
     >
       <Button.Text>Save</Button.Text>
     </Button>
+    <Button 
+      variant="soft" 
+      color="primary" 
+      onPress={handleSubmit(onPublish)}
+      isLoading={publishMutation.isPending}
+      isDisabled={publishMutation.isPending}
+    >
+        <Button.Text>{publishMutation.isPending ? 'Publishing...' : 'Publish'}</Button.Text>
+      </Button>
+    </>
   );
 
   // Create stable components

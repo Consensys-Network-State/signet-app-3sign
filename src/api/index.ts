@@ -14,3 +14,19 @@ export const postSignature = async (documentId: string, signatureVC: string) => 
   return await axios.post(`${API_URL}/documents/${documentId}/sign`, JSON.parse(signatureVC));
 }
 
+export const getAgreement = async (agreementId: string) => {
+  return await axios.get(`${API_URL}/agreements/${agreementId}/state`);
+}
+
+export const postAgreement = async (agreementVC: string) => {
+  return await axios.post(`${API_URL}/agreements`, JSON.parse(agreementVC));
+}
+
+export const postAgreementInput = async (agreementId: string, inputVC: string) => {
+  return await axios.post(`${API_URL}/agreements/${agreementId}/processInput`, JSON.parse(inputVC));
+}
+
+export const getAgreementByUserId = async (userId: string) => {
+  return await axios.get(`${API_URL}/agreements?contributor=${userId}`);
+}
+
