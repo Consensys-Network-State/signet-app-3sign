@@ -1,21 +1,23 @@
 import { create } from 'zustand';
 import { combine, devtools, persist } from 'zustand/middleware';
 
+export interface VariableValidation {
+  required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  pattern?: string;
+  enum?: string[];
+};
+
 export interface DocumentVariable {
   id?: string;
   type: 'string' | 'number' | 'boolean' | 'address' | 'dateTime';
   name: string;
   description?: string;
   value?: string;
-  validation?: {
-    required?: boolean;
-    minLength?: number;
-    maxLength?: number;
-    min?: number;
-    max?: number;
-    pattern?: string;
-    enum?: string[];
-  };
+  validation?: VariableValidation
 }
 
 export interface DocumentMetadata {
@@ -28,6 +30,42 @@ export interface DocumentMetadata {
   description: string;
 }
 
+export interface DocumentState {
+  name: string;
+  description: string;
+  isInitial?: boolean;
+  initialParams?: Record<string, string>;
+}
+
+export interface InputDataField {
+  type?: string;
+  validation?: VariableValidation;
+}
+
+export interface DocumentInput {
+  type: string;
+  schema?: string;
+  displayName: string;
+  description: string;
+  data: Record<string, string | InputDataField>;
+  issuer: string;
+}
+
+export interface Transition {
+  from: string;
+  to: string;
+  conditions: {
+    type: string;
+    input: string;
+  }[];
+}
+
+export interface DocumentExecution {
+  states: Record<string, DocumentState>;
+  inputs: Record<string, DocumentInput>;
+  transitions: Transition[];
+}
+
 export interface Document {
   id: string;
   metadata: DocumentMetadata;
@@ -36,7 +74,7 @@ export interface Document {
     type: 'md' | 'mdast';
     data: string | any;
   };
-  execution: any; // Update this when finalized
+  execution: DocumentExecution;
   createdAt: string;
   updatedAt: string;
 }
@@ -131,6 +169,9 @@ export const useDocumentStore = create(
               undefined,
               'documentStore/deleteDocument'
             );
+          },
+          getDocument: (id: string) => {
+            return get().documents.find(doc => doc.id === id);
           },
           setCurrentDocument: (id: string | null) => {
             set(
@@ -245,6 +286,9 @@ export const useDocumentStore = create(
               undefined,
               'documentStore/deleteDraft'
             );
+          },
+          getDraft: (id: string) => {
+            return get().drafts.find(draft => draft.id === id);
           },
           setCurrentDraft: (id: string | null) => {
             set(

@@ -14,6 +14,7 @@ interface DatePickerProps extends Omit<SelectProps, 'value'> {
   description?: string;
   children?: React.ReactNode;
   required?: boolean;
+  disabled?: boolean;
 }
 
 const DatePickerField = React.forwardRef<React.ElementRef<typeof DatePicker>, DatePickerProps>(
@@ -24,6 +25,7 @@ const DatePickerField = React.forwardRef<React.ElementRef<typeof DatePicker>, Da
       description,
       children,
       required,
+      disabled,
       ...otherProps
     } = props;
 
@@ -60,6 +62,7 @@ const DatePickerField = React.forwardRef<React.ElementRef<typeof DatePicker>, Da
           ref={inputRef}
           {...ariaProps}
           {...otherProps}
+          disabled={disabled}
         >
           {children}
         </DatePicker>
