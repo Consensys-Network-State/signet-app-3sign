@@ -73,6 +73,11 @@ export async function createAgreementInitVC(address: `0x${string}`, agreement: D
   const agent = await setupAgent();
   const did = await agent.didManagerGet({did: `did:pkh:eip155:1:${address}`});
 
+  // Filter out empty keys or keys with empty string values
+  const filteredParams = Object.fromEntries(
+    Object.entries(params).filter(([_, value]) => value !== null && value !== undefined && value !== '')
+  );
+
   const credential = {
     id: uuidv4(),
     issuer: { id: did.did },
@@ -85,7 +90,7 @@ export async function createAgreementInitVC(address: `0x${string}`, agreement: D
     credentialSubject: {
       id: did.did,
       agreement: encodeObjectToBase64(agreement),
-      params
+      params: filteredParams
     },
   }
   const vc = await agent.createVerifiableCredential({
