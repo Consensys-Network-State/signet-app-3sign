@@ -5,10 +5,10 @@ import { Text, Card, Button, Input, InputField } from "@ds3/react";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@ds3/react";
 import { useDocumentStore } from "../store/documentStore";
 import { Controller } from "react-hook-form";
-import { useForm } from "react-hook-form";
 import { isAddress } from 'viem';
 import AddressCard from "../web3/AddressCard";
 import truncateEthAddress from "truncate-eth-address";
+import { DraftFormContext } from './markdown/Draft';
 
 // TODO: Remove these test transitions once backend integration is complete
 const TEST_TRANSITIONS = [
@@ -148,8 +148,8 @@ const VCDetailsModal: React.FC<{
 
 const ActionSideMenu: React.FC = () => {
   const params = useParams();
-  const { control } = useForm();
   const [selectedVC, setSelectedVC] = React.useState<VerifiableCredential | null>(null);
+  const form = React.useContext(DraftFormContext);
   
   // Get document ID from any of the possible route parameters
   const documentId = params.draftId || params.agreementId || params.documentId;
@@ -161,24 +161,24 @@ const ActionSideMenu: React.FC = () => {
            state.drafts.find(draft => draft.id === documentId);
   });
 
-  if (!currentDocument) {
+  if (!currentDocument || !form) {
     return null;
   }
 
+  // Get form methods
+  const { control, formState: { errors }, handleSubmit } = form;
+  
   // Get execution data from the document
   const executionInputs = currentDocument.execution?.inputs || {};
   const states = currentDocument.execution?.states || {};
-  // Using test transitions for now
   const transitions = TEST_TRANSITIONS;
 
-  // Find initial state
+  // Find initial state first
   const initialState = Object.entries(states)
     .find(([_, state]) => state && typeof state === 'object' && 'isInitial' in state && state.isInitial)?.[1];
   
   const initialParams = initialState?.initialParams || {};
-  // Temporarily force isInitializing to false to test transitions
-  const isInitializing = false;
-
+  
   // Helper function to get input details from template
   const getInputDetails = (inputId: string): DocumentInput | undefined => {
     // Use test inputs for now
@@ -192,7 +192,47 @@ const ActionSideMenu: React.FC = () => {
     return matches.map(match => match.replace('${variables.', '').replace('}', ''));
   };
 
-  console.log('Rendering transitions:', transitions); // Debug log
+  // Get cached form values
+  const getCachedValues = React.useCallback(() => {
+    if (!documentId) return {};
+    const cached = localStorage.getItem(`draft_${documentId}_values`);
+    return cached ? JSON.parse(cached) : {};
+  }, [documentId]);
+
+  // Helper function to check if a transition's conditions are met
+  const isTransitionEnabled = React.useCallback((transition: Transition) => {
+    const input = getInputDetails(transition.conditions[0]?.input);
+    if (!input) return false;
+
+    // Check if all required variables have values from cache
+    const variableRefs = Object.values(input.data).flatMap(extractVariableRefs);
+    const cachedValues = getCachedValues();
+    return variableRefs.every(ref => cachedValues[ref]);
+  }, [getCachedValues]);
+
+  // Handle transition execution
+  const onExecuteTransition = React.useCallback(async (values: Record<string, string>, transition: Transition) => {
+    const input = getInputDetails(transition.conditions[0]?.input);
+    if (!input) return;
+
+    // TODO: Execute the transition
+    console.log('Executing transition:', {
+      transition,
+      input,
+      values
+    });
+  }, []);
+
+  // Handle initialization
+  const onInitialize = React.useCallback(async (values: Record<string, string>) => {
+    if (!initialState || !documentId) return;
+
+    // TODO: Execute initialization
+    console.log('Initializing agreement:', {
+      initialState,
+      values
+    });
+  }, [documentId, initialState]);
 
   return (
     <View className="flex flex-col gap-4">
@@ -214,11 +254,14 @@ const ActionSideMenu: React.FC = () => {
                   key={variableRef}
                   control={control}
                   name={variableRef}
-                  render={({ field }) => (
+                  render={({ field: { onChange, value, onBlur } }) => (
                     <InputField
-                      {...field}
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
                       variant="underline"
                       placeholder={variableRef}
+                      error={errors?.[variableRef]?.message?.toString()}
                       className="w-full"
                     />
                   )}
@@ -227,7 +270,13 @@ const ActionSideMenu: React.FC = () => {
             })}
 
             <View className="flex flex-row justify-end mt-2">
-              <Button variant="soft" color="primary" size="sm">
+              <Button 
+                variant="soft" 
+                color="primary" 
+                size="sm"
+                onPress={handleSubmit(onInitialize)}
+                isDisabled={!Object.values(initialParams).flatMap(extractVariableRefs).every(ref => getCachedValues()[ref])}
+              >
                 <Button.Text>Initialize</Button.Text>
               </Button>
             </View>
@@ -237,38 +286,31 @@ const ActionSideMenu: React.FC = () => {
 
       {/* Available Transitions Section */}
       {transitions.length > 0 && transitions.map((transition, index) => {
-        console.log('Processing transition:', transition);
         const input = getInputDetails(transition.conditions[0]?.input);
-        console.log('Found input:', input);
-        const toState = states[transition.to];
-        
-        if (!input || !toState) {
-          console.log('Missing input or toState:', { input, toState });
-          return null;
-        }
+        if (!input) return null;
 
         return (
           <Card key={index} className="p-4">
             <View className="flex flex-col gap-2">
               <Text className="font-semibold">{input.displayName}</Text>
               <Text className="text-sm text-neutral-11">{input.description}</Text>
-              {toState.description && (
-                <Text className="text-xs text-neutral-11">{toState.description}</Text>
-              )}
 
               {/* Input fields for variable references in data */}
-              {Object.entries(input.data || {}).map(([fieldKey, fieldValue]) => {
+              {Object.entries(input.data).map(([fieldKey, fieldValue]) => {
                 const variableRefs = extractVariableRefs(fieldValue);
                 return variableRefs.map(variableRef => (
                   <Controller
                     key={`${fieldKey}.${variableRef}`}
                     control={control}
-                    name={`${transition.conditions[0].input}.${fieldKey}.${variableRef}`}
-                    render={({ field }) => (
+                    name={variableRef}
+                    render={({ field: { onChange, value, onBlur } }) => (
                       <InputField
-                        {...field}
+                        value={value}
+                        onChangeText={onChange}
+                        onBlur={onBlur}
                         variant="underline"
                         placeholder={variableRef}
+                        error={errors?.[variableRef]?.message?.toString()}
                         className="w-full"
                       />
                     )}
@@ -277,14 +319,20 @@ const ActionSideMenu: React.FC = () => {
               })}
 
               <View className="flex flex-row justify-end mt-2">
-                <Button variant="soft" color="primary" size="sm">
+                <Button 
+                  variant="soft" 
+                  color="primary" 
+                  size="sm"
+                  onPress={handleSubmit((values) => onExecuteTransition(values, transition))}
+                  isDisabled={!isTransitionEnabled(transition)}
+                >
                   <Button.Text>Execute</Button.Text>
                 </Button>
               </View>
             </View>
           </Card>
-        )}
-      )}
+        );
+      })}
 
       {/* Completed Actions Section */}
       {TEST_COMPLETED_VCS.length > 0 && (

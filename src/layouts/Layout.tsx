@@ -68,7 +68,8 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
   };
 
   // Check if we should show the side menu
-  const showSideMenu = Boolean(params.draftId || params.agreementId || params.documentId);
+  const documentId = params.draftId || params.agreementId || params.documentId;
+  const showSideMenu = Boolean(documentId);
 
   return (
     <View className="h-screen bg-neutral-1 flex flex-col">

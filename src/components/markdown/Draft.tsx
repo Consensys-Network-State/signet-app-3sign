@@ -10,6 +10,9 @@ import { useDocumentStore, DocumentVariable, DocumentState } from '../../store/d
 import { Document } from "../../store/documentStore";
 import MarkdownDocumentView from './MarkdownDocumentView';
 
+// Create a context for the form
+export const DraftFormContext = React.createContext<ReturnType<typeof useForm> | undefined>(undefined);
+
 const Draft: React.FC = () => {
   const { draftId } = useParams<{ draftId: string }>();
   const { updateDraft, deleteDraft, getDraft } = useDocumentStore();
@@ -20,6 +23,26 @@ const Draft: React.FC = () => {
     if (draftId) return getDraft(draftId);
     return null;
   }, [draftId, getDraft]);
+
+  // Get initial values from localStorage or draft
+  const getInitialValues = React.useCallback(() => {
+    if (!draft || !draftId) return {};
+    
+    const storedValues = localStorage.getItem(`draft_${draftId}_values`);
+    if (storedValues) {
+      return JSON.parse(storedValues);
+    }
+    return Object.entries(draft.variables).reduce((acc, [key, variable]) => ({
+      ...acc,
+      [key]: variable.value || ''
+    }), {} as Record<string, string>);
+  }, [draftId, draft]);
+
+  const form = useForm({
+    defaultValues: getInitialValues(),
+    mode: 'onBlur',
+    reValidateMode: 'onBlur'
+  });
 
   if (!draftId || !draft) {
     return null;
@@ -40,24 +63,6 @@ const Draft: React.FC = () => {
       return acc;
     }, {} as Record<string, string>);
   }, [initialState]);
-
-  // Get initial values from localStorage or draft
-  const getInitialValues = React.useCallback(() => {
-    const storedValues = localStorage.getItem(`draft_${draftId}_values`);
-    if (storedValues) {
-      return JSON.parse(storedValues);
-    }
-    return Object.entries(draft.variables).reduce((acc, [key, variable]) => ({
-      ...acc,
-      [key]: variable.value || ''
-    }), {} as Record<string, string>);
-  }, [draftId, draft.variables]);
-
-  const form = useForm({
-    defaultValues: getInitialValues(),
-    mode: 'onBlur',
-    reValidateMode: 'onBlur'
-  });
 
   const {
     handleSubmit,
@@ -145,14 +150,16 @@ const Draft: React.FC = () => {
   );
 
   return (
-    <MarkdownDocumentView
-      content={draft.content}
-      variables={draft.variables}
-      rightHeader={rightHeader}
-      control={control}
-      errors={errors}
-      editableFields={Object.keys(initialInputs)}
-    />
+    <DraftFormContext.Provider value={form}>
+      <MarkdownDocumentView
+        content={draft.content}
+        variables={draft.variables}
+        rightHeader={rightHeader}
+        control={control}
+        errors={errors}
+        editableFields={Object.keys(initialInputs)}
+      />
+    </DraftFormContext.Provider>
   );
 };
 
