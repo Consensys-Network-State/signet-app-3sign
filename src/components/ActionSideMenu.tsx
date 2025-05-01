@@ -42,69 +42,98 @@ const ActionSideMenu: React.FC = () => {
   const isInitializing = !currentDocument.execution?.states[currentDocument.execution?.currentState || ''];
 
   return (
-    <View className="flex flex-col gap-4">
-      {/* Initialization Card */}
+    <View className="flex flex-col gap-8">
+      {/* Actions Section */}
       {isInitializing && Object.keys(initialParams).length > 0 && (
-        <Card className="p-4">
-          <View className="flex flex-col gap-2">
-            <Text className="font-semibold">Initialize Agreement</Text>
-            <Text className="text-sm text-neutral-11">{initialState?.description}</Text>
-            
-            {Object.entries(initialParams).map(([paramKey, paramValue]) => {
-              const variableRefs = extractVariableRefs(paramValue as string);
-              return variableRefs.map(variableRef => (
-                <Controller
-                  key={variableRef}
-                  control={control}
-                  name={variableRef}
-                  render={({ field }) => (
-                    <InputField
-                      {...field}
-                      variant="underline"
-                      placeholder={variableRef}
-                      className="w-full"
-                    />
-                  )}
-                />
-              ));
-            })}
+        <View className="flex flex-col gap-4">
+          <Text className="text-sm font-medium text-neutral-11">Actions</Text>
+          <Card className="p-4">
+            <View className="flex flex-col gap-2">
+              <Text className="font-semibold">Initialize Agreement</Text>
+              <Text className="text-sm text-neutral-11">{initialState?.description}</Text>
+              
+              {Object.entries(initialParams).map(([paramKey, paramValue]) => {
+                const variableRefs = extractVariableRefs(paramValue as string);
+                return variableRefs.map(variableRef => (
+                  <Controller
+                    key={variableRef}
+                    control={control}
+                    name={variableRef}
+                    render={({ field }) => (
+                      <InputField
+                        {...field}
+                        variant="underline"
+                        placeholder={variableRef}
+                        className="w-full"
+                      />
+                    )}
+                  />
+                ));
+              })}
 
-            <View className="flex flex-row justify-end mt-2">
-              <Button variant="soft" color="primary" size="sm">
-                <Button.Text>Initialize</Button.Text>
-              </Button>
+              <View className="flex flex-row justify-end mt-2">
+                <Button variant="soft" color="primary" size="sm">
+                  <Button.Text>Initialize</Button.Text>
+                </Button>
+              </View>
             </View>
-          </View>
-        </Card>
+          </Card>
+        </View>
       )}
 
-      {/* Transition Cards */}
-      {transitions.map((transition, index) => {
-        const input = executionInputs[transition.conditions[0]?.input];
-        const toState = states[transition.to];
-        
-        if (!input || !toState) return null;
+      {/* Next Actions Section */}
+      {transitions.length > 0 && (
+        <View className="flex flex-col gap-4">
+          <Text className="text-sm font-medium text-neutral-11">Next Actions</Text>
+          {transitions.map((transition, index) => {
+            const input = executionInputs[transition.conditions[0]?.input];
+            const toState = states[transition.to];
+            
+            if (!input || !toState) return null;
 
-        return (
-          <Card key={index} className="p-4">
-            <View className="flex flex-col gap-2">
-              <Text className="font-semibold">{input.displayName}</Text>
-              <Text className="text-sm text-neutral-11">{input.description}</Text>
-              <Text className="text-xs text-neutral-11">{toState.description}</Text>
+            return (
+              <Card key={index} className="p-4">
+                <View className="flex flex-col gap-2">
+                  <Text className="font-semibold">{input.displayName}</Text>
+                  <Text className="text-sm text-neutral-11">{input.description}</Text>
+                  <Text className="text-xs text-neutral-11">{toState.description}</Text>
 
-              {/* Input fields for variable references in data */}
-              {Object.entries(input.data || {}).map(([fieldKey, fieldValue]) => {
-                // Handle nested objects in data
-                if (typeof fieldValue === 'object' && fieldValue !== null) {
-                  return Object.entries(fieldValue).map(([nestedKey, nestedValue]) => {
-                    // Only show inputs for string values that contain variable references
-                    if (typeof nestedValue === 'string' && nestedValue.includes('${variables.')) {
-                      const variableRefs = extractVariableRefs(nestedValue);
+                  {/* Input fields for variable references in data */}
+                  {Object.entries(input.data || {}).map(([fieldKey, fieldValue]) => {
+                    // Handle nested objects in data
+                    if (typeof fieldValue === 'object' && fieldValue !== null) {
+                      return Object.entries(fieldValue).map(([nestedKey, nestedValue]) => {
+                        // Only show inputs for string values that contain variable references
+                        if (typeof nestedValue === 'string' && nestedValue.includes('${variables.')) {
+                          const variableRefs = extractVariableRefs(nestedValue);
+                          return variableRefs.map(variableRef => (
+                            <Controller
+                              key={`${fieldKey}.${nestedKey}.${variableRef}`}
+                              control={control}
+                              name={`${transition.conditions[0].input}.${fieldKey}.${nestedKey}.${variableRef}`}
+                              render={({ field }) => (
+                                <InputField
+                                  {...field}
+                                  variant="underline"
+                                  placeholder={variableRef}
+                                  className="w-full"
+                                />
+                              )}
+                            />
+                          ));
+                        }
+                        return null;
+                      });
+                    }
+                    
+                    // Handle simple string values
+                    if (typeof fieldValue === 'string' && fieldValue.includes('${variables.')) {
+                      const variableRefs = extractVariableRefs(fieldValue);
                       return variableRefs.map(variableRef => (
                         <Controller
-                          key={`${fieldKey}.${nestedKey}.${variableRef}`}
+                          key={`${fieldKey}.${variableRef}`}
                           control={control}
-                          name={`${transition.conditions[0].input}.${fieldKey}.${nestedKey}.${variableRef}`}
+                          name={`${transition.conditions[0].input}.${fieldKey}.${variableRef}`}
                           render={({ field }) => (
                             <InputField
                               {...field}
@@ -117,40 +146,19 @@ const ActionSideMenu: React.FC = () => {
                       ));
                     }
                     return null;
-                  });
-                }
-                
-                // Handle simple string values
-                if (typeof fieldValue === 'string' && fieldValue.includes('${variables.')) {
-                  const variableRefs = extractVariableRefs(fieldValue);
-                  return variableRefs.map(variableRef => (
-                    <Controller
-                      key={`${fieldKey}.${variableRef}`}
-                      control={control}
-                      name={`${transition.conditions[0].input}.${fieldKey}.${variableRef}`}
-                      render={({ field }) => (
-                        <InputField
-                          {...field}
-                          variant="underline"
-                          placeholder={variableRef}
-                          className="w-full"
-                        />
-                      )}
-                    />
-                  ));
-                }
-                return null;
-              })}
+                  })}
 
-              <View className="flex flex-row justify-end mt-2">
-                <Button variant="soft" color="primary" size="sm">
-                  <Button.Text>Execute</Button.Text>
-                </Button>
-              </View>
-            </View>
-          </Card>
-        );
-      })}
+                  <View className="flex flex-row justify-end mt-2">
+                    <Button variant="soft" color="primary" size="sm">
+                      <Button.Text>Execute</Button.Text>
+                    </Button>
+                  </View>
+                </View>
+              </Card>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 };
