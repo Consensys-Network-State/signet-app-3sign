@@ -72,83 +72,81 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
   const showSideMenu = Boolean(params.draftId || params.agreementId || params.documentId);
 
   return (
-    <View className="h-screen bg-neutral-1">
-      <View className="flex flex-col h-full">
-        {/* Navbar */}
-        <View className="bg-neutral-1 shadow-md sticky top-0 z-20">
-          {/* Status Message */}
-          {status && (
-            <View className={`w-full flex flex-row h-14 items-center justify-between px-8 py-2 ${getStatusBackgroundColor(status.type)}`}>
-              <View className="flex flex-row items-center">
-                <Icon className="mr-2" icon={Info} />
-                <Text>{status.message}</Text>
-              </View>
-              { status.actions &&
-                <View className="flex flex-row items-center px-4 gap-2">
-                  {status.actions}
-                </View>
-              }
+    <View className="h-screen bg-neutral-1 flex flex-col">
+      {/* Navbar */}
+      <View className="bg-neutral-1 shadow-md z-20">
+        {/* Status Message */}
+        {status && (
+          <View className={`w-full flex flex-row h-14 items-center justify-between px-8 py-2 ${getStatusBackgroundColor(status.type)}`}>
+            <View className="flex flex-row items-center">
+              <Icon className="mr-2" icon={Info} />
+              <Text>{status.message}</Text>
             </View>
-          )}
-
-          <View className="flex flex-row items-center justify-between px-8 py-6">
-            {(isEditMode || isDraftMode) ? (
-              <View className="flex flex-row items-center gap-2">
-                <Button
-                  variant="ghost"
-                  onPress={() => navigate('/')}
-                  className="flex items-center justify-center h-10"
-                >
-                  <Button.Icon icon={ChevronLeft} />
-                </Button>
-                <View className="flex flex-row items-center gap-2">
-                  <Input
-                    value={title}
-                    variant="ghost"
-                    className="text-primary-12 text-xl font-semibold h-10"
-                    {...{ onChangeText: handleTitleChange }}
-                  >
-                    <Input.Field />
-                  </Input>
-                  <StatusLabel status="draft" />
-                </View>
+            { status.actions &&
+              <View className="flex flex-row items-center px-4 gap-2">
+                {status.actions}
               </View>
-            ) : (
+            }
+          </View>
+        )}
+
+        <View className="flex flex-row items-center justify-between px-8 py-6">
+          {(isEditMode || isDraftMode) ? (
+            <View className="flex flex-row items-center gap-2">
               <Button
                 variant="ghost"
                 onPress={() => navigate('/')}
-                className="p-0"
+                className="flex items-center justify-center h-10"
               >
-                <H4 className="text-primary-12">Agreements</H4>
+                <Button.Icon icon={ChevronLeft} />
               </Button>
-            )}
-
-            <View className="flex flex-row items-center px-4 gap-2">
-              {rightHeader}
-              <Account />
-              <ModeToggle />
+              <View className="flex flex-row items-center gap-2">
+                <Input
+                  value={title}
+                  variant="ghost"
+                  className="text-primary-12 text-xl font-semibold h-10"
+                  {...{ onChangeText: handleTitleChange }}
+                >
+                  <Input.Field />
+                </Input>
+                <StatusLabel status="draft" />
+              </View>
             </View>
+          ) : (
+            <Button
+              variant="ghost"
+              onPress={() => navigate('/')}
+              className="p-0"
+            >
+              <H4 className="text-primary-12">Agreements</H4>
+            </Button>
+          )}
+
+          <View className="flex flex-row items-center px-4 gap-2">
+            {rightHeader}
+            <Account />
+            <ModeToggle />
           </View>
         </View>
+      </View>
 
-        {/* Main Content */}
-        <View className="flex-1 flex-grow overflow-y-auto">
-          <View className={`mx-auto w-full transition-all duration-300 ease-in-out ${showSideMenu ? 'max-w-[1520px]' : 'max-w-[1200px]'} p-8 m-12 rounded-4`}>
-            <View className="flex flex-row gap-2">
-              {/* Content */}
-              <View className="flex-1">
-                {children}
-              </View>
-
-              {/* Side Menu */}
-              {showSideMenu && (
-                <View className="sticky top-0 self-start max-h-screen overflow-visible transition-all duration-300 ease-in-out px-4 pb-4">
-                  <SideMenu>
-                    <ActionSideMenu />
-                  </SideMenu>
-                </View>
-              )}
+      {/* Main Content Area */}
+      <View className="flex-1 min-h-0">
+        <View className={`h-full mx-auto w-full transition-all duration-300 ease-in-out ${showSideMenu ? 'max-w-[1520px]' : 'max-w-[1200px]'}`}>
+          <View className="flex flex-row gap-2 h-full">
+            {/* Content */}
+            <View className="flex-1 overflow-auto">
+              {children}
             </View>
+
+            {/* Side Menu */}
+            {showSideMenu && (
+              <View className="w-[320px] overflow-hidden">
+                <SideMenu>
+                  <ActionSideMenu />
+                </SideMenu>
+              </View>
+            )}
           </View>
         </View>
       </View>

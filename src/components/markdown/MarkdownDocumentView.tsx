@@ -326,7 +326,7 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
 
   return (
     <Layout rightHeader={rightHeader}>
-      <View className="flex-1 p-8">
+      <View className="h-full p-8">
         {renderContent()}
       </View>
     </Layout>
