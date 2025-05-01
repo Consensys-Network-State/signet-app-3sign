@@ -26,6 +26,7 @@ const ActionSideMenu: React.FC = () => {
 
   const executionInputs = currentDocument.execution?.inputs || {};
   const states = currentDocument.execution?.states || {};
+  const transitions = currentDocument.execution?.transitions || [];
 
   // Helper function to extract variable references from a string
   const extractVariableRefs = (str: string): string[] => {
@@ -38,11 +39,12 @@ const ActionSideMenu: React.FC = () => {
     .find(([_, state]) => state.isInitial)?.[1];
   
   const initialParams = initialState?.initialParams || {};
+  const isInitializing = !currentDocument.execution?.states[currentDocument.execution?.currentState || ''];
 
   return (
     <View className="flex flex-col gap-4">
       {/* Initialization Card */}
-      {!currentDocument.execution?.currentState && Object.keys(initialParams).length > 0 && (
+      {isInitializing && Object.keys(initialParams).length > 0 && (
         <Card className="p-4">
           <View className="flex flex-col gap-2">
             <Text className="font-semibold">Initialize Agreement</Text>
@@ -76,63 +78,33 @@ const ActionSideMenu: React.FC = () => {
         </Card>
       )}
 
-      {/* State Cards */}
-      {Object.entries(states).map(([stateKey, state]) => {
-        // Find inputs that are used in transitions from this state
-        const relevantInputs = Object.entries(executionInputs).filter(([inputKey, _]) => 
-          currentDocument.execution?.transitions.some(t => 
-            t.from === stateKey && t.conditions.some(c => c.input === inputKey)
-          )
-        );
+      {/* Transition Cards */}
+      {transitions.map((transition, index) => {
+        const input = executionInputs[transition.conditions[0]?.input];
+        const toState = states[transition.to];
+        
+        if (!input || !toState) return null;
 
         return (
-          <Card key={stateKey} className="p-4">
+          <Card key={index} className="p-4">
             <View className="flex flex-col gap-2">
-              <Text className="font-semibold">{state.name}</Text>
-              <Text className="text-sm text-neutral-11">{state.description}</Text>
+              <Text className="font-semibold">{input.displayName}</Text>
+              <Text className="text-sm text-neutral-11">{input.description}</Text>
+              <Text className="text-xs text-neutral-11">{toState.description}</Text>
 
-              {/* Show inputs relevant to this state */}
-              {relevantInputs.map(([inputKey, input]) => (
-                <View key={inputKey} className="mt-4">
-                  <Text className="text-sm font-medium">{input.displayName}</Text>
-                  <Text className="text-xs text-neutral-11 mb-2">{input.description}</Text>
-                  
-                  {/* Input fields for variable references in data */}
-                  {Object.entries(input.data || {}).map(([fieldKey, fieldValue]) => {
-                    // Handle nested objects in data
-                    if (typeof fieldValue === 'object' && fieldValue !== null) {
-                      return Object.entries(fieldValue).map(([nestedKey, nestedValue]) => {
-                        // Only show inputs for string values that contain variable references
-                        if (typeof nestedValue === 'string' && nestedValue.includes('${variables.')) {
-                          const variableRefs = extractVariableRefs(nestedValue);
-                          return variableRefs.map(variableRef => (
-                            <Controller
-                              key={`${fieldKey}.${nestedKey}.${variableRef}`}
-                              control={control}
-                              name={`${inputKey}.${fieldKey}.${nestedKey}.${variableRef}`}
-                              render={({ field }) => (
-                                <InputField
-                                  {...field}
-                                  variant="underline"
-                                  placeholder={variableRef}
-                                  className="w-full"
-                                />
-                              )}
-                            />
-                          ));
-                        }
-                        return null;
-                      });
-                    }
-                    
-                    // Handle simple string values
-                    if (typeof fieldValue === 'string' && fieldValue.includes('${variables.')) {
-                      const variableRefs = extractVariableRefs(fieldValue);
+              {/* Input fields for variable references in data */}
+              {Object.entries(input.data || {}).map(([fieldKey, fieldValue]) => {
+                // Handle nested objects in data
+                if (typeof fieldValue === 'object' && fieldValue !== null) {
+                  return Object.entries(fieldValue).map(([nestedKey, nestedValue]) => {
+                    // Only show inputs for string values that contain variable references
+                    if (typeof nestedValue === 'string' && nestedValue.includes('${variables.')) {
+                      const variableRefs = extractVariableRefs(nestedValue);
                       return variableRefs.map(variableRef => (
                         <Controller
-                          key={`${fieldKey}.${variableRef}`}
+                          key={`${fieldKey}.${nestedKey}.${variableRef}`}
                           control={control}
-                          name={`${inputKey}.${fieldKey}.${variableRef}`}
+                          name={`${transition.conditions[0].input}.${fieldKey}.${nestedKey}.${variableRef}`}
                           render={({ field }) => (
                             <InputField
                               {...field}
@@ -145,15 +117,36 @@ const ActionSideMenu: React.FC = () => {
                       ));
                     }
                     return null;
-                  })}
+                  });
+                }
+                
+                // Handle simple string values
+                if (typeof fieldValue === 'string' && fieldValue.includes('${variables.')) {
+                  const variableRefs = extractVariableRefs(fieldValue);
+                  return variableRefs.map(variableRef => (
+                    <Controller
+                      key={`${fieldKey}.${variableRef}`}
+                      control={control}
+                      name={`${transition.conditions[0].input}.${fieldKey}.${variableRef}`}
+                      render={({ field }) => (
+                        <InputField
+                          {...field}
+                          variant="underline"
+                          placeholder={variableRef}
+                          className="w-full"
+                        />
+                      )}
+                    />
+                  ));
+                }
+                return null;
+              })}
 
-                  <View className="flex flex-row justify-end mt-2">
-                    <Button variant="soft" color="primary" size="sm">
-                      <Button.Text>Execute</Button.Text>
-                    </Button>
-                  </View>
-                </View>
-              ))}
+              <View className="flex flex-row justify-end mt-2">
+                <Button variant="soft" color="primary" size="sm">
+                  <Button.Text>Execute</Button.Text>
+                </Button>
+              </View>
             </View>
           </Card>
         );
