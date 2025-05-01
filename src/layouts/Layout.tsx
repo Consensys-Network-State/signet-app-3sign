@@ -7,7 +7,6 @@ import { Info, ChevronLeft } from 'lucide-react-native';
 import { useNavigate, useLocation, useParams } from 'react-router';
 import { useEditStore } from '../store/editorStore';
 import { useDocumentStore } from '../store/documentStore';
-import StatusLabel from '../components/StatusLabel';
 import SideMenu from './SideMenu';
 import ActionSideMenu from '../components/ActionSideMenu';
 
@@ -109,7 +108,6 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
                 >
                   <Input.Field />
                 </Input>
-                <StatusLabel status="draft" />
               </View>
             </View>
           ) : (

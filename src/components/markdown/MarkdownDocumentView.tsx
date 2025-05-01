@@ -14,6 +14,7 @@ import { isAddress } from 'viem';
 import AddressAvatar from "../../web3/AddressAvatar.tsx";
 import { DatePickerField } from '../../components/DatePickerField';
 import dayjs from 'dayjs';
+import StatusLabel from '../../components/StatusLabel';
 
 interface SpanProps {
   className?: string;
@@ -327,6 +328,9 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
   return (
     <Layout rightHeader={rightHeader}>
       <View className="h-full p-8">
+        <View className="mb-6 w-fit">
+          <StatusLabel status="draft" text="DRAFT - Initialize Agreement" />
+        </View>
         {renderContent()}
       </View>
     </Layout>
