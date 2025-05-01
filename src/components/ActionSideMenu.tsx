@@ -6,6 +6,9 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogD
 import { useDocumentStore } from "../store/documentStore";
 import { Controller } from "react-hook-form";
 import { useForm } from "react-hook-form";
+import { isAddress } from 'viem';
+import AddressCard from "../web3/AddressCard";
+import truncateEthAddress from "truncate-eth-address";
 
 // TODO: Remove these test transitions once backend integration is complete
 const TEST_TRANSITIONS = [
@@ -166,7 +169,7 @@ const ActionSideMenu: React.FC = () => {
   const executionInputs = currentDocument.execution?.inputs || {};
   const states = currentDocument.execution?.states || {};
   // Using test transitions for now
-  const transitions = [];
+  const transitions = TEST_TRANSITIONS;
 
   // Find initial state
   const initialState = Object.entries(states)
@@ -291,6 +294,11 @@ const ActionSideMenu: React.FC = () => {
             const input = getInputDetails(vc.credentialSubject.id);
             if (!input) return null;
 
+            // Extract the Ethereum address from the DID
+            const address = vc.issuer.id.split(':').pop() || '';
+            const isValidAddress = isAddress(address);
+            const truncatedAddress = isValidAddress ? truncateEthAddress(address) : address;
+
             return (
               <Card key={index} className="p-4 bg-neutral-3">
                 <View className="flex flex-col gap-2">
@@ -302,17 +310,37 @@ const ActionSideMenu: React.FC = () => {
                   </View>
                   
                   {/* Show the actual values that were signed */}
-                  {Object.entries(vc.credentialSubject.values).map(([key, value]) => (
-                    <View key={key} className="flex flex-col gap-1">
-                      <Text className="text-sm text-neutral-11">{key}</Text>
-                      <Text className="text-sm">{value}</Text>
-                    </View>
-                  ))}
+                  {Object.entries(vc.credentialSubject.values).map(([key, value]) => {
+                    // Check if the value looks like an Ethereum address
+                    const isAddressValue = typeof value === 'string' && isAddress(value);
+                    
+                    return (
+                      <View key={key} className="flex flex-col gap-1">
+                        <Text className="text-sm text-neutral-11">{key}</Text>
+                        {isAddressValue ? (
+                          <AddressCard 
+                            address={value as `0x${string}`} 
+                            className="h-8" 
+                            avatarClassName="w-5 h-5"
+                          />
+                        ) : (
+                          <Text className="text-sm">{value}</Text>
+                        )}
+                      </View>
+                    );
+                  })}
 
                   {/* Show who signed it */}
-                  <Text className="text-xs text-neutral-11 mt-2">
-                    Signed by {vc.issuer.id}
-                  </Text>
+                  <View className="mt-2">
+                    <Text className="text-xs text-neutral-11 mb-1">Signed by</Text>
+                    {isValidAddress && (
+                      <AddressCard 
+                        address={address as `0x${string}`} 
+                        className="h-8"
+                        avatarClassName="w-5 h-5"
+                      />
+                    )}
+                  </View>
 
                   {/* View Details Button */}
                   <View className="flex flex-row justify-end mt-2">
