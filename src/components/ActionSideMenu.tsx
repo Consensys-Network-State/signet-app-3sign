@@ -389,7 +389,7 @@ const ActionSideMenu: React.FC = () => {
     if (type === 'publish') {
       if (!trigger || !getValues) return;
       const fieldsToValidate = Object.keys(initialParams);
-      const isValid = await trigger(fieldsToValidate, { shouldFocus: true });
+      const isValid = await trigger(fieldsToValidate);
       if (!isValid) return;
       setConfirmDialog({ type });
     } else if (type === 'transition' && transition) {
@@ -489,6 +489,7 @@ const ActionSideMenu: React.FC = () => {
       {!isInitializing && nextActions && nextActions.length > 0 && nextActions.map((action, index) => {
         const inputs = action.conditions.map((condition) => condition.input);
         const input = inputs[0];
+        const transitionEnabled = isTransitionEnabled(action);
         return (
           <Card key={index} className="p-4">
             <View className="flex flex-col gap-2">
@@ -515,6 +516,7 @@ const ActionSideMenu: React.FC = () => {
                         onBlur={onBlur}
                         error={errors?.[fieldKey]?.message}
                         className="w-full"
+                        disabled={!transitionEnabled}
                       />
                     )}
                   />
@@ -528,11 +530,27 @@ const ActionSideMenu: React.FC = () => {
                   size="sm"
                   onPress={() => handleConfirm('transition', action as TransitionAction)}
                   loading={isExecuting}
+                  disabled={!transitionEnabled}
                 >
                   <Button.Spinner />
                   <Button.Text>{isExecuting ? 'Executing...' : 'Execute'}</Button.Text>
                 </Button>
               </View>
+              {!transitionEnabled && (
+                <View className="bg-error-2 border border-error-7 rounded p-3 mt-3">
+                  <Text className="text-xs text-error-10">
+                    You are not authorized to perform this action or edit these fields.
+                  </Text>
+                  <View className="mt-2">
+                    <Text className="text-xs text-neutral-11 mb-2">Authorized signer:</Text>
+                    <AddressCard
+                      address={input.issuer as `0x${string}`}
+                      className="h-8"
+                      avatarClassName="w-5 h-5"
+                    />
+                  </View>
+                </View>
+              )}
             </View>
           </Card>
         );
