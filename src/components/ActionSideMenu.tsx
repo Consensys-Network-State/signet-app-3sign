@@ -1,6 +1,6 @@
 import * as React from "react";
 import { View } from "react-native";
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { Text, Card, Button, Input, InputField } from "@ds3/react";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@ds3/react";
 import { useDocumentStore } from "../store/documentStore";
@@ -9,6 +9,12 @@ import { isAddress } from 'viem';
 import AddressCard from "../web3/AddressCard";
 import truncateEthAddress from "truncate-eth-address";
 import { DraftFormContext } from './markdown/Draft';
+import { useMutation } from "@tanstack/react-query";
+import { useAccount } from "wagmi";
+import { Document } from "../store/documentStore";
+import { createAgreementInitVC } from "../utils/veramoUtils";
+import { postAgreement } from "../api";
+import { getInitialState, getInitialStateParams } from "../utils/agreementUtils";
 
 // TODO: Remove these test transitions once backend integration is complete
 const TEST_TRANSITIONS = [
@@ -150,34 +156,27 @@ const ActionSideMenu: React.FC = () => {
   const params = useParams();
   const [selectedVC, setSelectedVC] = React.useState<VerifiableCredential | null>(null);
   const form = React.useContext(DraftFormContext);
-  
+  const { address } = useAccount();
+  const { updateDraft, deleteDraft, getDraft } = useDocumentStore();
+  const navigate = useNavigate();
+
   // Get document ID from any of the possible route parameters
   const documentId = params.draftId || params.agreementId || params.documentId;
   
   // Check both documents and drafts in the store
-  const currentDocument = useDocumentStore(state => {
-    if (!documentId) return null;
-    return state.documents.find(doc => doc.id === documentId) || 
-           state.drafts.find(draft => draft.id === documentId);
+  const currentDocument: Document | null = useDocumentStore(state => {
+    if (params.draftId) return state.drafts.find(draft => draft.id === params.draftId) || null;
+    else if (params.agreementId) return state.agreements.find(agreement => agreement.id === params.agreementId)?.document || null;
+    else return null;
   });
 
-  if (!currentDocument || !form) {
-    return null;
-  }
 
   // Get form methods
-  const { control, formState: { errors }, handleSubmit } = form;
   
-  // Get execution data from the document
-  const executionInputs = currentDocument.execution?.inputs || {};
-  const states = currentDocument.execution?.states || {};
-  const transitions = TEST_TRANSITIONS;
-
-  // Find initial state first
-  const initialState = Object.entries(states)
-    .find(([_, state]) => state && typeof state === 'object' && 'isInitial' in state && state.isInitial)?.[1];
-  
-  const initialParams = initialState?.initialParams || {};
+  // // Get execution data from the document
+  // const executionInputs = currentDocument.execution?.inputs || {};
+  // const states = currentDocument.execution?.states || {};
+  // const transitions = TEST_TRANSITIONS;
   
   // Helper function to get input details from template
   const getInputDetails = (inputId: string): DocumentInput | undefined => {
@@ -223,59 +222,93 @@ const ActionSideMenu: React.FC = () => {
     });
   }, []);
 
-  // Handle initialization
-  const onInitialize = React.useCallback(async (values: Record<string, string>) => {
-    if (!initialState || !documentId) return;
+  const executionInputs = currentDocument?.execution?.inputs || {};
+  const states = currentDocument?.execution?.states || {};
+  const transitions = currentDocument?.execution?.transitions || [];
+  
+  // Find initial state and its params  
+  const initialParams = getInitialStateParams(currentDocument);
 
-    // TODO: Execute initialization
-    console.log('Initializing agreement:', {
-      initialState,
-      values
-    });
-  }, [documentId, initialState]);
+  // Create mutation for publishing agreement
+  const publishMutation = useMutation({
+    mutationFn: async (values: Record<string, string>) => {
+      if (!currentDocument || !address) throw new Error("Draft or address not available");
+      const initValues = Object.fromEntries(
+        Object.entries(values).filter(([key]) => key in initialParams).map(([key, value]) => [initialParams[key], value])
+      );
+      const vc = await createAgreementInitVC(address as `0x${string}`, currentDocument, initValues);
+      return postAgreement(vc);
+    },
+    onSuccess: (data) => {
+      const newAgreementId = data.data.id;
+      console.log({
+        title: "Agreement Published",
+        description: "Your agreement has been successfully published",
+        variant: "success",
+      });
+      localStorage.removeItem(`draft_${params.draftId}_values`);
+      deleteDraft(params.draftId!);
+      navigate(`/agreements/${newAgreementId}`);
+    },
+    onError: (error) => {
+      console.log({
+        title: "Publication Failed",
+        description: error.message || "Failed to publish agreement",
+        variant: "error",
+      });
+    }
+  });
+
+  const onPublish = React.useCallback((values: Record<string, string>) => {
+    // TODO: Use Values from Form validation, right now validation is validating the whole form which shouldn't be the case
+    publishMutation.mutate(getCachedValues());
+  }, [publishMutation]);
+
+
+  console.log(currentDocument, !!form);
+  if (!currentDocument || !form) {
+    return null;
+  }
+
+  const { control, formState: { errors }, handleSubmit } = form;
 
   return (
     <View className="flex flex-col gap-4">
       <Text className="text-sm font-medium text-neutral-11">Actions</Text>
 
       {/* Initial Action Section */}
-      {initialState && Object.keys(initialParams).length > 0 && (
+      {params.draftId && Object.keys(initialParams).length > 0 && (
         <Card className="p-4">
           <View className="flex flex-col gap-2">
             <Text className="font-semibold">Initialize Agreement</Text>
-            {initialState.description && (
-              <Text className="text-sm text-neutral-11">{initialState.description}</Text>
-            )}
+            <Text className="text-sm text-neutral-11">{"Initialize the agreement with the following parameters"}</Text>
             
-            {Object.entries(initialParams).map(([paramKey, paramValue]) => {
-              const variableRefs = extractVariableRefs(paramValue);
-              return variableRefs.map(variableRef => (
-                <Controller
-                  key={variableRef}
-                  control={control}
-                  name={variableRef}
-                  render={({ field: { onChange, value, onBlur } }) => (
-                    <InputField
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      variant="underline"
-                      placeholder={variableRef}
-                      error={errors?.[variableRef]?.message?.toString()}
-                      className="w-full"
-                    />
-                  )}
-                />
-              ));
-            })}
+            {Object.keys(initialParams).map(paramKey => 
+              <Controller
+                key={paramKey}
+                control={control}
+                name={paramKey}
+                render={({ field: { onChange, value, onBlur } }) => (
+                  <InputField
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    variant="underline"
+                    placeholder={paramKey}
+                    error={errors?.[paramKey]?.message?.toString()}
+                    className="w-full"
+                  />
+                )}
+              />
+            )}
 
             <View className="flex flex-row justify-end mt-2">
               <Button 
                 variant="soft" 
                 color="primary" 
                 size="sm"
-                onPress={handleSubmit(onInitialize)}
-                isDisabled={!Object.values(initialParams).flatMap(extractVariableRefs).every(ref => getCachedValues()[ref])}
+                onPress={onPublish} // TODO: wrap onPublish with dynamic validation function that passes the correct values downstream
+                disabled={!Object.keys(initialParams).every(ref => getCachedValues()[ref])}
               >
                 <Button.Text>Initialize</Button.Text>
               </Button>
@@ -288,7 +321,6 @@ const ActionSideMenu: React.FC = () => {
       {transitions.length > 0 && transitions.map((transition, index) => {
         const input = getInputDetails(transition.conditions[0]?.input);
         if (!input) return null;
-
         return (
           <Card key={index} className="p-4">
             <View className="flex flex-col gap-2">
@@ -324,7 +356,7 @@ const ActionSideMenu: React.FC = () => {
                   color="primary" 
                   size="sm"
                   onPress={handleSubmit((values) => onExecuteTransition(values, transition))}
-                  isDisabled={!isTransitionEnabled(transition)}
+                  disabled={!isTransitionEnabled(transition)}
                 >
                   <Button.Text>Execute</Button.Text>
                 </Button>

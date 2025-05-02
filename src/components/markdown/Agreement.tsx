@@ -1,44 +1,51 @@
 import * as React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from '@ds3/react';
 import { useForm } from 'react-hook-form';
 import { useAccount } from 'wagmi';
-import { useMutation } from '@tanstack/react-query';
-import { createAgreementInitVC } from '../../utils/veramoUtils.ts';
-import { postAgreement } from '../../api';
-import { useDocumentStore, DocumentVariable, DocumentState } from '../../store/documentStore';
-import { Document } from "../../store/documentStore";
+import { useQuery } from '@tanstack/react-query';
+import { useDocumentStore, Agreement } from '../../store/documentStore';
 import MarkdownDocumentView from './MarkdownDocumentView';
+import Layout from '../../layouts/Layout.tsx';
+import { getAgreementByUserId } from '../../api/index.ts';
+import StatusLabel from '../StatusLabel.tsx';
+import { DraftFormContext } from './Draft.tsx';
+import { View } from 'react-native';
 
 const Draft: React.FC = () => {
   const { agreementId } = useParams<{ agreementId: string }>();
-  const { getDocument } = useDocumentStore();
+  const { getAgreement, addAgreements } = useDocumentStore();
   const { address } = useAccount();
   const navigate = useNavigate();
+  const [agreement, setAgreement] = React.useState<Agreement | null>(null);
 
-  const agreement = React.useMemo(() => {
-    if (agreementId) return getDocument(agreementId);
-    return null;
-  }, [agreementId, getDocument]);
+  // TODO: This should ideally be a query for the specific agreement ID. No such endpoint exists yet.
+  const { data: agreements, isLoading: isLoadingAgreements } = useQuery({
+    queryKey: [],
+    queryFn: () => getAgreementByUserId(address as string),
+  });
 
-  if (!agreementId || !agreement) {
-    return null;
-  }
 
-  // Get initial values from localStorage or draft
-  const getInitialValues = React.useCallback(() => {
-    // const storedValues = localStorage.getItem(`draft_${draftId}_values`);
-    // if (storedValues) {
-    //   return JSON.parse(storedValues);
-    // }
-    return Object.entries(agreement.variables).reduce((acc, [key, variable]) => ({
+  React.useEffect(() => {
+    if (!isLoadingAgreements && agreements) {
+      // TODO: the state is also queried here (agreement.state). Need to determine how we store and display this.
+      addAgreements(agreements.data || [])
+      setAgreement(agreements.data.find((agreement: Agreement) => agreement.id === agreementId) || null)
+    }
+  }, [agreements, isLoadingAgreements, addAgreements])
+
+  const initialValues = React.useMemo(() => {
+    if (!agreement || !agreement.document || !agreement.document.variables) {
+      return null;
+    }
+    
+    return Object.entries(agreement.state.Variables).reduce((acc, [key, variable]) => ({
       ...acc,
       [key]: variable.value || ''
     }), {} as Record<string, string>);
   }, [agreement]);
 
   const form = useForm({
-    defaultValues: getInitialValues(),
+    defaultValues: {},
     mode: 'onBlur',
     reValidateMode: 'onBlur'
   });
@@ -47,9 +54,15 @@ const Draft: React.FC = () => {
     handleSubmit,
     formState: { errors },
     control,
-    watch
+    watch,
+    reset
   } = form;
 
+  React.useEffect(() => {
+    if (agreement && initialValues) {
+      reset(initialValues);
+    }
+  }, [agreement, form, initialValues]);
 
   // Watch form values and update localStorage
 //   React.useEffect(() => {
@@ -110,36 +123,68 @@ const Draft: React.FC = () => {
 //     publishMutation.mutate(values);
 //   }, [publishMutation]);
 
-//   const rightHeader = (
-//     <>
-//       <Button 
-//         variant="soft" 
-//         color="primary" 
-//         onPress={handleSubmit(onSubmit)}
-//       >
-//         <Button.Text>Save</Button.Text>
-//       </Button>
-//       <Button 
-//         variant="soft" 
-//         color="primary" 
-//         onPress={handleSubmit(onPublish)}
-//         isLoading={publishMutation.isPending}
-//         isDisabled={publishMutation.isPending}
-//       >
-//         <Button.Text>{publishMutation.isPending ? 'Publishing...' : 'Publish'}</Button.Text>
-//       </Button>
-//     </>
-//   );
+  const currentState = React.useMemo(() => {
+    if (!agreement) return null;
+    return agreement.state.State;
+  }, [agreement])
+
+  const nextStates = React.useMemo(() => {
+    if (!agreement) return null;
+    return agreement.document.execution.transitions
+        .filter((transition) => transition.from === currentState!.id)
+        .map((transition) => ({
+            to: agreement.document.execution.states[transition.to],
+            conditions: transition.conditions.map((condition) => ({
+                type: condition.type,
+                input: agreement.document.execution.inputs[condition.input]
+            }))
+        }));
+  }, [currentState, agreement])
+
+  if (isLoadingAgreements) {
+    return <div>Loading...</div>;
+  }
+
+  if (!agreement) return null; // TODO: Handle Error
 
   return (
-    <MarkdownDocumentView
-      content={agreement.content}
-      variables={agreement.variables}
-    //   rightHeader={rightHeader}
-      control={control}
-      errors={errors}
-    //   editableFields={Object.keys(initialInputs)}
-    />
+    <>
+      <DraftFormContext.Provider value={form}>
+        <Layout>
+          <View className="h-full p-8">
+            <View className="mb-6 w-fit">
+              <StatusLabel status="draft" text="Published Agreement -- TODO: Add status" />
+            </View>
+            <MarkdownDocumentView
+              content={agreement.document.content}
+              variables={agreement.document.variables}
+              control={control}
+              errors={errors}
+              // editableFields={Object.keys(initialInputs)}
+            />
+          </View>  
+        </Layout>
+      </DraftFormContext.Provider>
+        {/* <>
+        <Text>
+            Current State: {currentState.name}
+        </Text>
+        <Text>...........................</Text>
+        <Text>
+            Next States: {nextStates.map((state) => state.to.name).join(', ')}
+        </Text>
+        </> */}
+        {/* <Layout>
+            <MarkdownDocumentView
+                content={agreement.document.content}
+                variables={agreement.document.variables}
+                //   rightHeader={rightHeader}
+                control={control}
+                errors={errors}
+                //   editableFields={Object.keys(initialInputs)}
+            />
+        </Layout> */}
+    </>
   );
 };
 
