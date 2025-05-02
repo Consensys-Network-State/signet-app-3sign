@@ -19,6 +19,7 @@ import { getInitialStateParams, getNextStates } from "../utils/agreementUtils";
 import { formCache } from "../utils/formCache";
 import { handleTitleChange as handleTitleChangeUtil } from '../utils/documentUtils';
 import VariableInput, { createValidationRules } from './form/VariableInput';
+import ConfirmActionDialog from './ConfirmActionDialog';
 
 const TEST_INPUTS = {
   "partyAData": {
@@ -380,6 +381,37 @@ const ActionSideMenu: React.FC = () => {
     }
   }, [getValues, areTransitionFieldsValid, inputMutation, trigger]);
 
+  // Replace confirmDialog state to also track transition
+  const [confirmDialog, setConfirmDialog] = React.useState<null | { type: 'publish' | 'transition', transition?: TransitionAction }>(null);
+
+  // Handler to open dialog after validation
+  const handleConfirm = async (type: 'publish' | 'transition', transition?: TransitionAction) => {
+    if (type === 'publish') {
+      if (!trigger || !getValues) return;
+      const fieldsToValidate = Object.keys(initialParams);
+      const isValid = await trigger(fieldsToValidate, { shouldFocus: true });
+      if (!isValid) return;
+      setConfirmDialog({ type });
+    } else if (type === 'transition' && transition) {
+      if (!trigger || !getValues) return;
+      const fieldsToValidate = Object.keys(transition.conditions[0].input.data);
+      const isValid = await trigger(fieldsToValidate, { shouldFocus: true });
+      if (!isValid) return;
+      setConfirmDialog({ type, transition });
+    }
+  };
+
+  const handleCloseDialog = () => setConfirmDialog(null);
+
+  const handleConfirmAction = async () => {
+    if (confirmDialog?.type === 'publish') {
+      await onPublish();
+    } else if (confirmDialog?.type === 'transition' && confirmDialog.transition) {
+      await onExecuteTransition(confirmDialog.transition);
+    }
+    setConfirmDialog(null);
+  };
+
   if (!currentDocument || !form) {
     return null;
   }
@@ -442,7 +474,7 @@ const ActionSideMenu: React.FC = () => {
                 variant="soft" 
                 color="primary" 
                 size="sm"
-                onPress={onPublish}
+                onPress={() => handleConfirm('publish')}
                 loading={isInitializingAction}
               >
                 <Button.Spinner />
@@ -494,7 +526,7 @@ const ActionSideMenu: React.FC = () => {
                   variant="soft" 
                   color="primary" 
                   size="sm"
-                  onPress={() => onExecuteTransition(action as TransitionAction)}
+                  onPress={() => handleConfirm('transition', action as TransitionAction)}
                   loading={isExecuting}
                 >
                   <Button.Spinner />
@@ -585,6 +617,15 @@ const ActionSideMenu: React.FC = () => {
         vc={selectedVC!}
         isOpen={selectedVC !== null}
         onClose={() => setSelectedVC(null)}
+      />
+
+      {/* Confirmation Dialog */}
+      <ConfirmActionDialog
+        open={!!confirmDialog}
+        onOpenChange={handleCloseDialog}
+        onConfirm={handleConfirmAction}
+        loading={isInitializingAction || isExecuting}
+        type={confirmDialog?.type || 'publish'}
       />
     </View>
   );
