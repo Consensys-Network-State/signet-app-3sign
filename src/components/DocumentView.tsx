@@ -22,6 +22,7 @@ const DocumentView: React.FC<DocumentViewProps> = ({ type }) => {
   const { addAgreements, getDraft, getAgreement: getAgreementFromStore } = useDocumentStore();
   const isInitialized = !!agreementId;
   const [fetchedAndLoaded, setFetchedAndLoaded] = React.useState(false);
+  const [fetchedValues, setFetchedValues] = React.useState<Record<string, string>>({});
 
   // Load agreement data if needed
   const { data: agreement, isLoading: isLoadingAgreement } = useQuery({
@@ -37,6 +38,12 @@ const DocumentView: React.FC<DocumentViewProps> = ({ type }) => {
     if (type === 'agreement' && !isLoadingAgreement && agreement) {
       addAgreements([agreement]);
       setFetchedAndLoaded(true);
+      setFetchedValues(
+        Object.fromEntries(
+          Object.entries(agreement.state.Variables)
+            .map(([key, value]) => [key, value.value || ''])
+        )
+      );
     }
   }, [agreement, isLoadingAgreement, addAgreements, type]);
 
@@ -61,7 +68,18 @@ const DocumentView: React.FC<DocumentViewProps> = ({ type }) => {
     formState: { errors },
     control,
     watch,
+    reset
   } = form;
+
+  // Need to reset the form values when the document is pulled from the query
+  React.useEffect(() => {
+    if (document && documentId) {
+      reset({
+        ...fetchedValues,
+        ...formCache.getInitialValues(documentId, document || null)
+      });
+    }
+  }, [document, documentId, reset])
 
   // Watch form values and update localStorage
   React.useEffect(() => {
