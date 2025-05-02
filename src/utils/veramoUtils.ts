@@ -107,6 +107,37 @@ export async function createAgreementInitVC(address: `0x${string}`, agreement: D
 export async function createAgreementInputVC(address: `0x${string}`, inputId: string, values: Record<string, any>) {
   const agent = await setupAgent();
   const did = await agent.didManagerGet({did: `did:pkh:eip155:1:${address}`});
+
+  // Filter out empty keys or keys with empty string values
+  const filteredValues = Object.fromEntries(
+    Object.entries(values).filter(([_, value]) => value !== null && value !== undefined && value !== '')
+  );
+
+  const credential = {
+    id: uuidv4(),
+    issuer: { id: did.did },
+    '@context': ['https://www.w3.org/2018/credentials/v1'],
+    type: [
+      'VerifiableCredential',
+      'Agreement',
+    ],
+    issuanceDate: new Date().toISOString(),
+    credentialSubject: {
+      id: inputId,
+      type: "signedFields", // TODO: Make this configurable
+      values: filteredValues
+    },
+  }
+
+  const vc = await agent.createVerifiableCredential({
+    credential,
+    proofFormat: 'EthereumEip712Signature2021',
+  });
+
+  const verificationResult = await agent.verifyCredential({ credential: vc });
+  if (!verificationResult.verified) throw new Error('Failed to sign with wallet');
+  return JSON.stringify(vc);
+
 }
 
 export async function createSignatureVC(address: `0x${string}`, documentState: Block[], documentVC: string) {

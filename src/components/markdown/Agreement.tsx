@@ -57,6 +57,16 @@ const Draft: React.FC = () => {
     reset
   } = form;
 
+  // Watch form values and update localStorage
+  React.useEffect(() => {
+    const subscription = watch((values) => {
+      if (!values) return;
+      localStorage.setItem(`draft_${agreementId}_values`, JSON.stringify(values));
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, agreementId]);
+
   React.useEffect(() => {
     if (agreement && initialValues) {
       reset(initialValues);

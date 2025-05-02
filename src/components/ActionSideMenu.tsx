@@ -12,8 +12,8 @@ import { DraftFormContext } from './markdown/Draft';
 import { useMutation } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { Document } from "../store/documentStore";
-import { createAgreementInitVC } from "../utils/veramoUtils";
-import { postAgreement } from "../api";
+import { createAgreementInitVC, createAgreementInputVC } from "../utils/veramoUtils";
+import { postAgreement, postAgreementInput } from "../api/index";
 import { getCurrentState, getInitialState, getInitialStateParams, getNextStates } from "../utils/agreementUtils";
 
 // TODO: Remove these test transitions once backend integration is complete
@@ -206,27 +206,8 @@ const ActionSideMenu: React.FC = () => {
   }, [documentId]);
 
   // Helper function to check if a transition's conditions are met
-  const isTransitionEnabled = React.useCallback((transition: Transition) => {
-    const input = getInputDetails(transition.conditions[0]?.input);
-    if (!input) return false;
-
-    // Check if all required variables have values from cache
-    const variableRefs = Object.values(input.data).flatMap(extractVariableRefs);
-    const cachedValues = getCachedValues();
-    return variableRefs.every(ref => cachedValues[ref]);
-  }, [getCachedValues]);
-
-  // Handle transition execution
-  const onExecuteTransition = React.useCallback(async (values: Record<string, string>, transition: Transition) => {
-    const input = getInputDetails(transition.conditions[0]?.input);
-    if (!input) return;
-
-    // TODO: Execute the transition
-    console.log('Executing transition:', {
-      transition,
-      input,
-      values
-    });
+  const isTransitionEnabled = React.useCallback((transition: any) => {
+    return transition.conditions.every((condition: any) => condition.input.issuer.toLowerCase() === address.toLowerCase());
   }, []);
 
   const executionInputs = currentDocument?.execution?.inputs || {};
@@ -275,6 +256,48 @@ const ActionSideMenu: React.FC = () => {
     // TODO: Use Values from Form validation, right now validation is validating the whole form which shouldn't be the case
     publishMutation.mutate(getCachedValues());
   }, [publishMutation]);
+
+  // Create mutation for publishing agreement
+  const inputMutation = useMutation({
+    mutationFn: async ({ values, transition } : { values: Record<string, string>, transition: any}) => {
+      if (!currentAgreement || !address) throw new Error("Agreement or address not available");
+      const inputValues = Object.fromEntries(
+        Object.entries(values).filter(([key]) => key in transition.conditions[0].input.data)
+      );
+      const vc = await createAgreementInputVC(address as `0x${string}`, transition.conditions[0].input.id, inputValues);
+      console.log(transition);
+      const input = {
+        inputId: transition.conditions[0].input.id,
+        inputValue: JSON.parse(vc)
+      }
+      console.log(input);
+      return postAgreementInput(documentId, JSON.stringify(input));
+    },
+    onSuccess: (data) => {
+      console.log(data);
+      console.log({
+        title: "Input Processed",
+        description: "Your input has been successfully processed in the agreement",
+        variant: "success",
+      });
+    },
+    onError: (error) => {
+      console.log({
+        title: "Input Failed",
+        description: error.message || "Failed to process input in the agreement",
+        variant: "error",
+      });
+    }
+  });
+
+  // Handle transition execution
+  const onExecuteTransition = React.useCallback(async (transition) => {
+    const data =  {
+      values: getCachedValues(),
+      transition
+    }
+    inputMutation.mutate(data)
+  }, []);
 
 
   if (!currentDocument || !form) {
@@ -367,8 +390,9 @@ const ActionSideMenu: React.FC = () => {
                   variant="soft" 
                   color="primary" 
                   size="sm"
-                  onPress={handleSubmit((values) => onExecuteTransition(values, action))}
-                  // disabled={!isTransitionEnabled(transition)}
+                  onPress={() => onExecuteTransition(action)}
+                  disabled={!isTransitionEnabled(action)}
+                  tooltip="hi"
                 >
                   <Button.Text>Execute</Button.Text>
                 </Button>

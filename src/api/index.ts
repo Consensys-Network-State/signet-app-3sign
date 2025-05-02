@@ -23,7 +23,7 @@ export const postAgreement = async (agreementVC: string) => {
 }
 
 export const postAgreementInput = async (agreementId: string, inputVC: string) => {
-  return await axios.post(`${API_URL}/agreements/${agreementId}/processInput`, JSON.parse(inputVC));
+  return await axios.post(`${API_URL}/agreements/${agreementId}/input`, JSON.parse(inputVC));
 }
 
 export const getAgreementByUserId = async (userId: string) => {
