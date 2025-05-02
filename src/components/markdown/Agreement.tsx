@@ -13,9 +13,8 @@ import { View } from 'react-native';
 
 const Draft: React.FC = () => {
   const { agreementId } = useParams<{ agreementId: string }>();
-  const { getAgreement, addAgreements } = useDocumentStore();
+  const { addAgreements } = useDocumentStore();
   const { address } = useAccount();
-  const navigate = useNavigate();
   const [agreement, setAgreement] = React.useState<Agreement | null>(null);
 
   // TODO: This should ideally be a query for the specific agreement ID. No such endpoint exists yet.
@@ -64,83 +63,6 @@ const Draft: React.FC = () => {
     }
   }, [agreement, form, initialValues]);
 
-  // Watch form values and update localStorage
-//   React.useEffect(() => {
-//     const subscription = watch((values) => {
-//       if (!values) return;
-//       localStorage.setItem(`draft_${draftId}_values`, JSON.stringify(values));
-//     });
-
-//     return () => subscription.unsubscribe();
-//   }, [watch, draftId]);
-
-  // Only update draft on submit
-//   const onSubmit = React.useCallback((values: Record<string, string>) => {
-//     if (!draft) return;
-
-//     const updatedVariables = Object.entries(draft.variables).reduce((acc, [key, variable]) => ({
-//       ...acc,
-//       [key]: {
-//         ...variable,
-//         value: values[key] || ''
-//       }
-//     }), {} as Record<string, DocumentVariable>);
-
-//     console.log(updatedVariables);
-
-//     updateDraft(draftId, draft.content.data as string, updatedVariables);
-//     localStorage.removeItem(`draft_${draftId}_values`);
-//   }, [draft, draftId, updateDraft]);
-
-//   // Create mutation for publishing agreement
-//   const publishMutation = useMutation({
-//     mutationFn: async (values: Record<string, string>) => {
-//       if (!draft || !address) throw new Error("Draft or address not available");
-      
-//       const vc = await createAgreementInitVC(address as `0x${string}`, draft as Document, values);
-//       return postAgreement(vc);
-//     },
-//     onSuccess: () => {
-//       console.log({
-//         title: "Agreement Published",
-//         description: "Your agreement has been successfully published",
-//         variant: "success",
-//       });
-//       localStorage.removeItem(`draft_${draftId}_values`);
-//       deleteDraft(draftId);
-//       navigate(`/`);
-//     },
-//     onError: (error) => {
-//       console.log({
-//         title: "Publication Failed",
-//         description: error.message || "Failed to publish agreement",
-//         variant: "error",
-//       });
-//     }
-//   });
-
-//   const onPublish = React.useCallback((values: Record<string, string>) => {
-//     publishMutation.mutate(values);
-//   }, [publishMutation]);
-
-  const currentState = React.useMemo(() => {
-    if (!agreement) return null;
-    return agreement.state.State;
-  }, [agreement])
-
-  const nextStates = React.useMemo(() => {
-    if (!agreement) return null;
-    return agreement.document.execution.transitions
-        .filter((transition) => transition.from === currentState!.id)
-        .map((transition) => ({
-            to: agreement.document.execution.states[transition.to],
-            conditions: transition.conditions.map((condition) => ({
-                type: condition.type,
-                input: agreement.document.execution.inputs[condition.input]
-            }))
-        }));
-  }, [currentState, agreement])
-
   if (isLoadingAgreements) {
     return <div>Loading...</div>;
   }
@@ -165,25 +87,6 @@ const Draft: React.FC = () => {
           </View>  
         </Layout>
       </DraftFormContext.Provider>
-        {/* <>
-        <Text>
-            Current State: {currentState.name}
-        </Text>
-        <Text>...........................</Text>
-        <Text>
-            Next States: {nextStates.map((state) => state.to.name).join(', ')}
-        </Text>
-        </> */}
-        {/* <Layout>
-            <MarkdownDocumentView
-                content={agreement.document.content}
-                variables={agreement.document.variables}
-                //   rightHeader={rightHeader}
-                control={control}
-                errors={errors}
-                //   editableFields={Object.keys(initialInputs)}
-            />
-        </Layout> */}
     </>
   );
 };

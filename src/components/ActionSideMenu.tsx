@@ -14,7 +14,7 @@ import { useAccount } from "wagmi";
 import { Document } from "../store/documentStore";
 import { createAgreementInitVC } from "../utils/veramoUtils";
 import { postAgreement } from "../api";
-import { getInitialState, getInitialStateParams } from "../utils/agreementUtils";
+import { getCurrentState, getInitialState, getInitialStateParams, getNextStates } from "../utils/agreementUtils";
 
 // TODO: Remove these test transitions once backend integration is complete
 const TEST_TRANSITIONS = [
@@ -162,6 +162,9 @@ const ActionSideMenu: React.FC = () => {
 
   // Get document ID from any of the possible route parameters
   const documentId = params.draftId || params.agreementId || params.documentId;
+
+  // If draftId is present, we are initializing the agreement
+  const isInitializing = !!params.draftId; 
   
   // Check both documents and drafts in the store
   const currentDocument: Document | null = useDocumentStore(state => {
@@ -170,6 +173,10 @@ const ActionSideMenu: React.FC = () => {
     else return null;
   });
 
+  const currentAgreement = useDocumentStore(state => {
+    if (params.agreementId) return state.agreements.find(agreement => agreement.id === params.agreementId) || null;
+    else return null;
+  });
 
   // Get form methods
   
@@ -225,6 +232,11 @@ const ActionSideMenu: React.FC = () => {
   const executionInputs = currentDocument?.execution?.inputs || {};
   const states = currentDocument?.execution?.states || {};
   const transitions = currentDocument?.execution?.transitions || [];
+
+  const nextActions = React.useMemo(() => {
+    if (!currentAgreement) return null;
+    return getNextStates(currentAgreement);
+  }, [currentAgreement])
   
   // Find initial state and its params  
   const initialParams = getInitialStateParams(currentDocument);
@@ -265,7 +277,6 @@ const ActionSideMenu: React.FC = () => {
   }, [publishMutation]);
 
 
-  console.log(currentDocument, !!form);
   if (!currentDocument || !form) {
     return null;
   }
@@ -277,7 +288,7 @@ const ActionSideMenu: React.FC = () => {
       <Text className="text-sm font-medium text-neutral-11">Actions</Text>
 
       {/* Initial Action Section */}
-      {params.draftId && Object.keys(initialParams).length > 0 && (
+      {isInitializing && Object.keys(initialParams).length > 0 && (
         <Card className="p-4">
           <View className="flex flex-col gap-2">
             <Text className="font-semibold">Initialize Agreement</Text>
@@ -318,9 +329,10 @@ const ActionSideMenu: React.FC = () => {
       )}
 
       {/* Available Transitions Section */}
-      {transitions.length > 0 && transitions.map((transition, index) => {
-        const input = getInputDetails(transition.conditions[0]?.input);
-        if (!input) return null;
+      {!isInitializing && nextActions && nextActions.length > 0 && nextActions.map((action, index) => {
+        const inputs = action.conditions.map((condition) => condition.input);
+        // TODO: Handle multiple inputs of different types
+        const input = inputs[0];
         return (
           <Card key={index} className="p-4">
             <View className="flex flex-col gap-2">
@@ -329,25 +341,25 @@ const ActionSideMenu: React.FC = () => {
 
               {/* Input fields for variable references in data */}
               {Object.entries(input.data).map(([fieldKey, fieldValue]) => {
-                const variableRefs = extractVariableRefs(fieldValue);
-                return variableRefs.map(variableRef => (
+                // const variableRefs = extractVariableRefs(fieldValue);
+                return (
                   <Controller
-                    key={`${fieldKey}.${variableRef}`}
+                    key={`${fieldKey}.${fieldKey}`}
                     control={control}
-                    name={variableRef}
+                    name={fieldKey}
                     render={({ field: { onChange, value, onBlur } }) => (
                       <InputField
                         value={value}
                         onChangeText={onChange}
                         onBlur={onBlur}
                         variant="underline"
-                        placeholder={variableRef}
-                        error={errors?.[variableRef]?.message?.toString()}
+                        placeholder={fieldValue.name}
+                        error={errors?.[fieldKey]?.message?.toString()}
                         className="w-full"
                       />
                     )}
                   />
-                ));
+                );
               })}
 
               <View className="flex flex-row justify-end mt-2">
@@ -355,8 +367,8 @@ const ActionSideMenu: React.FC = () => {
                   variant="soft" 
                   color="primary" 
                   size="sm"
-                  onPress={handleSubmit((values) => onExecuteTransition(values, transition))}
-                  disabled={!isTransitionEnabled(transition)}
+                  onPress={handleSubmit((values) => onExecuteTransition(values, action))}
+                  // disabled={!isTransitionEnabled(transition)}
                 >
                   <Button.Text>Execute</Button.Text>
                 </Button>
