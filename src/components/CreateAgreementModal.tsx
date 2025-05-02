@@ -5,7 +5,7 @@ import AddressAvatar from '../web3/AddressAvatar';
 import { useNavigate } from 'react-router';
 import { useEditStore } from '../store/editorStore';
 import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
-import { useDocumentStore, Document, DocumentMetadata, DocumentVariable } from '../store/documentStore';
+import { useDocumentStore, Document } from '../store/documentStore';
 import newAgreement from '../templates/new-agreement.json';
 import grantAgreement from '../templates/grant-agreement.json';
 import mouTemplate from '../templates/mou-template.json';
@@ -296,10 +296,12 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
     } else {
       // Handle default templates
       if (selectedOption.type === 'markdown') {
+        const template = mouTemplate as Document;
         const draftId = createMarkdownDraft(
-          selectedOption.title,
-          mouTemplate.content.data,
-          mouTemplate.variables
+          template.metadata.name,
+          template.content.data,
+          template.variables,
+          template.execution
         );
         onClose();
         navigate(`/drafts/${draftId}`);

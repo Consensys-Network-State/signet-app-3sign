@@ -67,7 +67,7 @@ export interface DocumentExecution {
 }
 
 export interface Document {
-  id: string;
+  id?: string;
   metadata: DocumentMetadata;
   variables: Record<string, DocumentVariable>;
   content: {
@@ -75,145 +75,166 @@ export interface Document {
     data: string | any;
   };
   execution: DocumentExecution;
+}
+
+export interface Agreement {
+  id: string;
+  document: Document;
+  contributors: `0x${string}`[];
+  state: {
+    IsCompleted: boolean;
+    State: {
+      description: string;
+      id: string;
+      name: string;
+      isInitial: boolean;
+    };
+  };
   createdAt: string;
   updatedAt: string;
 }
 
 interface DocumentSlice {
-  documents: Document[];
+  agreements: Agreement[];
   drafts: Document[];
   currentDocumentId: string | null;
   currentDraftId: string | null;
 }
+
+const emptyExecution: DocumentExecution = {
+  states: {},
+  inputs: {},
+  transitions: [],
+};
 
 export const useDocumentStore = create(
   persist(
     devtools(
       combine(
         {
-          documents: [],
+          agreements: [],
           drafts: [],
           currentDocumentId: null,
           currentDraftId: null,
         } as DocumentSlice,
         (set, get) => ({
-          createDocument: (metadata: DocumentMetadata, variables: Record<string, DocumentVariable>, content: string) => {
-            const id = crypto.randomUUID();
-            const now = new Date().toISOString();
-            const document: Document = {
-              id,
-              metadata,
-              variables,
-              content: {
-                type: 'md',
-                data: content,
-              },
-              createdAt: now,
-              updatedAt: now,
-            };
-            set(
-              (state) => ({
-                documents: [...state.documents, document],
-                currentDocumentId: id,
-              }),
-              undefined,
-              'documentStore/createDocument'
-            );
-            return id;
+          // createDocument: (metadata: DocumentMetadata, variables: Record<string, DocumentVariable>, content: string) => {
+          //   const id = crypto.randomUUID();
+          //   const now = new Date().toISOString();
+          //   const document: Agreement = {
+          //     id,
+          //     metadata,
+          //     variables,
+          //     content: {
+          //       type: 'md',
+          //       data: content,
+          //     },
+          //     createdAt: now,
+          //     updatedAt: now,
+          //   };
+          //   set(
+          //     (state) => ({
+          //       agreement: [...state.documents, document],
+          //       currentDocumentId: id,
+          //     }),
+          //     undefined,
+          //     'documentStore/createDocument'
+          //   );
+          //   return id;
+          // },
+          // updateDocument: (id: string, content: string) => {
+          //   set(
+          //     (state) => ({
+          //       documents: state.documents.map(doc =>
+          //         doc.id === id
+          //           ? { ...doc, content: { type: 'md', data: content }, updatedAt: new Date().toISOString() }
+          //           : doc
+          //       ),
+          //     }),
+          //     undefined,
+          //     'documentStore/updateDocument'
+          //   );
+          // },
+          // updateDocumentMetadata: (id: string, metadata: Partial<DocumentMetadata>) => {
+          //   set(
+          //     (state) => ({
+          //       documents: state.documents.map(doc =>
+          //         doc.id === id
+          //           ? { ...doc, metadata: { ...doc.metadata, ...metadata }, updatedAt: new Date().toISOString() }
+          //           : doc
+          //       ),
+          //     }),
+          //     undefined,
+          //     'documentStore/updateDocumentMetadata'
+          //   );
+          // },
+          // updateDocumentVariables: (id: string, variables: Record<string, DocumentVariable>) => {
+          //   set(
+          //     (state) => ({
+          //       documents: state.documents.map(doc =>
+          //         doc.id === id
+          //           ? { ...doc, variables, updatedAt: new Date().toISOString() }
+          //           : doc
+          //       ),
+          //     }),
+          //     undefined,
+          //     'documentStore/updateDocumentVariables'
+          //   );
+          // },
+          // deleteDocument: (id: string) => {
+          //   set(
+          //     (state) => ({
+          //       documents: state.documents.filter(doc => doc.id !== id),
+          //       currentDocumentId: state.currentDocumentId === id ? null : state.currentDocumentId,
+          //     }),
+          //     undefined,
+          //     'documentStore/deleteDocument'
+          //   );
+          // },
+          getAgreement: (id: string) => {
+            return get().agreements.find(agreement => agreement.id === id);
           },
-          updateDocument: (id: string, content: string) => {
-            set(
-              (state) => ({
-                documents: state.documents.map(doc =>
-                  doc.id === id
-                    ? { ...doc, content: { type: 'md', data: content }, updatedAt: new Date().toISOString() }
-                    : doc
-                ),
-              }),
-              undefined,
-              'documentStore/updateDocument'
-            );
-          },
-          updateDocumentMetadata: (id: string, metadata: Partial<DocumentMetadata>) => {
-            set(
-              (state) => ({
-                documents: state.documents.map(doc =>
-                  doc.id === id
-                    ? { ...doc, metadata: { ...doc.metadata, ...metadata }, updatedAt: new Date().toISOString() }
-                    : doc
-                ),
-              }),
-              undefined,
-              'documentStore/updateDocumentMetadata'
-            );
-          },
-          updateDocumentVariables: (id: string, variables: Record<string, DocumentVariable>) => {
-            set(
-              (state) => ({
-                documents: state.documents.map(doc =>
-                  doc.id === id
-                    ? { ...doc, variables, updatedAt: new Date().toISOString() }
-                    : doc
-                ),
-              }),
-              undefined,
-              'documentStore/updateDocumentVariables'
-            );
-          },
-          deleteDocument: (id: string) => {
-            set(
-              (state) => ({
-                documents: state.documents.filter(doc => doc.id !== id),
-                currentDocumentId: state.currentDocumentId === id ? null : state.currentDocumentId,
-              }),
-              undefined,
-              'documentStore/deleteDocument'
-            );
-          },
-          getDocument: (id: string) => {
-            return get().documents.find(doc => doc.id === id);
-          },
-          setCurrentDocument: (id: string | null) => {
-            set(
-              () => ({ currentDocumentId: id }),
-              undefined,
-              'documentStore/setCurrentDocument'
-            );
-          },
-          getCurrentDocument: () => {
-            const state = get();
-            return state.currentDocumentId
-              ? state.documents.find(d => d.id === state.currentDocumentId)
-              : null;
-          },
-          createFromTemplate: (template: Document, title: string, author: string) => {
-            const id = crypto.randomUUID();
-            const now = new Date().toISOString();
-            const document: Document = {
-              id,
-              metadata: {
-                ...template.metadata,
-                id: `did:example:${id}`,
-                name: title,
-                author,
-                createdAt: now,
-              },
-              variables: template.variables,
-              content: template.content,
-              createdAt: now,
-              updatedAt: now,
-            };
-            set(
-              (state) => ({
-                documents: [...state.documents, document],
-                currentDocumentId: id,
-              }),
-              undefined,
-              'documentStore/createFromTemplate'
-            );
-            return id;
-          },
-          createDraft: (title: string, content: string, variables: Record<string, DocumentVariable> = {}, execution = {}) => {
+          // setCurrentDocument: (id: string | null) => {
+          //   set(
+          //     () => ({ currentDocumentId: id }),
+          //     undefined,
+          //     'documentStore/setCurrentDocument'
+          //   );
+          // },
+          // getCurrentDocument: () => {
+          //   const state = get();
+          //   return state.currentDocumentId
+          //     ? state.documents.find(d => d.id === state.currentDocumentId)
+          //     : null;
+          // },
+          // createFromTemplate: (template: Document, title: string, author: string) => {
+          //   const id = crypto.randomUUID();
+          //   const now = new Date().toISOString();
+          //   const document: Document = {
+          //     id,
+          //     metadata: {
+          //       ...template.metadata,
+          //       id: `did:example:${id}`,
+          //       name: title,
+          //       author,
+          //       createdAt: now,
+          //     },
+          //     variables: template.variables,
+          //     content: template.content,
+          //     createdAt: now,
+          //     updatedAt: now,
+          //   };
+          //   set(
+          //     (state) => ({
+          //       documents: [...state.documents, document],
+          //       currentDocumentId: id,
+          //     }),
+          //     undefined,
+          //     'documentStore/createFromTemplate'
+          //   );
+          //   return id;
+          // },
+          createDraft: (title: string, content: string, variables: Record<string, DocumentVariable> = {}, execution: DocumentExecution = emptyExecution) => {
             const id = crypto.randomUUID();
             const now = new Date().toISOString();
             const draft: Document = {
@@ -233,8 +254,6 @@ export const useDocumentStore = create(
                 data: content,
               },
               execution,
-              createdAt: now,
-              updatedAt: now,
             };
             set(
               (state) => ({
@@ -303,50 +322,50 @@ export const useDocumentStore = create(
               ? state.drafts.find(d => d.id === state.currentDraftId)
               : null;
           },
-          publishDraft: (draftId: string) => {
-            const draft = get().drafts.find(d => d.id === draftId);
-            if (!draft) return null;
+          // publishDraft: (draftId: string) => {
+          //   const draft = get().drafts.find(d => d.id === draftId);
+          //   if (!draft) return null;
 
-            const now = new Date().toISOString();
-            const document: Document = {
-              ...draft,
-              metadata: {
-                ...draft.metadata,
-                createdAt: now,
-              },
-              createdAt: now,
-              updatedAt: now,
-            };
+          //   const now = new Date().toISOString();
+          //   const document: Document = {
+          //     ...draft,
+          //     metadata: {
+          //       ...draft.metadata,
+          //       createdAt: now,
+          //     },
+          //     createdAt: now,
+          //     updatedAt: now,
+          //   };
 
-            set(
-              (state) => ({
-                documents: [...state.documents, document],
-                currentDocumentId: document.id,
-                drafts: state.drafts.filter(d => d.id !== draftId),
-                currentDraftId: state.currentDraftId === draftId ? null : state.currentDraftId,
-              }),
-              undefined,
-              'documentStore/publishDraft'
-            );
+          //   set(
+          //     (state) => ({
+          //       documents: [...state.documents, document],
+          //       currentDocumentId: document.id,
+          //       drafts: state.drafts.filter(d => d.id !== draftId),
+          //       currentDraftId: state.currentDraftId === draftId ? null : state.currentDraftId,
+          //     }),
+          //     undefined,
+          //     'documentStore/publishDraft'
+          //   );
 
-            return document.id;
-          },
-          addDocuments: (documents: Document[]) => {
+          //   return document.id;
+          // },
+          addAgreements: (agreements: Agreement[]) => {
             set(
               (state) => {
                 // Filter out documents that already exist in the store
-                const existingIds = new Set(state.documents.map(doc => doc.id));
-                const newDocuments = documents.filter(doc => !existingIds.has(doc.id));
+                const existingIds = new Set(state.agreements.map(agreement => agreement.id));
+                const newAgreements = agreements.filter(agreement => !existingIds.has(agreement.id));
                 
                 return {
-                  documents: [...state.documents, ...newDocuments],
+                  agreements: [...state.agreements, ...newAgreements],
                 };
               },
               undefined,
-              'documentStore/addDocuments'
+              'documentStore/addAgreements'
             );
 
-            return documents.map(doc => doc.id);
+            return agreements.map(agreement => agreement.id);
           },
         })
       ),

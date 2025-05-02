@@ -6,9 +6,13 @@ import { useAccount } from 'wagmi';
 import { useMutation } from '@tanstack/react-query';
 import { createAgreementInitVC } from '../../utils/veramoUtils.ts';
 import { postAgreement } from '../../api';
-import { useDocumentStore, DocumentVariable, DocumentState } from '../../store/documentStore';
+import { useDocumentStore, DocumentVariable } from '../../store/documentStore';
 import { Document } from "../../store/documentStore";
 import MarkdownDocumentView from './MarkdownDocumentView';
+import Layout from '../../layouts/Layout.tsx';
+import StatusLabel from '../../components/StatusLabel';
+import { View } from 'react-native';
+import { getInitialStateParams } from '../../utils/agreementUtils.ts';
 
 // Create a context for the form
 export const DraftFormContext = React.createContext<ReturnType<typeof useForm> | undefined>(undefined);
@@ -48,21 +52,10 @@ const Draft: React.FC = () => {
     return null;
   }
 
-  const initialState = Object.values(draft.execution.states)
-    .find((stateObj: DocumentState) => stateObj.isInitial);
-
   // Transform initialParams into a map of variable names
   const initialInputs = React.useMemo(() => {
-    if (!initialState?.initialParams) return {};
-    
-    return Object.entries(initialState.initialParams).reduce((acc, [key, value]) => {
-      const match = typeof value === 'string' && value.match(/\$\{variables\.([^}]+)\}/);
-      if (match && match[1]) {
-        acc[match[1]] = key;
-      }
-      return acc;
-    }, {} as Record<string, string>);
-  }, [initialState]);
+    return getInitialStateParams(draft);
+  }, [draft]);
 
   const {
     handleSubmit,
@@ -101,7 +94,7 @@ const Draft: React.FC = () => {
   const publishMutation = useMutation({
     mutationFn: async (values: Record<string, string>) => {
       if (!draft || !address) throw new Error("Draft or address not available");
-      
+
       const vc = await createAgreementInitVC(address as `0x${string}`, draft as Document, values);
       return postAgreement(vc);
     },
@@ -151,14 +144,20 @@ const Draft: React.FC = () => {
 
   return (
     <DraftFormContext.Provider value={form}>
-      <MarkdownDocumentView
-        content={draft.content}
-        variables={draft.variables}
-        rightHeader={rightHeader}
-        control={control}
-        errors={errors}
-        editableFields={Object.keys(initialInputs)}
-      />
+      <Layout rightHeader={rightHeader}>
+        <View className="h-full p-8">
+          <View className="mb-6 w-fit">
+            <StatusLabel status="draft" text="DRAFT - Initialize Agreement" />
+          </View>
+          <MarkdownDocumentView
+            content={draft.content}
+            variables={draft.variables}
+            control={control}
+            errors={errors}
+            editableFields={Object.keys(initialInputs)}
+          />
+        </View>  
+      </Layout>
     </DraftFormContext.Provider>
   );
 };

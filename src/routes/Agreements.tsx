@@ -2,7 +2,7 @@ import * as React from 'react';
 import { View, Pressable } from 'react-native';
 import { Text, Button, Card } from '@ds3/react';
 import { useEditStore } from '../store/editorStore';
-import { useDocumentStore, Document } from '../store/documentStore';
+import { useDocumentStore } from '../store/documentStore';
 import { useNavigate } from 'react-router';
 import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import Layout from '../layouts/Layout';
@@ -17,16 +17,6 @@ import { getAgreementByUserId } from '../api';
 import { useEffect } from 'react';
 
 type EthereumAddress = `0x${string}`;
-
-// Mock data for published agreements
-const MOCK_PUBLISHED = [
-  {
-    id: '123',
-    title: 'Grants Agreement Smith Freeman 2025',
-    status: 'signed',
-    owner: '0x1234567890123456789012345678901234567890' as EthereumAddress,
-  }
-];
 
 const AgreementCard: React.FC<{
   title: string;
@@ -64,7 +54,7 @@ const AgreementCard: React.FC<{
 
 const Agreements: React.FC = () => {
   const { drafts: blockNoteDrafts, setCurrentDraft: setCurrentBlockNoteDraft, deleteDraft: deleteBlockNoteDraft } = useEditStore();
-  const { drafts: markdownDrafts, setCurrentDraft: setCurrentMarkdownDraft, deleteDraft: deleteMarkdownDraft, addDocuments, documents: markdownDocuments } = useDocumentStore();
+  const { drafts: markdownDrafts, setCurrentDraft: setCurrentMarkdownDraft, deleteDraft: deleteMarkdownDraft, addAgreements, agreements: savedAgreements } = useDocumentStore();
   const { setEditorMode } = useBlockNoteStore();
   const navigate = useNavigate();
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
@@ -75,12 +65,14 @@ const Agreements: React.FC = () => {
     queryFn: () => getAgreementByUserId(address as string),
   });
 
+  
+
   useEffect(() => {
     if (!isLoadingAgreements && agreements) {
       // TODO: the state is also queried here (agreement.state). Need to determine how we store and display this.
-      addDocuments(agreements.data?.map((agreement: any) => agreement.document))
+      addAgreements(agreements.data || [])
     }
-  }, [agreements, isLoadingAgreements, addDocuments])
+  }, [agreements, isLoadingAgreements, addAgreements])
 
   const handleBlockNoteDraftClick = (draftId: string) => {
     setCurrentBlockNoteDraft(draftId);
@@ -148,13 +140,13 @@ const Agreements: React.FC = () => {
           </>
         )}
 
-        {markdownDocuments.length > 0 && (
+        {savedAgreements.length > 0 && (
           <>
             <Text className="text-lg font-semibold mt-4">Published</Text>
-            {markdownDocuments.map(agreement => (
+            {savedAgreements.map(agreement => (
               <AgreementCard
                 key={agreement.id}
-                title={agreement.metadata.name}
+                title={agreement.document.metadata.name}
                 status="signed"
                 owner="0x"
                 onClick={() => handlePublishedClick(agreement.id)}
@@ -163,7 +155,7 @@ const Agreements: React.FC = () => {
           </>
         )}
 
-        {blockNoteDrafts.length === 0 && markdownDrafts.length === 0 && MOCK_PUBLISHED.length === 0 && (
+        {blockNoteDrafts.length === 0 && markdownDrafts.length === 0 && savedAgreements.length === 0 && (
           <Text className="text-neutral-11">No agreements found</Text>
         )}
       </View>

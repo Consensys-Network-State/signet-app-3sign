@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { View, TextInput } from 'react-native';
-import { Text, InputField, Input, Button } from '@ds3/react';
-import Layout from '../../layouts/Layout';
+import { Text, InputField, Input } from '@ds3/react';
 import { DocumentVariable } from '../../store/documentStore';
 import { unified } from 'unified';
 import remarkStringify from 'remark-stringify';
@@ -14,7 +13,6 @@ import { isAddress } from 'viem';
 import AddressAvatar from "../../web3/AddressAvatar.tsx";
 import { DatePickerField } from '../../components/DatePickerField';
 import dayjs from 'dayjs';
-import StatusLabel from '../../components/StatusLabel';
 
 interface SpanProps {
   className?: string;
@@ -175,7 +173,6 @@ export interface MarkdownDocumentViewProps {
     data: string | Root;
   };
   variables?: Record<string, any>;
-  rightHeader?: React.ReactNode;
   errors?: Record<string, any>;
   editableFields?: string[];
 }
@@ -184,7 +181,6 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
   control,
   content,
   variables = {},
-  rightHeader,
   errors = {},
   editableFields = []
 }) => {
@@ -326,14 +322,9 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
   }, [content, variables, components]);
 
   return (
-    <Layout rightHeader={rightHeader}>
-      <View className="h-full p-8">
-        <View className="mb-6 w-fit">
-          <StatusLabel status="draft" text="DRAFT - Initialize Agreement" />
-        </View>
-        {renderContent()}
-      </View>
-    </Layout>
+    <>
+      {renderContent()}
+    </>
   );
 };
 

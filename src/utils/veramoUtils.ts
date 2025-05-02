@@ -93,13 +93,20 @@ export async function createAgreementInitVC(address: `0x${string}`, agreement: D
       params: filteredParams
     },
   }
+
   const vc = await agent.createVerifiableCredential({
     credential,
     proofFormat: 'EthereumEip712Signature2021',
   });
+
   const verificationResult = await agent.verifyCredential({ credential: vc });
   if (!verificationResult.verified) throw new Error('Failed to sign with wallet');
   return JSON.stringify(vc);
+}
+
+export async function createAgreementInputVC(address: `0x${string}`, inputId: string, values: Record<string, any>) {
+  const agent = await setupAgent();
+  const did = await agent.didManagerGet({did: `did:pkh:eip155:1:${address}`});
 }
 
 export async function createSignatureVC(address: `0x${string}`, documentState: Block[], documentVC: string) {
