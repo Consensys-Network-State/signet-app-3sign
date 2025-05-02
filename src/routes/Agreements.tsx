@@ -63,9 +63,8 @@ const Agreements: React.FC = () => {
   const { data: agreements, isLoading: isLoadingAgreements } = useQuery({
     queryKey: ['agreements', address],
     queryFn: () => getAgreementByUserId(address as string),
+    refetchOnMount: 'always' as const,
   });
-
-  
 
   useEffect(() => {
     if (!isLoadingAgreements && agreements) {
@@ -146,7 +145,7 @@ const Agreements: React.FC = () => {
             {savedAgreements.map(agreement => (
               <AgreementCard
                 key={agreement.id}
-                title={agreement.document.metadata.name}
+                title={agreement?.document?.metadata?.name}
                 status="signed"
                 owner="0x"
                 onClick={() => handlePublishedClick(agreement.id)}

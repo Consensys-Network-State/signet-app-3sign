@@ -15,33 +15,9 @@ import { useAccount } from "wagmi";
 import { Document } from "../store/documentStore";
 import { createAgreementInitVC, createAgreementInputVC } from "../utils/veramoUtils";
 import { postAgreement, postAgreementInput } from "../api/index";
-import { getCurrentState, getInitialState, getInitialStateParams, getNextStates } from "../utils/agreementUtils";
+import { getInitialStateParams, getNextStates } from "../utils/agreementUtils";
 import { formCache } from "../utils/formCache";
 import { handleTitleChange as handleTitleChangeUtil } from '../utils/documentUtils';
-
-// TODO: Remove these test transitions once backend integration is complete
-const TEST_TRANSITIONS = [
-  {
-    "from": "PENDING_PARTY_A_SIGNATURE",
-    "to": "PENDING_PARTY_B_SIGNATURE",
-    "conditions": [
-      {
-        "type": "isValid",
-        "input": "partyAData"
-      }
-    ]
-  },
-  {
-    "from": "PENDING_PARTY_B_SIGNATURE",
-    "to": "PENDING_ACCEPTANCE",
-    "conditions": [
-      {
-        "type": "isValid",
-        "input": "partyBData"
-      }
-    ]
-  }
-] as const;
 
 const TEST_INPUTS = {
   "partyAData": {
@@ -160,11 +136,11 @@ const ActionSideMenu: React.FC = () => {
   const [selectedVC, setSelectedVC] = React.useState<VerifiableCredential | null>(null);
   const form = React.useContext(FormContext);
   const { address } = useAccount();
-  const { updateDraft, deleteDraft, getDraft } = useDocumentStore();
+  const { deleteDraft } = useDocumentStore();
   const { getCurrentDraft: getCurrentBlockNoteDraft, updateDraftTitle: updateBlockNoteDraftTitle } = useEditStore();
-  const { getCurrentDraft: getCurrentMarkdownDraft, updateDraftTitle: updateMarkdownDraftTitle } = useDocumentStore();
+  const { getCurrentDraft: getCurrentMarkdownDraft, updateDraftTitle: updateMarkdownDraftTitle, updateAgreement } = useDocumentStore();
   const navigate = useNavigate();
-  
+
   const blockNoteDraft = getCurrentBlockNoteDraft();
   const markdownDraft = getCurrentMarkdownDraft();
   
@@ -202,25 +178,11 @@ const ActionSideMenu: React.FC = () => {
     if (params.agreementId) return state.agreements.find(agreement => agreement.id === params.agreementId) || null;
     else return null;
   });
-
-  // Get form methods
-  
-  // // Get execution data from the document
-  // const executionInputs = currentDocument.execution?.inputs || {};
-  // const states = currentDocument.execution?.states || {};
-  // const transitions = TEST_TRANSITIONS;
   
   // Helper function to get input details from template
   const getInputDetails = (inputId: string): DocumentInput | undefined => {
     // Use test inputs for now
     return TEST_INPUTS[inputId as keyof typeof TEST_INPUTS] || executionInputs[inputId];
-  };
-
-  // Helper function to extract variable references from a string
-  const extractVariableRefs = (str: string): string[] => {
-    if (typeof str !== 'string') return [];
-    const matches = str.match(/\${variables\.([^}]+)}/g) || [];
-    return matches.map(match => match.replace('${variables.', '').replace('}', ''));
   };
 
   // Get cached form values
@@ -231,12 +193,10 @@ const ActionSideMenu: React.FC = () => {
 
   // Helper function to check if a transition's conditions are met
   const isTransitionEnabled = React.useCallback((transition: any) => {
-    return transition.conditions.every((condition: any) => condition.input.issuer.toLowerCase() === address.toLowerCase());
-  }, []);
+    return transition.conditions.every((condition: any) => condition.input.issuer.toLowerCase() === address?.toLowerCase());
+  }, [address]);
 
   const executionInputs = currentDocument?.execution?.inputs || {};
-  const states = currentDocument?.execution?.states || {};
-  const transitions = currentDocument?.execution?.transitions || [];
 
   const nextActions = React.useMemo(() => {
     if (!currentAgreement) return null;
@@ -262,9 +222,6 @@ const ActionSideMenu: React.FC = () => {
       // First clean up the draft and local storage
       formCache.remove(params.draftId!);
       deleteDraft(params.draftId!);
-
-      // Navigate to agreements list first to trigger a fresh data fetch
-      navigate('/', { replace: true });
       
       // Then navigate to the new agreement after a short delay
       setTimeout(() => {
@@ -293,16 +250,19 @@ const ActionSideMenu: React.FC = () => {
         Object.entries(values).filter(([key]) => key in transition.conditions[0].input.data)
       );
       const vc = await createAgreementInputVC(address as `0x${string}`, transition.conditions[0].input.id, inputValues);
-      console.log(transition);
+
       const input = {
         inputId: transition.conditions[0].input.id,
         inputValue: JSON.parse(vc)
       }
-      console.log(input);
-      return postAgreementInput(documentId, JSON.stringify(input));
+
+      return postAgreementInput(documentId!, JSON.stringify(input));
     },
     onSuccess: (data) => {
-      console.log(data);
+      updateAgreement(currentAgreement!.id, {
+        ...currentAgreement!,
+        ...data.data.updatedState
+      });
       console.log({
         title: "Input Processed",
         description: "Your input has been successfully processed in the agreement",
@@ -336,7 +296,13 @@ const ActionSideMenu: React.FC = () => {
 
   return (
     <View className="flex flex-col gap-4">
-      <Text className="text-sm font-medium text-neutral-11">Actions</Text>
+      { currentAgreement && currentAgreement.state.IsComplete
+        ? <>
+          <Text className="text-md font-medium text-neutral-11">{currentAgreement.state.State.name}</Text>
+          <Text className="text-sm font-medium text-neutral-11">{currentAgreement.state.State.description}</Text>
+        </>
+        : <Text className="text-sm font-medium text-neutral-11">Actions</Text> 
+      }
 
       {/* Initial Action Section */}
       {isInitializing && Object.keys(initialParams).length > 0 && (

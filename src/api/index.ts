@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Agreement } from '../store/documentStore';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -14,8 +15,9 @@ export const postSignature = async (documentId: string, signatureVC: string) => 
   return await axios.post(`${API_URL}/documents/${documentId}/sign`, JSON.parse(signatureVC));
 }
 
-export const getAgreement = async (agreementId: string) => {
-  return await axios.get(`${API_URL}/agreements/${agreementId}/state`);
+export const getAgreement = async (agreementId: string): Promise<Agreement> => {
+  const { data } = await axios.get(`${API_URL}/agreements/${agreementId}`);
+  return data;
 }
 
 export const postAgreement = async (agreementVC: string) => {

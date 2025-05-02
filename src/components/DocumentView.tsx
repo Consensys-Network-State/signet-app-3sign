@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { useAccount } from 'wagmi';
 import { useQuery } from '@tanstack/react-query';
-import { useDocumentStore, Agreement, Document } from '../store/documentStore';
+import { useDocumentStore } from '../store/documentStore';
 import MarkdownDocumentView from './markdown/MarkdownDocumentView';
 import Layout from '../layouts/Layout';
-import { getAgreementByUserId } from '../api';
+import { getAgreement } from '../api';
 import StatusLabel from './StatusLabel';
 import { View } from 'react-native';
 import { FormContext } from '../contexts/FormContext';
@@ -20,15 +19,14 @@ interface DocumentViewProps {
 const DocumentView: React.FC<DocumentViewProps> = ({ type }) => {
   const { draftId, agreementId } = useParams();
   const documentId = type === 'draft' ? draftId : agreementId;
-  const { addAgreements, getDraft, getAgreement } = useDocumentStore();
-  const { address } = useAccount();
-  const navigate = useNavigate();
-  const [isInitialized, setIsInitialized] = React.useState(false);
+  const { addAgreements, getDraft, getAgreement: getAgreementFromStore } = useDocumentStore();
+  const isInitialized = !!agreementId;
+  const [fetchedAndLoaded, setFetchedAndLoaded] = React.useState(false);
 
   // Load agreement data if needed
-  const { data: agreements, isLoading: isLoadingAgreements } = useQuery({
-    queryKey: ['agreements', address, documentId],
-    queryFn: () => getAgreementByUserId(address as string),
+  const { data: agreement, isLoading: isLoadingAgreement } = useQuery({
+    queryKey: ['agreement', documentId],
+    queryFn: () => getAgreement(documentId!),
     enabled: type === 'agreement',
     refetchOnMount: 'always' as const,
     retry: 2,
@@ -36,21 +34,21 @@ const DocumentView: React.FC<DocumentViewProps> = ({ type }) => {
 
   // Effect to handle agreement data
   React.useEffect(() => {
-    if (type === 'agreement' && !isLoadingAgreements && agreements?.data) {
-      addAgreements(agreements.data);
-      setIsInitialized(true);
+    if (type === 'agreement' && !isLoadingAgreement && agreement) {
+      addAgreements([agreement]);
+      setFetchedAndLoaded(true);
     }
-  }, [agreements, isLoadingAgreements, addAgreements, type]);
+  }, [agreement, isLoadingAgreement, addAgreements, type]);
 
   // Get current document
   const document = React.useMemo(() => {
     if (type === 'draft') {
       return getDraft(documentId!);
-    } else {
-      const agreement = getAgreement(documentId!);
+    } else if (fetchedAndLoaded) {
+      const agreement = getAgreementFromStore(documentId!);
       return agreement?.document;
     }
-  }, [type, documentId, getDraft, getAgreement]);
+  }, [type, documentId, getDraft, getAgreementFromStore, fetchedAndLoaded]);
 
   // Form setup
   const form = useForm({
@@ -63,7 +61,6 @@ const DocumentView: React.FC<DocumentViewProps> = ({ type }) => {
     formState: { errors },
     control,
     watch,
-    reset
   } = form;
 
   // Watch form values and update localStorage
@@ -77,7 +74,8 @@ const DocumentView: React.FC<DocumentViewProps> = ({ type }) => {
   }, [watch, documentId]);
 
   // Show loading state while fetching agreement data
-  if (type === 'agreement' && (!isInitialized || isLoadingAgreements)) {
+  // console.log(isInitialized, isLoadingAgreement);
+  if (type === 'agreement' && (!isInitialized || isLoadingAgreement)) {
     return (
       <Layout isLoading={true}>
         <View className="h-full flex items-center justify-center">

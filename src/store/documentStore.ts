@@ -82,7 +82,7 @@ export interface Agreement {
   document: Document;
   contributors: `0x${string}`[];
   state: {
-    IsCompleted: boolean;
+    IsComplete: boolean;
     State: {
       description: string;
       id: string;
@@ -350,6 +350,15 @@ export const useDocumentStore = create(
 
           //   return document.id;
           // },
+          updateAgreement: (id: string, agreement: Agreement) => {
+            set(
+              (state) => ({
+                agreements: state.agreements.map(a => a.id === id ? agreement : a),
+              }),
+              undefined,
+              'documentStore/updateAgreement'
+            );
+          },
           addAgreements: (agreements: Agreement[]) => {
             set(
               (state) => {
