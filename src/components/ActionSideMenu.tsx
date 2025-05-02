@@ -493,6 +493,15 @@ const ActionSideMenu: React.FC = () => {
         return (
           <Card key={index} className="p-4">
             <View className="flex flex-col gap-2">
+              {/* Responsible Party at the top */}
+              <View className="mb-2">
+                <Text className="text-xs text-neutral-11 mb-3">Responsible Party</Text>
+                <AddressCard
+                  address={input.issuer as `0x${string}`}
+                  className="h-8"
+                  avatarClassName="w-5 h-5"
+                />
+              </View>
               <Text className="font-semibold">{input.displayName}</Text>
               <Text className="text-sm text-neutral-11">{input.description}</Text>
 
@@ -536,21 +545,6 @@ const ActionSideMenu: React.FC = () => {
                   <Button.Text>{isExecuting ? 'Executing...' : 'Execute'}</Button.Text>
                 </Button>
               </View>
-              {!transitionEnabled && (
-                <View className="bg-error-2 border border-error-7 rounded p-3 mt-3">
-                  <Text className="text-xs text-error-10">
-                    You are not authorized to perform this action or edit these fields.
-                  </Text>
-                  <View className="mt-2">
-                    <Text className="text-xs text-neutral-11 mb-2">Authorized signer:</Text>
-                    <AddressCard
-                      address={input.issuer as `0x${string}`}
-                      className="h-8"
-                      avatarClassName="w-5 h-5"
-                    />
-                  </View>
-                </View>
-              )}
             </View>
           </Card>
         );
