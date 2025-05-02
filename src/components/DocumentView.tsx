@@ -41,7 +41,8 @@ const DocumentView: React.FC<DocumentViewProps> = ({ type }) => {
       setFetchedValues(
         Object.fromEntries(
           Object.entries(agreement.state.Variables)
-            .map(([key, value]) => [key, value.value || ''])
+            .filter(([_, value]) => value && value.value !== undefined)
+            .map(([key, value]) => [key, value.value])
         )
       );
     }
@@ -76,10 +77,13 @@ const DocumentView: React.FC<DocumentViewProps> = ({ type }) => {
     if (document && documentId) {
       reset({
         ...fetchedValues,
-        ...formCache.getInitialValues(documentId, document || null)
+        ...Object.fromEntries(
+          Object.entries(formCache.getInitialValues(documentId, document || null))
+            .filter(([key, value]) => !fetchedValues[key])
+        )
       });
     }
-  }, [document, documentId, reset])
+  }, [document, documentId, reset, fetchedValues])
 
   // Watch form values and update localStorage
   React.useEffect(() => {
