@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { View, TextInput } from 'react-native';
-import { Text, InputField, Input } from '@ds3/react';
+import { View } from 'react-native';
+import { Text } from '@ds3/react';
 import { DocumentVariable } from '../../store/documentStore';
 import { unified } from 'unified';
 import remarkStringify from 'remark-stringify';
@@ -9,162 +9,13 @@ import rehypeRaw from 'rehype-raw';
 import type { Root } from 'mdast';
 import type { Components } from 'react-markdown';
 import { Controller } from 'react-hook-form';
-import { isAddress } from 'viem';
-import AddressAvatar from "../../web3/AddressAvatar.tsx";
-import { DatePickerField } from '../../components/DatePickerField';
-import dayjs from 'dayjs';
-import DocumentSignatureDialog from '../../blocks/DocumentSignatureDialog';
+import VariableInput, { createValidationRules } from '../form/VariableInput';
 
 interface SpanProps {
   className?: string;
   children?: React.ReactNode;
   'data-name'?: string;
 }
-
-// Create a shared validation function
-const createValidationRules = (variable: DocumentVariable) => {
-  const rules: Record<string, any> = {
-    required: variable.validation?.required ? `${variable.name} is required` : false,
-  };
-
-  rules.validate = (value: string) => {
-    if (!value) {
-      return rules.required || true;
-    }
-
-    if (variable.type === 'address' && !isAddress(value)) {
-      return 'Invalid Ethereum address';
-    }
-
-    if (variable.type === 'dateTime' && !dayjs(value).isValid()) {
-      return 'Invalid date';
-    }
-
-    const { validation } = variable;
-    if (!validation) return true;
-
-    if (validation.pattern && !new RegExp(validation.pattern).test(value)) {
-      return `Invalid ${variable.name.toLowerCase()} format`;
-    }
-
-    if (validation.minLength && value.length < validation.minLength) {
-      return `${variable.name} must be at least ${validation.minLength} characters`;
-    }
-
-    if (validation.min) {
-      const numValue = Number(value);
-      if (!isNaN(numValue) && numValue < validation.min) {
-        return `${variable.name} must be at least ${validation.min}`;
-      }
-    }
-
-    if (validation.enum && !validation.enum.includes(value)) {
-      return `${variable.name} must be one of: ${validation.enum.join(', ')}`;
-    }
-
-    return true;
-  };
-
-  return rules;
-};
-
-// Create a completely isolated input component
-const VariableInput = React.memo(({ 
-  name, 
-  variable, 
-  value, 
-  onChange, 
-  onBlur,
-  error,
-  disabled = false,
-}: { 
-  name: string;
-  variable: DocumentVariable;
-  value: string;
-  onChange: (value: string) => void;
-  onBlur: () => void;
-  error?: { message?: string } | string | undefined;
-  disabled?: boolean;
-}) => {
-  const inputRef = React.useRef<TextInput>(null);
-  const [localValue, setLocalValue] = React.useState(value);
-  const [localError, setLocalError] = React.useState<string | undefined>(undefined);
-
-  React.useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
-
-  const validateValue = React.useCallback((newValue: string) => {
-    const rules = createValidationRules(variable);
-    const result = rules.validate(newValue);
-    return result === true ? undefined : result;
-  }, [variable]);
-
-  const handleChange = React.useCallback((newValue: string) => {
-    setLocalValue(newValue);
-    const validationError = validateValue(newValue);
-    setLocalError(validationError);
-    onChange(newValue);
-  }, [onChange, validateValue]);
-
-  const errorMessage = localError || (typeof error === 'string' ? error : error?.message);
-
-  if (variable.type === 'address') {
-    return (
-      <InputField
-        // @ts-ignore - using RN TextInput interface
-        ref={inputRef}
-        value={localValue}
-        onChangeText={handleChange}
-        variant="underline"
-        placeholder={variable.name}
-        error={errorMessage}
-        className="w-[300px]"
-        disabled={disabled}
-      >
-        {isAddress(localValue) && (
-          <AddressAvatar address={localValue} className="w-6 h-6" />
-        )}
-        <Input.Field />
-      </InputField>
-    );
-  }
-
-  if (variable.type === 'dateTime') {
-    return (
-      <DatePickerField
-        value={localValue ? dayjs(localValue) : undefined}
-        onChange={(date) => handleChange(date ? date.format() : '')}
-        placeholder="Select date"
-        error={errorMessage}
-        className="w-[300px]"
-        disabled={disabled}
-      />
-    );
-  }
-
-  return (
-    <InputField
-      // @ts-ignore - using RN TextInput interface
-      ref={inputRef}
-      value={localValue}
-      onChangeText={handleChange}
-      variant="underline"
-      placeholder={variable.name}
-      error={errorMessage}
-      className="w-[300px]"
-      disabled={disabled}
-    />
-  );
-}, (prevProps, nextProps) => {
-  const prevError = typeof prevProps.error === 'string' ? prevProps.error : prevProps.error?.message;
-  const nextError = typeof nextProps.error === 'string' ? nextProps.error : nextProps.error?.message;
-  
-  return (
-    prevProps.value === nextProps.value &&
-    prevError === nextError
-  );
-});
 
 // Types for the component props
 export interface MarkdownDocumentViewProps {
@@ -245,27 +96,6 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
         const variable = variables[variableName];
         const disabled = !editableFields.find(field => field === variableName);
         if (variable) {
-          if (variable.type === 'signature') {
-            return (
-              <Controller
-                control={control}
-                name={variableName}
-                rules={createValidationRules(variable)}
-                render={({ field: { onChange, value } }) => {
-                  // For signatures, we want to use the party name if available
-                  const partyName = variables[variableName.replace('Signature', 'Name')]?.value;
-                  return (
-                    <DocumentSignatureDialog
-                      name={partyName}
-                      value={value}
-                      onSignatureAdopted={onChange}
-                      disabled={disabled}
-                    />
-                  );
-                }}
-              />
-            );
-          }
           return (
             <Controller
               control={control}

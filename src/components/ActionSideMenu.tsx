@@ -18,6 +18,7 @@ import { postAgreement, postAgreementInput } from "../api/index";
 import { getInitialStateParams, getNextStates } from "../utils/agreementUtils";
 import { formCache } from "../utils/formCache";
 import { handleTitleChange as handleTitleChangeUtil } from '../utils/documentUtils';
+import VariableInput, { createValidationRules } from './form/VariableInput';
 
 const TEST_INPUTS = {
   "partyAData": {
@@ -94,6 +95,29 @@ interface VerifiableCredential {
   };
   type: readonly string[];
   issuanceDate: string;
+}
+
+interface TransitionAction {
+  to: DocumentState;
+  conditions: Array<{
+    type: string;
+    input: {
+      id: string;
+      issuer: any;
+      data: Record<string, any>;
+      type: string;
+      schema?: string;
+      displayName: string;
+      description: string;
+    };
+  }>;
+}
+
+interface DocumentState {
+  description: string;
+  id: string;
+  name: string;
+  isInitial: boolean;
 }
 
 const VCDetailsModal: React.FC<{
@@ -279,13 +303,13 @@ const ActionSideMenu: React.FC = () => {
   });
 
   // Handle transition execution
-  const onExecuteTransition = React.useCallback(async (transition) => {
-    const data =  {
+  const onExecuteTransition = React.useCallback(async (transition: TransitionAction) => {
+    const data = {
       values: getCachedValues(),
       transition
-    }
-    inputMutation.mutate(data)
-  }, []);
+    };
+    inputMutation.mutate(data);
+  }, [getCachedValues(), inputMutation]);
 
 
   if (!currentDocument || !form) {
@@ -320,31 +344,37 @@ const ActionSideMenu: React.FC = () => {
               <Input.Field placeholder="Agreement Title" />
             </Input>
             
-            {Object.keys(initialParams).map(paramKey => 
-              <Controller
-                key={paramKey}
-                control={control}
-                name={paramKey}
-                render={({ field: { onChange, value, onBlur } }) => (
-                  <InputField
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    variant="underline"
-                    placeholder={paramKey}
-                    error={errors?.[paramKey]?.message?.toString()}
-                    className="w-full"
-                  />
-                )}
-              />
-            )}
+            {Object.entries(initialParams).map(([paramKey]) => {
+              const variable = currentDocument?.variables?.[paramKey];
+              if (!variable) return null;
+              
+              return (
+                <Controller
+                  key={paramKey}
+                  control={control}
+                  name={paramKey}
+                  rules={createValidationRules(variable)}
+                  render={({ field: { onChange, value, onBlur } }) => (
+                    <VariableInput
+                      name={paramKey}
+                      variable={variable}
+                      value={value}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      error={errors?.[paramKey]?.message}
+                      className="w-full"
+                    />
+                  )}
+                />
+              );
+            })}
 
             <View className="flex flex-row justify-end mt-2">
               <Button 
                 variant="soft" 
                 color="primary" 
                 size="sm"
-                onPress={onPublish} // TODO: wrap onPublish with dynamic validation function that passes the correct values downstream
+                onPress={onPublish}
                 disabled={!Object.keys(initialParams).every(ref => getCachedValues()[ref])}
               >
                 <Button.Text>Initialize</Button.Text>
@@ -367,20 +397,23 @@ const ActionSideMenu: React.FC = () => {
 
               {/* Input fields for variable references in data */}
               {Object.entries(input.data).map(([fieldKey, fieldValue]) => {
-                // const variableRefs = extractVariableRefs(fieldValue);
+                const variable = currentDocument?.variables?.[fieldKey];
+                if (!variable) return null;
+                
                 return (
                   <Controller
                     key={`${fieldKey}.${fieldKey}`}
                     control={control}
                     name={fieldKey}
+                    rules={createValidationRules(variable)}
                     render={({ field: { onChange, value, onBlur } }) => (
-                      <InputField
+                      <VariableInput
+                        name={fieldKey}
+                        variable={variable}
                         value={value}
-                        onChangeText={onChange}
+                        onChange={onChange}
                         onBlur={onBlur}
-                        variant="underline"
-                        placeholder={fieldValue.name}
-                        error={errors?.[fieldKey]?.message?.toString()}
+                        error={errors?.[fieldKey]?.message}
                         className="w-full"
                       />
                     )}
@@ -393,7 +426,7 @@ const ActionSideMenu: React.FC = () => {
                   variant="soft" 
                   color="primary" 
                   size="sm"
-                  onPress={() => onExecuteTransition(action)}
+                  onPress={() => onExecuteTransition(action as TransitionAction)}
                   disabled={!isTransitionEnabled(action)}
                   tooltip="hi"
                 >
