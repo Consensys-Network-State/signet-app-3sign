@@ -5,7 +5,7 @@ import { Text, Card, Button, Input, InputField } from "@ds3/react";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@ds3/react";
 import { useDocumentStore } from "../store/documentStore";
 import { useEditStore } from "../store/editorStore";
-import { Controller } from "react-hook-form";
+import { Controller, UseFormReturn, FieldValues } from "react-hook-form";
 import { isAddress } from 'viem';
 import AddressCard from "../web3/AddressCard";
 import truncateEthAddress from "truncate-eth-address";
@@ -165,6 +165,10 @@ const ActionSideMenu: React.FC = () => {
   const { getCurrentDraft: getCurrentMarkdownDraft, updateDraftTitle: updateMarkdownDraftTitle, updateAgreement } = useDocumentStore();
   const navigate = useNavigate();
 
+  // Add loading states for each action type
+  const [isInitializingAction, setIsInitializingAction] = React.useState(false);
+  const [isExecuting, setIsExecuting] = React.useState(false);
+
   const blockNoteDraft = getCurrentBlockNoteDraft();
   const markdownDraft = getCurrentMarkdownDraft();
   
@@ -173,17 +177,6 @@ const ActionSideMenu: React.FC = () => {
     markdownDraft?.metadata?.name || 
     'Untitled Agreement'
   );
-
-  const handleTitleChange = (newTitle: string) => {
-    setTitle(newTitle);
-    handleTitleChangeUtil({
-      title: newTitle,
-      blockNoteDraft,
-      markdownDraft,
-      updateBlockNoteDraftTitle,
-      updateMarkdownDraftTitle,
-    });
-  };
 
   // Get document ID from any of the possible route parameters
   const documentId = params.draftId || params.agreementId || params.documentId;
@@ -203,6 +196,11 @@ const ActionSideMenu: React.FC = () => {
     else return null;
   });
   
+  // Get form state and validation trigger - handle undefined form
+  const errors = form?.formState?.errors;
+  const trigger = form?.trigger;
+  const getValues = form?.getValues;
+  
   // Helper function to get input details from template
   const getInputDetails = (inputId: string): DocumentInput | undefined => {
     // Use test inputs for now
@@ -219,6 +217,30 @@ const ActionSideMenu: React.FC = () => {
   const isTransitionEnabled = React.useCallback((transition: any) => {
     return transition.conditions.every((condition: any) => condition.input.issuer.toLowerCase() === address?.toLowerCase());
   }, [address]);
+
+  // Helper to check if fields for a transition are valid
+  const areTransitionFieldsValid = React.useCallback(async (transition: TransitionAction) => {
+    if (!trigger) return true; // If no form context, assume valid
+    
+    // Get all fields that need to be validated from the input data
+    const fieldsToValidate = Object.keys(transition.conditions[0].input.data);
+    
+    // Validate all required fields
+    const result = await trigger(fieldsToValidate, { shouldFocus: true });
+    
+    // Check if any required fields are empty
+    if (result && getValues) {
+      const values = getValues();
+      const hasEmptyRequiredFields = fieldsToValidate.some(field => {
+        const value = values[field];
+        const variable = currentDocument?.variables[field];
+        return variable?.validation?.required && !value;
+      });
+      return !hasEmptyRequiredFields;
+    }
+    
+    return result;
+  }, [trigger, getValues, currentDocument?.variables]);
 
   const executionInputs = currentDocument?.execution?.inputs || {};
 
@@ -261,10 +283,31 @@ const ActionSideMenu: React.FC = () => {
     }
   });
 
-  const onPublish = React.useCallback((values: Record<string, string>) => {
-    // TODO: Use Values from Form validation, right now validation is validating the whole form which shouldn't be the case
-    publishMutation.mutate(getCachedValues());
-  }, [publishMutation]);
+  const onPublish = React.useCallback(async () => {
+    if (!trigger || !getValues) return; // Don't proceed if no form context
+    setIsInitializingAction(true);
+    try {
+      // Validate all initial params
+      const fieldsToValidate = Object.keys(initialParams);
+      const isValid = await trigger(fieldsToValidate);
+      if (!isValid) {
+        setIsInitializingAction(false);
+        return;
+      }
+
+      // Then proceed with publication
+      await publishMutation.mutateAsync(getValues());
+    } catch (error: any) {
+      console.error('Failed to publish:', error);
+      console.log({
+        title: "Publication Failed",
+        description: error?.message || "Failed to publish agreement",
+        variant: "error",
+      });
+    } finally {
+      setIsInitializingAction(false);
+    }
+  }, [initialParams, trigger, getValues, publishMutation]);
 
   // Create mutation for publishing agreement
   const inputMutation = useMutation({
@@ -302,25 +345,50 @@ const ActionSideMenu: React.FC = () => {
     }
   });
 
-  // Handle transition execution
   const onExecuteTransition = React.useCallback(async (transition: TransitionAction) => {
-    const data = {
-      values: getCachedValues(),
-      transition
-    };
-    inputMutation.mutate(data);
-  }, [getCachedValues(), inputMutation]);
+    if (!trigger || !getValues) return; // Don't proceed if no form context
+    
+    setIsExecuting(true);
+    try {
+      // First validate the required fields
+      const isValid = await areTransitionFieldsValid(transition);
+      if (!isValid) {
+        console.log({
+          title: "Validation Failed",
+          description: "Please fill in all required fields correctly",
+          variant: "error",
+        });
+        setIsExecuting(false);
+        return;
+      }
 
+      // Then proceed with the transition
+      const data = {
+        values: getValues(),
+        transition
+      };
+      await inputMutation.mutateAsync(data);
+    } catch (error: any) {
+      console.error('Failed to execute transition:', error);
+      console.log({
+        title: "Execution Failed",
+        description: error?.message || "Failed to execute transition",
+        variant: "error",
+      });
+    } finally {
+      setIsExecuting(false);
+    }
+  }, [getValues, areTransitionFieldsValid, inputMutation, trigger]);
 
   if (!currentDocument || !form) {
     return null;
   }
 
-  const { control, formState: { errors }, handleSubmit } = form;
+  const { control } = form;
 
   return (
     <View className="flex flex-col gap-4">
-      { currentAgreement && currentAgreement.state.IsComplete
+      {currentAgreement && currentAgreement.state.IsComplete
         ? <>
           <Text className="text-md font-medium text-neutral-11">{currentAgreement.state.State.name}</Text>
           <Text className="text-sm font-medium text-neutral-11">{currentAgreement.state.State.description}</Text>
@@ -328,7 +396,7 @@ const ActionSideMenu: React.FC = () => {
         : <Text className="text-sm font-medium text-neutral-11">Actions</Text> 
       }
 
-      {/* Initial Action Section */}
+      {/* Initial Action Section - Only show in draft mode */}
       {isInitializing && Object.keys(initialParams).length > 0 && (
         <Card className="p-4">
           <View className="flex flex-col gap-2">
@@ -339,9 +407,9 @@ const ActionSideMenu: React.FC = () => {
               value={title}
               variant="underline"
               className="text-primary-12 text-xl font-semibold"
-              {...{ onChangeText: handleTitleChange }}
+              {...{ onChangeText: setTitle }}
             >
-              <Input.Field placeholder="Agreement Title" />
+              <Input.Field />
             </Input>
             
             {Object.entries(initialParams).map(([paramKey]) => {
@@ -375,9 +443,10 @@ const ActionSideMenu: React.FC = () => {
                 color="primary" 
                 size="sm"
                 onPress={onPublish}
-                disabled={!Object.keys(initialParams).every(ref => getCachedValues()[ref])}
+                loading={isInitializingAction}
               >
-                <Button.Text>Initialize</Button.Text>
+                <Button.Spinner />
+                <Button.Text>{isInitializingAction ? 'Initializing...' : 'Initialize'}</Button.Text>
               </Button>
             </View>
           </View>
@@ -387,7 +456,6 @@ const ActionSideMenu: React.FC = () => {
       {/* Available Transitions Section */}
       {!isInitializing && nextActions && nextActions.length > 0 && nextActions.map((action, index) => {
         const inputs = action.conditions.map((condition) => condition.input);
-        // TODO: Handle multiple inputs of different types
         const input = inputs[0];
         return (
           <Card key={index} className="p-4">
@@ -396,7 +464,7 @@ const ActionSideMenu: React.FC = () => {
               <Text className="text-sm text-neutral-11">{input.description}</Text>
 
               {/* Input fields for variable references in data */}
-              {Object.entries(input.data).map(([fieldKey, fieldValue]) => {
+              {Object.entries(input.data).map(([fieldKey]) => {
                 const variable = currentDocument?.variables?.[fieldKey];
                 if (!variable) return null;
                 
@@ -427,10 +495,10 @@ const ActionSideMenu: React.FC = () => {
                   color="primary" 
                   size="sm"
                   onPress={() => onExecuteTransition(action as TransitionAction)}
-                  disabled={!isTransitionEnabled(action)}
-                  tooltip="hi"
+                  loading={isExecuting}
                 >
-                  <Button.Text>Execute</Button.Text>
+                  <Button.Spinner />
+                  <Button.Text>{isExecuting ? 'Executing...' : 'Execute'}</Button.Text>
                 </Button>
               </View>
             </View>
