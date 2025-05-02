@@ -13,6 +13,7 @@ import { isAddress } from 'viem';
 import AddressAvatar from "../../web3/AddressAvatar.tsx";
 import { DatePickerField } from '../../components/DatePickerField';
 import dayjs from 'dayjs';
+import DocumentSignatureDialog from '../../blocks/DocumentSignatureDialog';
 
 interface SpanProps {
   className?: string;
@@ -244,6 +245,27 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
         const variable = variables[variableName];
         const disabled = !editableFields.find(field => field === variableName);
         if (variable) {
+          if (variable.type === 'signature') {
+            return (
+              <Controller
+                control={control}
+                name={variableName}
+                rules={createValidationRules(variable)}
+                render={({ field: { onChange, value } }) => {
+                  // For signatures, we want to use the party name if available
+                  const partyName = variables[variableName.replace('Signature', 'Name')]?.value;
+                  return (
+                    <DocumentSignatureDialog
+                      name={partyName}
+                      value={value}
+                      onSignatureAdopted={onChange}
+                      disabled={disabled}
+                    />
+                  );
+                }}
+              />
+            );
+          }
           return (
             <Controller
               control={control}

@@ -52,21 +52,19 @@
       }
     },
     "partyASignature": {
-      "type": "string",
+      "type": "signature",
       "name": "Party A Signature",
       "description": "Digital signature of the first party",
       "validation": {
-        "required": true,
-        "minLength": 1
+        "required": true
       }
     },
     "partyBSignature": {
-      "type": "string",
+      "type": "signature",
       "name": "Party B Signature",
       "description": "Digital signature of the second party",
       "validation": {
-        "required": true,
-        "minLength": 1
+        "required": true
       }
     }
   },
