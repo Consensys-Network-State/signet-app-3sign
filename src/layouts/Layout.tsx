@@ -9,6 +9,7 @@ import { useEditStore } from '../store/editorStore';
 import { useDocumentStore } from '../store/documentStore';
 import SideMenu from './SideMenu';
 import ActionSideMenu from '../components/ActionSideMenu';
+import { handleTitleChange as handleTitleChangeUtil } from '../utils/documentUtils';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -66,11 +67,13 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, isLoadin
 
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
-    if (blockNoteDraft) {
-      updateDraftTitle(blockNoteDraft.id, newTitle);
-    } else if (markdownDraft?.id) {
-      updateMarkdownDraftTitle(markdownDraft.id, newTitle);
-    }
+    handleTitleChangeUtil({
+      title: newTitle,
+      blockNoteDraft,
+      markdownDraft,
+      updateBlockNoteDraftTitle: updateDraftTitle,
+      updateMarkdownDraftTitle,
+    });
   };
 
   // Check if we should show the side menu

@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router';
 import { Text, Card, Button, Input, InputField } from "@ds3/react";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@ds3/react";
 import { useDocumentStore } from "../store/documentStore";
+import { useEditStore } from "../store/editorStore";
 import { Controller } from "react-hook-form";
 import { isAddress } from 'viem';
 import AddressCard from "../web3/AddressCard";
@@ -16,6 +17,7 @@ import { createAgreementInitVC, createAgreementInputVC } from "../utils/veramoUt
 import { postAgreement, postAgreementInput } from "../api/index";
 import { getCurrentState, getInitialState, getInitialStateParams, getNextStates } from "../utils/agreementUtils";
 import { formCache } from "../utils/formCache";
+import { handleTitleChange as handleTitleChangeUtil } from '../utils/documentUtils';
 
 // TODO: Remove these test transitions once backend integration is complete
 const TEST_TRANSITIONS = [
@@ -159,7 +161,29 @@ const ActionSideMenu: React.FC = () => {
   const form = React.useContext(FormContext);
   const { address } = useAccount();
   const { updateDraft, deleteDraft, getDraft } = useDocumentStore();
+  const { getCurrentDraft: getCurrentBlockNoteDraft, updateDraftTitle: updateBlockNoteDraftTitle } = useEditStore();
+  const { getCurrentDraft: getCurrentMarkdownDraft, updateDraftTitle: updateMarkdownDraftTitle } = useDocumentStore();
   const navigate = useNavigate();
+  
+  const blockNoteDraft = getCurrentBlockNoteDraft();
+  const markdownDraft = getCurrentMarkdownDraft();
+  
+  const [title, setTitle] = React.useState(
+    blockNoteDraft?.title || 
+    markdownDraft?.metadata?.name || 
+    'Untitled Agreement'
+  );
+
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    handleTitleChangeUtil({
+      title: newTitle,
+      blockNoteDraft,
+      markdownDraft,
+      updateBlockNoteDraftTitle,
+      updateMarkdownDraftTitle,
+    });
+  };
 
   // Get document ID from any of the possible route parameters
   const documentId = params.draftId || params.agreementId || params.documentId;
@@ -320,6 +344,15 @@ const ActionSideMenu: React.FC = () => {
           <View className="flex flex-col gap-2">
             <Text className="font-semibold">Initialize Agreement</Text>
             <Text className="text-sm text-neutral-11">{"Initialize the agreement with the following parameters"}</Text>
+            
+            <Input
+              value={title}
+              variant="underline"
+              className="text-primary-12 text-xl font-semibold"
+              {...{ onChangeText: handleTitleChange }}
+            >
+              <Input.Field placeholder="Agreement Title" />
+            </Input>
             
             {Object.keys(initialParams).map(paramKey => 
               <Controller

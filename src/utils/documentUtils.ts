@@ -50,3 +50,26 @@ export const countNumberOfSignatures = (state: Block[]) => {
     numOfSignatureBlocks: signatureBlocks.length
   }
 }
+
+export interface TitleChangeHandlerParams {
+  title: string;
+  blockNoteDraft?: any;
+  markdownDraft?: any;
+  updateBlockNoteDraftTitle?: (id: string, title: string) => void;
+  updateMarkdownDraftTitle?: (id: string, title: string) => void;
+}
+
+export const handleTitleChange = ({
+  title,
+  blockNoteDraft,
+  markdownDraft,
+  updateBlockNoteDraftTitle,
+  updateMarkdownDraftTitle,
+}: TitleChangeHandlerParams) => {
+  if (blockNoteDraft && updateBlockNoteDraftTitle) {
+    updateBlockNoteDraftTitle(blockNoteDraft.id, title);
+  } else if (markdownDraft?.id && updateMarkdownDraftTitle) {
+    updateMarkdownDraftTitle(markdownDraft.id, title);
+  }
+  return title;
+};
