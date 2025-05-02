@@ -201,9 +201,12 @@ const ActionSideMenu: React.FC = () => {
   // Get cached form values
   const getCachedValues = React.useCallback(() => {
     if (!documentId) return {};
-    const cached = localStorage.getItem(`draft_${documentId}_values`);
+    
+    // Check if we're in a draft or agreement context
+    const prefix = params.draftId ? 'draft' : 'agreement';
+    const cached = localStorage.getItem(`${prefix}_${documentId}_values`);
     return cached ? JSON.parse(cached) : {};
-  }, [documentId]);
+  }, [documentId, params.draftId]);
 
   // Helper function to check if a transition's conditions are met
   const isTransitionEnabled = React.useCallback((transition: any) => {

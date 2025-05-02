@@ -17,12 +17,27 @@ const Draft: React.FC = () => {
   const { address } = useAccount();
   const [agreement, setAgreement] = React.useState<Agreement | null>(null);
 
+  // Get initial values from localStorage or agreement state
+  const getInitialValues = React.useCallback(() => {
+    if (!agreement || !agreementId) return {};
+    
+    const storedValues = localStorage.getItem(`agreement_${agreementId}_values`);
+    if (storedValues) {
+      return JSON.parse(storedValues);
+    }
+
+    // Fallback to agreement state values
+    return Object.entries(agreement.state.Variables || {}).reduce((acc, [key, variable]: [string, any]) => ({
+      ...acc,
+      [key]: variable?.value || ''
+    }), {} as Record<string, string>);
+  }, [agreementId, agreement]);
+
   // TODO: This should ideally be a query for the specific agreement ID. No such endpoint exists yet.
   const { data: agreements, isLoading: isLoadingAgreements } = useQuery({
     queryKey: [],
     queryFn: () => getAgreementByUserId(address as string),
   });
-
 
   React.useEffect(() => {
     if (!isLoadingAgreements && agreements) {
@@ -32,19 +47,8 @@ const Draft: React.FC = () => {
     }
   }, [agreements, isLoadingAgreements, addAgreements])
 
-  const initialValues = React.useMemo(() => {
-    if (!agreement || !agreement.document || !agreement.document.variables) {
-      return null;
-    }
-    
-    return Object.entries(agreement.state.Variables).reduce((acc, [key, variable]) => ({
-      ...acc,
-      [key]: variable.value || ''
-    }), {} as Record<string, string>);
-  }, [agreement]);
-
   const form = useForm({
-    defaultValues: {},
+    defaultValues: getInitialValues(),
     mode: 'onBlur',
     reValidateMode: 'onBlur'
   });
@@ -61,17 +65,19 @@ const Draft: React.FC = () => {
   React.useEffect(() => {
     const subscription = watch((values) => {
       if (!values) return;
-      localStorage.setItem(`draft_${agreementId}_values`, JSON.stringify(values));
+      localStorage.setItem(`agreement_${agreementId}_values`, JSON.stringify(values));
     });
 
     return () => subscription.unsubscribe();
   }, [watch, agreementId]);
 
+  // Reset form when agreement changes
   React.useEffect(() => {
-    if (agreement && initialValues) {
+    if (agreement) {
+      const initialValues = getInitialValues();
       reset(initialValues);
     }
-  }, [agreement, form, initialValues]);
+  }, [agreement, reset, getInitialValues]);
 
   if (isLoadingAgreements) {
     return <div>Loading...</div>;
