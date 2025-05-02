@@ -26,6 +26,7 @@ interface DocumentSignatureDialogProps {
   value?: string;
   onSignatureAdopted: (signature: string) => void;
   disabled?: boolean;
+  error?: string;
 }
 
 export type FormData = {
@@ -106,17 +107,14 @@ const DocumentSignatureDialog: React.FC<DocumentSignatureDialogProps> = (props: 
             <Text>Cancel</Text>
           </Button>
         </DialogClose>
-
-        {isValid ?
-          <DialogClose asChild>
-            <Button variant="soft" color="primary" onPress={handleSubmit(onSubmit)}>
-              <Text>Adopt Signature</Text>
-            </Button>
-          </DialogClose> :
-          <Button variant="soft" color="primary" onPress={handleSubmit(onSubmit)}>
-            <Text>Adopt Signature</Text>
-          </Button>
-        }
+        <Button
+          variant="soft"
+          color="primary"
+          onPress={handleSubmit(onSubmit)}
+          disabled={!isValid}
+        >
+          <Text>Adopt Signature</Text>
+        </Button>
       </DialogFooter>
     </DialogContent>
   );
@@ -131,6 +129,9 @@ const DocumentSignatureDialog: React.FC<DocumentSignatureDialogProps> = (props: 
           onEdit={() => setIsOpen(true)}
           disabled={props.disabled}
         />
+        {props.error && (
+          <Text className="text-error-10 text-xs mt-2">{props.error}</Text>
+        )}
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           {dialogContent}
         </Dialog>
@@ -147,6 +148,9 @@ const DocumentSignatureDialog: React.FC<DocumentSignatureDialogProps> = (props: 
           <Button.Text>Click here to sign</Button.Text>
         </Button>
       </DialogTrigger>
+      {props.error && (
+        <Text className="text-error-10 text-sm mt-2">{props.error}</Text>
+      )}
       {dialogContent}
     </Dialog>
   );

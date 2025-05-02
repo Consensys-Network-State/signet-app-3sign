@@ -140,6 +140,7 @@ const VariableInput: React.FC<VariableInputProps> = ({
         value={value}
         onSignatureAdopted={onChange}
         disabled={disabled}
+        error={errorMessage}
       />
     );
   }
