@@ -18,23 +18,27 @@ interface LayoutProps {
     type?: 'warning' | 'info' | 'error';
     actions?: React.ReactNode;
   };
+  isLoading?: boolean;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
+const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, isLoading }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams();
   const { getCurrentDraft, updateDraftTitle } = useEditStore();
-  const { getCurrentDraft: getCurrentMarkdownDraft, updateDraftTitle: updateMarkdownDraftTitle } = useDocumentStore();
+  const { getCurrentDraft: getCurrentMarkdownDraft, updateDraftTitle: updateMarkdownDraftTitle, getAgreement } = useDocumentStore();
   const isEditMode = location.pathname === '/edit';
   const isDraftMode = location.pathname.startsWith('/drafts/');
+  const isDocumentMode = location.pathname.startsWith('/agreements/');
   
   const blockNoteDraft = isEditMode ? getCurrentDraft() : null;
   const markdownDraft = isDraftMode ? getCurrentMarkdownDraft() : null;
+  const agreement = isDocumentMode ? getAgreement(params.agreementId!) : null;
   
   const [title, setTitle] = React.useState(
     blockNoteDraft?.title || 
     markdownDraft?.metadata.name || 
+    agreement?.document.metadata?.name ||
     'Untitled Agreement'
   );
   
@@ -43,8 +47,10 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
       setTitle(blockNoteDraft.title);
     } else if (markdownDraft) {
       setTitle(markdownDraft.metadata.name);
+    } else if (agreement) {
+      setTitle(agreement.document.metadata?.name || 'Untitled Agreement');
     }
-  }, [blockNoteDraft, markdownDraft]);
+  }, [blockNoteDraft, markdownDraft, agreement]);
 
   const getStatusBackgroundColor = (type?: 'warning' | 'info' | 'error') => {
     switch (type) {
@@ -62,14 +68,17 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
     setTitle(newTitle);
     if (blockNoteDraft) {
       updateDraftTitle(blockNoteDraft.id, newTitle);
-    } else if (markdownDraft) {
+    } else if (markdownDraft?.id) {
       updateMarkdownDraftTitle(markdownDraft.id, newTitle);
     }
   };
 
   // Check if we should show the side menu
   const documentId = params.draftId || params.agreementId || params.documentId;
-  const showSideMenu = Boolean(documentId);
+  const showSideMenu = Boolean(documentId) && !isLoading;
+
+  // Determine if we should show the title input
+  const showTitleInput = isEditMode || isDraftMode || isDocumentMode;
 
   return (
     <View className="h-screen bg-neutral-1 flex flex-col">
@@ -91,7 +100,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
         )}
 
         <View className="flex flex-row items-center justify-between px-8 py-6">
-          {(isEditMode || isDraftMode) ? (
+          {showTitleInput ? (
             <View className="flex flex-row items-center gap-2">
               <Button
                 variant="ghost"
@@ -106,6 +115,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status }) => {
                   variant="ghost"
                   className="text-primary-12 text-xl font-semibold h-10"
                   {...{ onChangeText: handleTitleChange }}
+                  readOnly={isDocumentMode}
                 >
                   <Input.Field />
                 </Input>

@@ -8,13 +8,14 @@ import { Controller } from "react-hook-form";
 import { isAddress } from 'viem';
 import AddressCard from "../web3/AddressCard";
 import truncateEthAddress from "truncate-eth-address";
-import { DraftFormContext } from './markdown/Draft';
+import { FormContext } from '../contexts/FormContext';
 import { useMutation } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { Document } from "../store/documentStore";
 import { createAgreementInitVC, createAgreementInputVC } from "../utils/veramoUtils";
 import { postAgreement, postAgreementInput } from "../api/index";
 import { getCurrentState, getInitialState, getInitialStateParams, getNextStates } from "../utils/agreementUtils";
+import { formCache } from "../utils/formCache";
 
 // TODO: Remove these test transitions once backend integration is complete
 const TEST_TRANSITIONS = [
@@ -155,7 +156,7 @@ const VCDetailsModal: React.FC<{
 const ActionSideMenu: React.FC = () => {
   const params = useParams();
   const [selectedVC, setSelectedVC] = React.useState<VerifiableCredential | null>(null);
-  const form = React.useContext(DraftFormContext);
+  const form = React.useContext(FormContext);
   const { address } = useAccount();
   const { updateDraft, deleteDraft, getDraft } = useDocumentStore();
   const navigate = useNavigate();
@@ -201,12 +202,8 @@ const ActionSideMenu: React.FC = () => {
   // Get cached form values
   const getCachedValues = React.useCallback(() => {
     if (!documentId) return {};
-    
-    // Check if we're in a draft or agreement context
-    const prefix = params.draftId ? 'draft' : 'agreement';
-    const cached = localStorage.getItem(`${prefix}_${documentId}_values`);
-    return cached ? JSON.parse(cached) : {};
-  }, [documentId, params.draftId]);
+    return formCache.get(documentId);
+  }, [documentId]);
 
   // Helper function to check if a transition's conditions are met
   const isTransitionEnabled = React.useCallback((transition: any) => {
@@ -235,16 +232,20 @@ const ActionSideMenu: React.FC = () => {
       const vc = await createAgreementInitVC(address as `0x${string}`, currentDocument, initValues);
       return postAgreement(vc);
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       const newAgreementId = data.data.id;
-      console.log({
-        title: "Agreement Published",
-        description: "Your agreement has been successfully published",
-        variant: "success",
-      });
-      localStorage.removeItem(`draft_${params.draftId}_values`);
+      
+      // First clean up the draft and local storage
+      formCache.remove(params.draftId!);
       deleteDraft(params.draftId!);
-      navigate(`/agreements/${newAgreementId}`);
+
+      // Navigate to agreements list first to trigger a fresh data fetch
+      navigate('/', { replace: true });
+      
+      // Then navigate to the new agreement after a short delay
+      setTimeout(() => {
+        navigate(`/agreements/${newAgreementId}`, { replace: true });
+      }, 500);
     },
     onError: (error) => {
       console.log({
