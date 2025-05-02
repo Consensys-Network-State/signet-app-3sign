@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { View } from 'react-native';
 import { Text } from '@ds3/react';
-import { DocumentVariable } from '../../store/documentStore';
+import { DocumentVariable, DocumentInput } from '../../store/documentStore';
 import { unified } from 'unified';
 import remarkStringify from 'remark-stringify';
 import ReactMarkdown from 'react-markdown';
@@ -24,9 +24,16 @@ export interface MarkdownDocumentViewProps {
     type: 'md' | 'mdast';
     data: string | Root;
   };
-  variables?: Record<string, any>;
+  variables?: Record<string, DocumentVariable>;
   errors?: Record<string, any>;
-  editableFields?: string[];
+  nextActions?: Array<{
+    conditions: Array<{
+      input: DocumentInput;
+    }>;
+  }>;
+  userAddress?: string;
+  initialParams?: Record<string, string>;
+  isInitializing?: boolean;
 }
 
 const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
@@ -34,8 +41,34 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
   content,
   variables = {},
   errors = {},
-  editableFields = []
+  nextActions = [],
+  userAddress,
+  initialParams = {},
+  isInitializing = false
 }) => {
+  // Helper function to check if a field should be enabled
+  const isFieldEnabled = React.useCallback((variableName: string) => {
+    // If we're initializing, only enable fields in initialParams
+    if (isInitializing) {
+      return Object.keys(initialParams).includes(variableName);
+    }
+
+    // Otherwise check next actions
+    if (!nextActions || !userAddress) return false;
+
+    return nextActions.some(action => {
+      return action.conditions.some(condition => {
+        const input = condition.input;
+        // Check if this variable is in the input's data requirements
+        const isFieldInInput = Object.keys(input.data).includes(variableName);
+        // Check if the current user is the required issuer
+        const isCorrectIssuer = input.issuer.toLowerCase() === userAddress.toLowerCase();
+        
+        return isFieldInInput && isCorrectIssuer;
+      });
+    });
+  }, [nextActions, userAddress, isInitializing, initialParams]);
+
   // Create stable components
   const components = React.useMemo<Components>(() => ({
     h1: ({ children }) => <Text className="text-4xl font-bold mb-4">{children}</Text>,
@@ -94,7 +127,8 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
       if (className === 'variable-input' && props['data-name']) {
         const variableName = props['data-name'];
         const variable = variables[variableName];
-        const disabled = !editableFields.find(field => field === variableName);
+        const enabled = isFieldEnabled(variableName);
+        
         if (variable) {
           return (
             <Controller
@@ -109,7 +143,7 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
                   onChange={onChange}
                   onBlur={onBlur}
                   error={errors[variableName]}
-                  disabled={disabled}
+                  disabled={!enabled}
                 />
               )}
             />
@@ -118,7 +152,7 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
       }
       return <Text className={className}>{children}</Text>;
     }
-  }), [variables, control, errors, editableFields]);
+  }), [variables, control, errors, isFieldEnabled]);
 
   const renderContent = React.useCallback(() => {
     let markdownContent: string;
