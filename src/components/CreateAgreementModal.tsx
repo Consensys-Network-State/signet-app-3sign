@@ -5,6 +5,7 @@ import AddressAvatar from '../web3/AddressAvatar';
 import { useNavigate } from 'react-router';
 import { useDocumentStore, Document } from '../store/documentStore';
 import mouTemplate from '../templates/mou-template.json';
+import mouWithPaymentTemplate from '../templates/grant-with-tx.json';
 import { Trash2 } from 'lucide-react-native';
 
 interface TemplateInfo {
@@ -26,7 +27,7 @@ interface TemplateOption {
   selected: boolean;
   type: 'markdown';
   isCustom?: boolean;
-  template?: Document;
+  template: Document;
   category: 'default' | 'custom';
 }
 
@@ -41,7 +42,16 @@ const DEFAULT_TEMPLATES: TemplateOption[] = [
     title: 'Memorandum of Understanding',
     selected: true,
     type: 'markdown',
-    category: 'default'
+    category: 'default',
+    template: mouTemplate as Document
+  }, 
+  {
+    id: 'mou-with-payment',
+    title: 'Memorandum of Understanding with Payment',
+    selected: true,
+    type: 'markdown',
+    category: 'default',
+    template: mouWithPaymentTemplate as Document
   }
 ];
 
@@ -57,6 +67,18 @@ const TEMPLATE_INFO: Record<string, TemplateInfo> = {
       address: '0x1234567890123456789012345678901234567890',
     },
     description: 'A template for non-binding memorandum of understanding between two parties, with support for variable interpolation and markdown formatting.',
+  },
+  'mou-with-payment': {
+    title: 'Memorandum of Understanding with Payment',
+    author: {
+      name: 'Agreements Protocol',
+      address: '0x1234567890123456789012345678901234567890',
+    },
+    smartContracts: {
+      name: 'None',
+      address: '0x1234567890123456789012345678901234567890',
+    },
+    description: 'A template for non-binding memorandum of understanding between two parties, with support for variable interpolation and markdown formatting. Includes payment terms.',
   },
 };
 
@@ -233,16 +255,18 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
         selectedOption.template.metadata.name,
         selectedOption.template.content.data as string,
         selectedOption.template.variables,
+        selectedOption.template.contracts,
         selectedOption.template.execution
       );
       onClose();
       navigate(`/drafts/${draftId}`);
     } else {
-      const template = mouTemplate as Document;
+      const template = selectedOption.template;
       const draftId = createDraft(
         template.metadata.name,
         template.content.data,
         template.variables,
+        template.contracts,
         template.execution
       );
       onClose();

@@ -101,7 +101,7 @@ export async function createAgreementInitVC(address: `0x${string}`, agreement: D
   return JSON.stringify(vc);
 }
 
-export async function createAgreementInputVC(address: `0x${string}`, inputId: string, values: Record<string, any>) {
+export async function createAgreementInputVC(address: `0x${string}`, inputId: string, values: Record<string, any>, isTxProof: boolean = false) {
   const agent = await setupAgent();
   const did = await agent.didManagerGet({did: `did:pkh:eip155:1:${address}`});
 
@@ -121,8 +121,10 @@ export async function createAgreementInputVC(address: `0x${string}`, inputId: st
     issuanceDate: new Date().toISOString(),
     credentialSubject: {
       id: inputId,
-      type: "signedFields", // TODO: Make this configurable
-      values: filteredValues
+      type: "signedFields", // TODO: Make this have better support for txProofs
+      ...(isTxProof ? {
+        txProof: filteredValues.txProof
+      } : { values: filteredValues }),
     },
   }
 

@@ -59,6 +59,12 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
     return nextActions.some(action => {
       return action.conditions.some(condition => {
         const input = condition.input;
+        
+        if (input.type === 'EVMTransaction') {
+          // TODO: Handle EVMTransaction Input types in markdown if applicable
+          return false;
+        }
+
         // Check if this variable is in the input's data requirements
         const isFieldInInput = Object.keys(input.data).includes(variableName);
         // Check if the current user is the required issuer

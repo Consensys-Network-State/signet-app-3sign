@@ -42,14 +42,43 @@ export interface InputDataField {
   validation?: VariableValidation;
 }
 
-export interface DocumentInput {
-  type: string;
+export interface StandardDocumentInput {
+  type: 'VerifiedCredentialEIP712';
   schema?: string;
   displayName: string;
   description: string;
   data: Record<string, string | InputDataField>;
   issuer: string;
 }
+
+export interface ContractCallTxMetadata {
+  transactionType: 'contractCall';
+  method: string;
+  params: any[];
+  contractReference: string;
+}
+
+export interface NativeTransferTxMetadata {
+  transactionType: 'nativeTransfer';
+  chainId: string;
+  from: string;
+  to: string;
+  value: string;
+}
+
+export type TxMetadata = ContractCallTxMetadata | NativeTransferTxMetadata;
+
+export interface EVMTransactionInput {
+  id: string;
+  type: 'EVMTransaction';
+  schema?: string;
+  displayName: string;
+  description: string;
+  txMetadata: TxMetadata;
+  signer: string;
+}
+
+export type DocumentInput = StandardDocumentInput | EVMTransactionInput;
 
 export interface Transition {
   from: string;
@@ -66,10 +95,19 @@ export interface DocumentExecution {
   transitions: Transition[];
 }
 
+export interface Contract {
+  id: string;
+  description: string;
+  address: string;
+  chainId: string;
+  abi: string;
+}
+
 export interface Document {
   id?: string;
   metadata: DocumentMetadata;
   variables: Record<string, DocumentVariable>;
+  contracts?: Contract[],
   content: {
     type: 'md' | 'mdast';
     data: string | any;
@@ -94,6 +132,7 @@ export interface Agreement {
       name: string;
       value: any;
     }[];
+    Variables: Record<string, DocumentVariable>;
   };
   createdAt: string;
   updatedAt: string;
@@ -126,7 +165,7 @@ export const useDocumentStore = create(
           getAgreement: (id: string) => {
             return get().agreements.find(agreement => agreement.id === id);
           },
-          createDraft: (title: string, content: string, variables: Record<string, DocumentVariable> = {}, execution: DocumentExecution = emptyExecution) => {
+          createDraft: (title: string, content: string, variables: Record<string, DocumentVariable> = {}, contracts: Contract[] = [], execution: DocumentExecution = emptyExecution) => {
             const id = crypto.randomUUID();
             const now = new Date().toISOString();
             const draft: Document = {
@@ -141,6 +180,7 @@ export const useDocumentStore = create(
                 description: 'Draft document',
               },
               variables,
+              contracts,
               content: {
                 type: 'md',
                 data: content,
