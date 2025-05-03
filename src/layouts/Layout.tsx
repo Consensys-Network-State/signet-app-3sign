@@ -114,13 +114,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, isLoadin
               </View>
             </View>
           ) : (
-            <Button
-              variant="ghost"
-              onPress={() => navigate('/')}
-              className="p-0"
-            >
-              <H4 className="text-primary-12">Agreements</H4>
-            </Button>
+            <H4 className="text-primary-12">Agreements</H4>
           )}
 
           <View className="flex flex-row items-center px-4 gap-2">
