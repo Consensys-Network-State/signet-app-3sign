@@ -89,7 +89,7 @@ export interface Agreement {
       name: string;
       isInitial: boolean;
     };
-    ReceievedInputs: {
+    ReceivedInputs: {
       id: string;
       name: string;
       value: any;

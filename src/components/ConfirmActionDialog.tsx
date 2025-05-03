@@ -14,12 +14,10 @@ const ConfirmActionDialog: React.FC<ConfirmActionDialogProps> = ({ open, onOpenC
     <DialogContent>
       <DialogHeader>
         <DialogTitle>
-          {type === 'publish' ? 'Publish Agreement' : 'Execute Action'}
+          {type === 'publish' ? 'Publish Agreement' : 'Publish Updated Agreement'}
         </DialogTitle>
         <DialogDescription>
-          {type === 'publish'
-            ? 'Publishing this agreement will create a verifiable claim that will be stored on Arweave. This verifiable claim needs to be signed by a wallet so you will be prompted to sign using a MetaMask wallet. This action is immutable and irreversible.'
-            : 'Are you sure you want to execute this action? You may be prompted to sign with your MetaMask wallet.'}
+          Publishing this {type === 'publish' ? 'agreement' : 'update'} will create a verifiable claim that will be stored on Arweave. This verifiable claim needs to be signed by a wallet so you will be prompted to sign using a Meta Mask wallet. This action is immutable and irreversible.
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
@@ -36,7 +34,7 @@ const ConfirmActionDialog: React.FC<ConfirmActionDialogProps> = ({ open, onOpenC
         >
           <Button.Spinner />
           <Button.Text>
-            {type === 'publish' ? 'Sign & Publish' : 'Sign & Execute'}
+            Sign & Publish
           </Button.Text>
         </Button>
       </DialogFooter>

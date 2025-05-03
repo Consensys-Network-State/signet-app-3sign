@@ -11,7 +11,7 @@
   "variables": {
     "partyAEthAddress": {
       "type": "address",
-      "name": "Party A Ethereum Address",
+      "name": "Party A Address",
       "description": "Ethereum address of the first party",
       "validation": {
         "required": true
@@ -26,9 +26,17 @@
         "minLength": 1
       }
     },
+    "partyASignature": {
+      "type": "signature",
+      "name": "Party A Signature",
+      "description": "Digital signature of the first party",
+      "validation": {
+        "required": true
+      }
+    },
     "partyBEthAddress": {
       "type": "address",
-      "name": "Party B Ethereum Address",
+      "name": "Party B Address",
       "description": "Ethereum address of the second party",
       "validation": {
         "required": true
@@ -43,26 +51,18 @@
         "minLength": 1
       }
     },
-    "effectiveDate": {
-      "type": "dateTime",
-      "name": "Effective Date",
-      "description": "The date when this MOU becomes effective",
-      "validation": {
-        "required": true
-      }
-    },
-    "partyASignature": {
-      "type": "signature",
-      "name": "Party A Signature",
-      "description": "Digital signature of the first party",
-      "validation": {
-        "required": true
-      }
-    },
     "partyBSignature": {
       "type": "signature",
       "name": "Party B Signature",
       "description": "Digital signature of the second party",
+      "validation": {
+        "required": true
+      }
+    },
+    "effectiveDate": {
+      "type": "dateTime",
+      "name": "Effective Date",
+      "description": "The date when this MOU becomes effective",
       "validation": {
         "required": true
       }

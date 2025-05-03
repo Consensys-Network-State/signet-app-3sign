@@ -17,6 +17,7 @@ import { getInitialStateParams, getNextStates } from "../utils/agreementUtils";
 import { formCache } from "../utils/formCache";
 import VariableInput, { createValidationRules } from './VariableInput';
 import ConfirmActionDialog from './ConfirmActionDialog';
+import StatusLabel from './StatusLabel';
 
 interface DocumentInput {
   type: string;
@@ -381,11 +382,11 @@ const ActionSideMenu: React.FC = () => {
       {isInitializing && Object.keys(initialParams).length > 0 && (
         <Card className="p-4">
           <View className="flex flex-col gap-4">
-            <Text className="font-semibold">Initialize Agreement</Text>
-            <Text className="text-sm text-neutral-11 mb-3">{"Initialize the agreement with the following parameters"}</Text>
+            <Text className="font-semibold">Publish Agreement</Text>
+            <Text className="text-sm text-neutral-11 mb-3">{"This agreement will be published and stored on Arweave."}</Text>
             
             <InputField
-              label="Document Title"
+              label="Agreement Name"
               value={title}
               variant="soft"
               className="text-primary-12 text-xl font-semibold"
@@ -420,6 +421,18 @@ const ActionSideMenu: React.FC = () => {
               );
             })}
 
+            {/* Next Action Section */}
+            {currentDocument?.execution?.states && (
+              <View>
+                <Text className="text-sm text-neutral-11 mb-2">Next Action</Text>
+                <StatusLabel
+                  status="info"
+                  text={Object.values(currentDocument.execution.states).find(state => state.isInitial)?.name || 'Next Action'} 
+                />
+              </View>
+            )}
+
+
             <View className="flex flex-row justify-end mt-2">
               <Button 
                 variant="soft" 
@@ -429,7 +442,7 @@ const ActionSideMenu: React.FC = () => {
                 loading={isInitializingAction}
               >
                 <Button.Spinner />
-                <Button.Text>{isInitializingAction ? 'Initializing...' : 'Initialize'}</Button.Text>
+                <Button.Text>{isInitializingAction ? 'Publishing...' : 'Continue'}</Button.Text>
               </Button>
             </View>
           </View>
@@ -484,6 +497,17 @@ const ActionSideMenu: React.FC = () => {
                 );
               })}
 
+               {/* Next Action Section */}
+               {action.to && (
+                <View className="mt-0">
+                  <Text className="text-sm text-neutral-11 mb-2">Next Action</Text>
+                  <StatusLabel 
+                    status="info"
+                    text={action.to.name} 
+                  />
+                </View>
+              )}
+
               <View className="flex flex-row justify-end mt-2">
                 <Button 
                   variant="soft" 
@@ -494,7 +518,7 @@ const ActionSideMenu: React.FC = () => {
                   disabled={!transitionEnabled}
                 >
                   <Button.Spinner />
-                  <Button.Text>{isExecuting ? 'Executing...' : 'Execute'}</Button.Text>
+                  <Button.Text>{isExecuting ? 'Updating...' : 'Continue'}</Button.Text>
                 </Button>
               </View>
             </View>
@@ -503,10 +527,10 @@ const ActionSideMenu: React.FC = () => {
       })}
 
       {/* Completed Actions Section */}
-      {currentAgreement?.state?.ReceivedInputs?.length > 0 && (
+      {currentAgreement?.state?.ReceivedInputs && currentAgreement.state.ReceivedInputs.length > 0 && (
         <>
           <Text className="text-sm font-medium text-neutral-11 mt-4">Completed Actions</Text>
-          {currentAgreement?.state?.ReceivedInputs.map(({ value: vc }, index) => {
+          {currentAgreement.state.ReceivedInputs.map(({ value: vc }, index) => {
             const input = getInputDetails(vc.credentialSubject.id);
             if (!input) return null;
 

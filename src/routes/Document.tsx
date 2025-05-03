@@ -164,8 +164,8 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
         <View className="h-full p-8">
           <View className="mb-6 w-fit">
             <StatusLabel 
-              status={type === 'draft' ? 'draft' : 'signed'} 
-              text={type === 'draft' ? 'DRAFT - Initialize Agreement' : 'Published Agreement'} 
+              status={type === 'draft' ? 'warning' : 'info'} 
+              text={type === 'draft' ? 'Draft' : agreement?.state.State.name || 'Published'} 
             />
           </View>
           <MarkdownDocumentView
