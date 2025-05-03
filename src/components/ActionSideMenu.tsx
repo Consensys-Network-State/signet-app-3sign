@@ -470,8 +470,8 @@ const ActionSideMenu: React.FC = () => {
               <Text className="text-sm text-neutral-11 mb-3">{input.description}</Text>
 
               {/* Input fields for variable references in data */}
-              {Object.entries(input.data).map(([fieldKey]) => {
-                const variable = currentDocument?.variables?.[fieldKey];
+              {Object.entries(input.data).map(([fieldKey, fieldValue]) => {
+                const variable = fieldValue;
                 if (!variable) return null;
                 
                 return (

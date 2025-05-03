@@ -157,7 +157,13 @@
         "displayName": "Party A Rejected Party B's Data",
         "description": "EIP712 signature from Party A rejecting Party B's data",
         "data": {
-          "id": "${metadata.id}"
+          "partyARejectionSignature": {
+            "type": "signature",
+            "name": "Party A Rejection Signature",
+            "validation": {
+              "required": true
+            }
+          }
         },
         "issuer": "${variables.partyAEthAddress.value}"
       }
