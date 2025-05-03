@@ -27,11 +27,6 @@ const Router: React.FC = () => {
           <Agreements />
         </ProtectedRoute>
       } />
-      <Route path="/edit" element={
-        <ProtectedRoute>
-          <Home />
-        </ProtectedRoute>
-      } />
       <Route path="/drafts/:draftId" element={
         <ProtectedRoute>
           <DocumentView type="draft" />
@@ -40,11 +35,6 @@ const Router: React.FC = () => {
       <Route path="/agreements/:agreementId" element={
         <ProtectedRoute>
           <DocumentView type="agreement" />
-        </ProtectedRoute>
-      } />
-      <Route path="/:documentId" element={
-        <ProtectedRoute>
-          <Document />
         </ProtectedRoute>
       } />
     </Routes>

@@ -1,14 +1,12 @@
 import * as React from "react";
 import { View } from "react-native";
 import { useNavigate, useParams } from 'react-router';
-import { Text, Card, Button, Input, InputField } from "@ds3/react";
+import { Text, Card, Button, Input } from "@ds3/react";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@ds3/react";
 import { useDocumentStore } from "../store/documentStore";
-import { useEditStore } from "../store/editorStore";
-import { Controller, UseFormReturn, FieldValues } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { isAddress } from 'viem';
 import AddressCard from "../web3/AddressCard";
-import truncateEthAddress from "truncate-eth-address";
 import { FormContext } from '../contexts/FormContext';
 import { useMutation } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
@@ -17,8 +15,7 @@ import { createAgreementInitVC, createAgreementInputVC } from "../utils/veramoUt
 import { postAgreement, postAgreementInput } from "../api/index";
 import { getInitialStateParams, getNextStates } from "../utils/agreementUtils";
 import { formCache } from "../utils/formCache";
-import { handleTitleChange as handleTitleChangeUtil } from '../utils/documentUtils';
-import VariableInput, { createValidationRules } from './form/VariableInput';
+import VariableInput, { createValidationRules } from './VariableInput';
 import ConfirmActionDialog from './ConfirmActionDialog';
 
 const TEST_INPUTS = {
@@ -161,23 +158,32 @@ const ActionSideMenu: React.FC = () => {
   const [selectedVC, setSelectedVC] = React.useState<VerifiableCredential | null>(null);
   const form = React.useContext(FormContext);
   const { address } = useAccount();
-  const { deleteDraft } = useDocumentStore();
-  const { getCurrentDraft: getCurrentBlockNoteDraft, updateDraftTitle: updateBlockNoteDraftTitle } = useEditStore();
-  const { getCurrentDraft: getCurrentMarkdownDraft, updateDraftTitle: updateMarkdownDraftTitle, updateAgreement } = useDocumentStore();
+  const { deleteDraft, getCurrentDraft, updateDraftTitle, updateAgreement } = useDocumentStore();
   const navigate = useNavigate();
 
   // Add loading states for each action type
   const [isInitializingAction, setIsInitializingAction] = React.useState(false);
   const [isExecuting, setIsExecuting] = React.useState(false);
 
-  const blockNoteDraft = getCurrentBlockNoteDraft();
-  const markdownDraft = getCurrentMarkdownDraft();
+  const draft = getCurrentDraft();
   
   const [title, setTitle] = React.useState(
-    blockNoteDraft?.title || 
-    markdownDraft?.metadata?.name || 
+    draft?.metadata?.name || 
     'Untitled Agreement'
   );
+
+  React.useEffect(() => {
+    if (draft) {
+      setTitle(draft.metadata.name);
+    }
+  }, [draft]);
+
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    if (draft?.id) {
+      updateDraftTitle(draft.id, newTitle);
+    }
+  };
 
   // Get document ID from any of the possible route parameters
   const documentId = params.draftId || params.agreementId || params.documentId;
@@ -207,12 +213,6 @@ const ActionSideMenu: React.FC = () => {
     // Use test inputs for now
     return TEST_INPUTS[inputId as keyof typeof TEST_INPUTS] || executionInputs[inputId];
   };
-
-  // Get cached form values
-  const getCachedValues = React.useCallback(() => {
-    if (!documentId) return {};
-    return formCache.get(documentId);
-  }, [documentId]);
 
   // Helper function to check if a transition's conditions are met
   const isTransitionEnabled = React.useCallback((transition: any) => {
@@ -439,7 +439,7 @@ const ActionSideMenu: React.FC = () => {
               value={title}
               variant="underline"
               className="text-primary-12 text-xl font-semibold"
-              {...{ onChangeText: setTitle }}
+              {...{ onChangeText: handleTitleChange }}
             >
               <Input.Field />
             </Input>
@@ -561,7 +561,6 @@ const ActionSideMenu: React.FC = () => {
             // Extract the Ethereum address from the DID
             const address = vc.issuer.id.split(':').pop() || '';
             const isValidAddress = isAddress(address);
-            const truncatedAddress = isValidAddress ? truncateEthAddress(address) : address;
 
             return (
               <Card key={index} className="p-4 bg-neutral-3">

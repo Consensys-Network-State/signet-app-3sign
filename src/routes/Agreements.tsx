@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { View, Pressable } from 'react-native';
 import { Text, Button, Card } from '@ds3/react';
-import { useEditStore } from '../store/editorStore';
 import { useDocumentStore } from '../store/documentStore';
 import { useNavigate } from 'react-router';
-import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import Layout from '../layouts/Layout';
 import { Plus } from 'lucide-react-native';
 import AddressAvatar from '../web3/AddressAvatar';
@@ -15,6 +13,7 @@ import DeleteDraftDialog from '../components/DeleteDraftDialog';
 import { useQuery } from '@tanstack/react-query';
 import { getAgreementByUserId } from '../api';
 import { useEffect } from 'react';
+import { Document } from '../store/documentStore';
 
 type EthereumAddress = `0x${string}`;
 
@@ -53,9 +52,7 @@ const AgreementCard: React.FC<{
 );
 
 const Agreements: React.FC = () => {
-  const { drafts: blockNoteDrafts, setCurrentDraft: setCurrentBlockNoteDraft, deleteDraft: deleteBlockNoteDraft } = useEditStore();
-  const { drafts: markdownDrafts, setCurrentDraft: setCurrentMarkdownDraft, deleteDraft: deleteMarkdownDraft, addAgreements, agreements: savedAgreements } = useDocumentStore();
-  const { setEditorMode } = useBlockNoteStore();
+  const { drafts, setCurrentDraft, deleteDraft, addAgreements, agreements: savedAgreements } = useDocumentStore();
   const navigate = useNavigate();
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
   const { address } = useAccount();
@@ -68,19 +65,12 @@ const Agreements: React.FC = () => {
 
   useEffect(() => {
     if (!isLoadingAgreements && agreements) {
-      // TODO: the state is also queried here (agreement.state). Need to determine how we store and display this.
       addAgreements(agreements.data || [])
     }
   }, [agreements, isLoadingAgreements, addAgreements])
 
-  const handleBlockNoteDraftClick = (draftId: string) => {
-    setCurrentBlockNoteDraft(draftId);
-    setEditorMode(BlockNoteMode.EDIT);
-    navigate('/edit');
-  };
-
-  const handleMarkdownDraftClick = (draftId: string) => {
-    setCurrentMarkdownDraft(draftId);
+  const handleDraftClick = (draftId: string) => {
+    setCurrentDraft(draftId);
     navigate(`/drafts/${draftId}`);
   };
 
@@ -92,13 +82,9 @@ const Agreements: React.FC = () => {
     setIsCreateModalOpen(true);
   };
 
-  const handleDeleteBlockNoteDraft = (draftId: string) => {
-    deleteBlockNoteDraft(draftId);
-  };
-
-  const handleDeleteMarkdownDraft = (draftId: string) => {
+  const handleDeleteDraft = (draftId: string) => {
     localStorage.removeItem(`draft_${draftId}_values`);
-    deleteMarkdownDraft(draftId);
+    deleteDraft(draftId);
   };
 
   return (
@@ -111,29 +97,17 @@ const Agreements: React.FC = () => {
       }
     >
       <View className="flex flex-col gap-4">
-        {(blockNoteDrafts.length > 0 || markdownDrafts.length > 0) && (
+        {drafts.length > 0 && (
           <>
             <Text className="text-lg font-semibold">Drafts</Text>
-            {blockNoteDrafts.map(draft => (
-              <AgreementCard
-                key={draft.id}
-                title={draft.title}
-                status="draft"
-                owner={address as EthereumAddress}
-                onClick={() => handleBlockNoteDraftClick(draft.id)}
-                onDelete={() => handleDeleteBlockNoteDraft(draft.id)}
-                updatedAt={draft.updatedAt}
-              />
-            ))}
-            {markdownDrafts.map(draft => (
+            {drafts.map((draft: Document) => (
               <AgreementCard
                 key={draft.id}
                 title={draft.metadata.name}
                 status="draft"
                 owner={address as EthereumAddress}
-                onClick={() => handleMarkdownDraftClick(draft.id)}
-                onDelete={() => handleDeleteMarkdownDraft(draft.id)}
-                updatedAt={draft.updatedAt}
+                onClick={() => draft.id && handleDraftClick(draft.id)}
+                onDelete={() => draft.id && handleDeleteDraft(draft.id)}
               />
             ))}
           </>
@@ -154,7 +128,7 @@ const Agreements: React.FC = () => {
           </>
         )}
 
-        {blockNoteDrafts.length === 0 && markdownDrafts.length === 0 && savedAgreements.length === 0 && (
+        {drafts.length === 0 && savedAgreements.length === 0 && (
           <Text className="text-neutral-11">No agreements found</Text>
         )}
       </View>

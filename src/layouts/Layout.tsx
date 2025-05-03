@@ -5,11 +5,9 @@ import Account from "../web3/Account.tsx";
 import { H4 } from "@ds3/react/src/components/Heading.tsx";
 import { Info, ChevronLeft } from 'lucide-react-native';
 import { useNavigate, useLocation, useParams } from 'react-router';
-import { useEditStore } from '../store/editorStore';
 import { useDocumentStore } from '../store/documentStore';
 import SideMenu from './SideMenu';
 import ActionSideMenu from '../components/ActionSideMenu';
-import { handleTitleChange as handleTitleChangeUtil } from '../utils/documentUtils';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -26,32 +24,27 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, isLoadin
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams();
-  const { getCurrentDraft, updateDraftTitle } = useEditStore();
-  const { getCurrentDraft: getCurrentMarkdownDraft, updateDraftTitle: updateMarkdownDraftTitle, getAgreement } = useDocumentStore();
+  const { getCurrentDraft, updateDraftTitle, getAgreement } = useDocumentStore();
   const isEditMode = location.pathname === '/edit';
   const isDraftMode = location.pathname.startsWith('/drafts/');
   const isDocumentMode = location.pathname.startsWith('/agreements/');
   
-  const blockNoteDraft = isEditMode ? getCurrentDraft() : null;
-  const markdownDraft = isDraftMode ? getCurrentMarkdownDraft() : null;
+  const draft = isDraftMode ? getCurrentDraft() : null;
   const agreement = isDocumentMode ? getAgreement(params.agreementId!) : null;
   
   const [title, setTitle] = React.useState(
-    blockNoteDraft?.title || 
-    markdownDraft?.metadata.name || 
+    draft?.metadata.name || 
     agreement?.document.metadata?.name ||
     'Untitled Agreement'
   );
   
   React.useEffect(() => {
-    if (blockNoteDraft) {
-      setTitle(blockNoteDraft.title);
-    } else if (markdownDraft) {
-      setTitle(markdownDraft.metadata.name);
+    if (draft) {
+      setTitle(draft.metadata.name);
     } else if (agreement) {
       setTitle(agreement.document.metadata?.name || 'Untitled Agreement');
     }
-  }, [blockNoteDraft, markdownDraft, agreement]);
+  }, [draft, agreement]);
 
   const getStatusBackgroundColor = (type?: 'warning' | 'info' | 'error') => {
     switch (type) {
@@ -67,13 +60,9 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, isLoadin
 
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle);
-    handleTitleChangeUtil({
-      title: newTitle,
-      blockNoteDraft,
-      markdownDraft,
-      updateBlockNoteDraftTitle: updateDraftTitle,
-      updateMarkdownDraftTitle,
-    });
+    if (draft?.id) {
+      updateDraftTitle(draft.id, newTitle);
+    }
   };
 
   // Check if we should show the side menu

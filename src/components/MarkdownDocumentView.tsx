@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { View } from 'react-native';
 import { Text } from '@ds3/react';
-import { DocumentVariable, DocumentInput } from '../../store/documentStore';
+import { DocumentVariable, DocumentInput } from '../store/documentStore';
 import { unified } from 'unified';
 import remarkStringify from 'remark-stringify';
 import ReactMarkdown from 'react-markdown';
@@ -9,7 +9,7 @@ import rehypeRaw from 'rehype-raw';
 import type { Root } from 'mdast';
 import type { Components } from 'react-markdown';
 import { Controller } from 'react-hook-form';
-import VariableInput, { createValidationRules } from '../form/VariableInput';
+import VariableInput, { createValidationRules } from './VariableInput';
 
 interface SpanProps {
   className?: string;

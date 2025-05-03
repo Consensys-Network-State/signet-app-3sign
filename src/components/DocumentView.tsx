@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { useDocumentStore, Agreement } from '../store/documentStore';
-import MarkdownDocumentView from './markdown/MarkdownDocumentView';
+import MarkdownDocumentView from './MarkdownDocumentView';
 import Layout from '../layouts/Layout';
 import { getAgreement } from '../api';
 import StatusLabel from './StatusLabel';

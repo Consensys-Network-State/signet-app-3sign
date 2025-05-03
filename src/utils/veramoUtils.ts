@@ -1,9 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { setupAgent } from "../veramo";
 import { ethers } from 'ethers';
-import { Block } from "../blocks/BlockNoteSchema.tsx";
 import { Document } from "../store/documentStore";
-import { separateSignaturesFromDocument } from "./documentUtils.ts";
 
 export const encodeObjectToBase64 = (obj: any) => {
   try {
@@ -43,9 +41,8 @@ export async function signVCWithEIP712(credential: any) {
   if (!verificationResult.verified) throw new Error('Failed to sign with wallet');
   return vc;
 }
-export async function createDocumentVC(address: `0x${string}`, signatories: `0x${string}`[], documentState: Block[]) {
-  const { document } = separateSignaturesFromDocument(documentState);
 
+export async function createDocumentVC(address: `0x${string}`, signatories: `0x${string}`[], document: Document) {
   const did = await getDIDFromAddress(address);
 
   const vc = await signVCWithEIP712(
@@ -137,11 +134,9 @@ export async function createAgreementInputVC(address: `0x${string}`, inputId: st
   const verificationResult = await agent.verifyCredential({ credential: vc });
   if (!verificationResult.verified) throw new Error('Failed to sign with wallet');
   return JSON.stringify(vc);
-
 }
 
-export async function createSignatureVC(address: `0x${string}`, documentState: Block[], documentVC: string) {
-  const { signatures } = separateSignaturesFromDocument(documentState);
+export async function createSignatureVC(address: `0x${string}`, document: Document, documentVC: string) {
   const did = await getDIDFromAddress(address);
 
   // Construct VC from this
@@ -159,7 +154,7 @@ export async function createSignatureVC(address: `0x${string}`, documentState: B
         id: did.did,
         documentHash: ethers.keccak256(new TextEncoder().encode(documentVC)),
         timeStamp: new Date().toISOString(),
-        signatureBlocks: JSON.stringify(signatures),
+        document: encodeObjectToBase64(document),
       },
     }
   );
@@ -172,7 +167,7 @@ export async function validateAndProcessDocumentVC(vc: any) {
   if (!verificationResult.verified) throw new Error('Failed to validate document');
   // How do we check if the issuer of the VC is the correct person
   return {
-    document: decodeBase64ToObject(vc.credentialSubject.document) as Block[],
+    document: decodeBase64ToObject(vc.credentialSubject.document) as Document,
     signatories: vc.credentialSubject.signatories,
   }
 }

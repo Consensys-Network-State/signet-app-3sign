@@ -3,13 +3,8 @@ import { View } from 'react-native';
 import { Button, Text, Card, CardContent, Dialog, DialogContent, DialogFooter, Alert, DialogHeader, DialogTitle, DialogDescription, DialogClose, DialogTrigger } from '@ds3/react';
 import AddressAvatar from '../web3/AddressAvatar';
 import { useNavigate } from 'react-router';
-import { useEditStore } from '../store/editorStore';
-import { useBlockNoteStore, BlockNoteMode } from '../store/blockNoteStore';
 import { useDocumentStore, Document } from '../store/documentStore';
-import newAgreement from '../templates/new-agreement.json';
-import grantAgreement from '../templates/grant-agreement.json';
 import mouTemplate from '../templates/mou-template.json';
-import { Block } from '../blocks/BlockNoteSchema';
 import { Trash2 } from 'lucide-react-native';
 
 interface TemplateInfo {
@@ -29,7 +24,7 @@ interface TemplateOption {
   id: string;
   title: string;
   selected: boolean;
-  type: 'blocknote' | 'markdown';
+  type: 'markdown';
   isCustom?: boolean;
   template?: Document;
   category: 'default' | 'custom';
@@ -42,53 +37,15 @@ interface CreateAgreementModalProps {
 
 const DEFAULT_TEMPLATES: TemplateOption[] = [
   {
-    id: 'grants',
-    title: 'Grants Agreement',
-    selected: true,
-    type: 'blocknote',
-    category: 'default'
-  },
-  {
-    id: 'empty',
-    title: 'Empty Template',
-    selected: false,
-    type: 'blocknote',
-    category: 'default'
-  },
-  {
     id: 'mou',
     title: 'Memorandum of Understanding',
-    selected: false,
+    selected: true,
     type: 'markdown',
     category: 'default'
   }
 ];
 
 const TEMPLATE_INFO: Record<string, TemplateInfo> = {
-  grants: {
-    title: 'Grants Agreement',
-    author: {
-      name: 'Lawyer Co',
-      address: '0x1234567890123456789012345678901234567890',
-    },
-    smartContracts: {
-      name: 'Sabler',
-      address: '0x1234567890123456789012345678901234567890',
-    },
-    description: 'A comprehensive template for grant agreements, including monthly unlock schedules and standard legal clauses.',
-  },
-  empty: {
-    title: 'Empty Template',
-    author: {
-      name: 'Legal Team',
-      address: '0x1234567890123456789012345678901234567890',
-    },
-    smartContracts: {
-      name: 'None',
-      address: '0x1234567890123456789012345678901234567890',
-    },
-    description: 'Start with a blank template to create your own custom agreement from scratch.',
-  },
   mou: {
     title: 'Memorandum of Understanding',
     author: {
@@ -164,13 +121,11 @@ const DeleteTemplateDialog: React.FC<DeleteTemplateDialogProps> = ({
 };
 
 const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClose }) => {
-  const [selectedTemplate, setSelectedTemplate] = React.useState('grants');
+  const [selectedTemplate, setSelectedTemplate] = React.useState('mou');
   const [importError, setImportError] = React.useState<string | null>(null);
   const [templateOptions, setTemplateOptions] = React.useState<TemplateOption[]>(DEFAULT_TEMPLATES);
   const navigate = useNavigate();
-  const { createDraft } = useEditStore();
-  const { setEditorMode } = useBlockNoteStore();
-  const { createDraft: createMarkdownDraft } = useDocumentStore();
+  const { createDraft } = useDocumentStore();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Load custom templates from localStorage on mount
@@ -230,7 +185,7 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
         id: `custom-${Date.now()}`,
         title: parsedTemplate.metadata.name,
         selected: false,
-        type: parsedTemplate.content.type === 'md' ? 'markdown' : 'blocknote',
+        type: 'markdown',
         isCustom: true,
         template: parsedTemplate,
         category: 'custom'
@@ -274,48 +229,26 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
     if (!selectedOption) return;
 
     if (selectedOption.isCustom && selectedOption.template) {
-      // Handle custom template
-      if (selectedOption.type === 'markdown') {
-        const draftId = createMarkdownDraft(
-          selectedOption.template.metadata.name,
-          selectedOption.template.content.data as string,
-          selectedOption.template.variables,
-          selectedOption.template.execution
-        );
-        onClose();
-        navigate(`/drafts/${draftId}`);
-      } else {
-        const draftId = createDraft(
-          selectedOption.template.metadata.name,
-          selectedOption.template.content.data as Block[]
-        );
-        setEditorMode(BlockNoteMode.EDIT);
-        onClose();
-        navigate('/edit');
-      }
+      const draftId = createDraft(
+        selectedOption.template.metadata.name,
+        selectedOption.template.content.data as string,
+        selectedOption.template.variables,
+        selectedOption.template.execution
+      );
+      onClose();
+      navigate(`/drafts/${draftId}`);
     } else {
-      // Handle default templates
-      if (selectedOption.type === 'markdown') {
-        const template = mouTemplate as Document;
-        const draftId = createMarkdownDraft(
-          template.metadata.name,
-          template.content.data,
-          template.variables,
-          template.execution
-        );
-        onClose();
-        navigate(`/drafts/${draftId}`);
-      } else {
-        const template = selectedOption.id === 'grants' 
-          ? grantAgreement as unknown as Block[]
-          : newAgreement as unknown as Block[];
-        const draftId = createDraft(selectedOption.title, template);
-        setEditorMode(BlockNoteMode.EDIT);
-        onClose();
-        navigate('/edit');
-      }
+      const template = mouTemplate as Document;
+      const draftId = createDraft(
+        template.metadata.name,
+        template.content.data,
+        template.variables,
+        template.execution
+      );
+      onClose();
+      navigate(`/drafts/${draftId}`);
     }
-  }, [selectedTemplate, templateOptions, onClose, navigate, createDraft, createMarkdownDraft, setEditorMode]);
+  }, [selectedTemplate, templateOptions, onClose, navigate, createDraft]);
 
   // Group templates by category
   const groupedTemplates = React.useMemo(() => {

@@ -2,11 +2,11 @@ import * as React from 'react';
 import { TextInput } from 'react-native';
 import { InputField, Input } from '@ds3/react';
 import { isAddress } from 'viem';
-import AddressAvatar from "../../web3/AddressAvatar";
-import { DatePickerField } from '../DatePickerField';
+import AddressAvatar from "../web3/AddressAvatar";
+import { DatePickerField } from './DatePickerField';
 import dayjs from 'dayjs';
-import DocumentSignatureDialog from '../../blocks/DocumentSignatureDialog';
-import { DocumentVariable } from '../../store/documentStore';
+import DocumentSignatureDialog from './DocumentSignatureDialog';
+import { DocumentVariable } from '../store/documentStore';
 
 // Create a shared validation function
 export const createValidationRules = (variable: DocumentVariable) => {
