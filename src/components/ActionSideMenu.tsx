@@ -1,5 +1,5 @@
 import * as React from "react";
-import { View } from "react-native";
+import { View, ScrollView } from "react-native";
 import { useNavigate, useParams } from 'react-router';
 import { Text, Card, Button, Input } from "@ds3/react";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@ds3/react";
@@ -133,13 +133,15 @@ const VCDetailsModal: React.FC<{
           </DialogDescription>
         </DialogHeader>
 
-        <View className="mt-4">
-          <View className="bg-neutral-2 p-4 rounded-md">
-            <Text className="font-mono text-sm whitespace-pre-wrap">
-              {JSON.stringify(vc, null, 2)}
-            </Text>
+        <ScrollView className="max-h-[60vh]">
+          <View className="mt-4">
+            <View className="bg-neutral-2 p-4 rounded-md">
+              <Text className="font-mono text-sm whitespace-pre-wrap">
+                {JSON.stringify(vc, null, 2)}
+              </Text>
+            </View>
           </View>
-        </View>
+        </ScrollView>
 
         <DialogFooter>
           <DialogClose asChild>
