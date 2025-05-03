@@ -96,7 +96,7 @@ const Agreements: React.FC = () => {
         </Button>
       }
     >
-      <View className="flex flex-col gap-4">
+      <View className="flex flex-col gap-4 pt-8 pb-8 px-8">
         {drafts.length > 0 && (
           <>
             <Text className="text-lg font-semibold">Drafts</Text>
