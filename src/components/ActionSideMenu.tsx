@@ -1,7 +1,7 @@
 import * as React from "react";
 import { View, ScrollView } from "react-native";
 import { useNavigate, useParams } from 'react-router';
-import { Text, Card, Button, Input } from "@ds3/react";
+import { Text, Card, Button, Input, InputField } from "@ds3/react";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@ds3/react";
 import { useDocumentStore } from "../store/documentStore";
 import { Controller } from "react-hook-form";
@@ -18,64 +18,9 @@ import { formCache } from "../utils/formCache";
 import VariableInput, { createValidationRules } from './VariableInput';
 import ConfirmActionDialog from './ConfirmActionDialog';
 
-const TEST_INPUTS = {
-  "partyAData": {
-    "type": "VerifiedCredentialEIP712",
-    "schema": "verified-credential-eip712.schema.json",
-    "displayName": "Party A Signature",
-    "description": "EIP712 signature from Party A proposing the MOU terms",
-    "data": {
-      "partyAName": "${variables.partyAName}",
-      "partyBEthAddress": "${variables.partyBEthAddress}"
-    },
-    "issuer": "${variables.partyAEthAddress.value}"
-  },
-  "partyBData": {
-    "type": "VerifiedCredentialEIP712",
-    "schema": "verified-credential-eip712.schema.json",
-    "displayName": "Party B Signature",
-    "description": "EIP712 signature from Party B accepting the MOU terms",
-    "data": {
-      "partyBName": "${variables.partyBName}"
-    },
-    "issuer": "${variables.partyBEthAddress.value}"
-  }
-} as const;
-
-// Test completed VCs
-const TEST_COMPLETED_VCS = [
-  {
-    "issuer": {
-      "id": "did:pkh:eip155:1:0x67fD5A5ec681b1208308813a2B3A0DD431Be7278"
-    },
-    "credentialSubject": {
-      "id": "partyAData",
-      "type": "signedFields",
-      "values": {
-        "partyAName": "Damian",
-        "partyBEthAddress": "0xBe32388C134a952cdBCc5673E93d46FfD8b85065"
-      }
-    },
-    "type": [
-      "VerifiableCredential",
-      "AgreementInputCredential"
-    ],
-    "issuanceDate": "2025-04-28T22:33:55.609Z"
-  }
-] as const;
-
-interface Transition {
-  from: string;
-  to: string;
-  conditions: Array<{
-    type: string;
-    input: string;
-  }>;
-}
-
 interface DocumentInput {
   type: string;
-  schema: string;
+  schema?: string;
   displayName: string;
   description: string;
   data: Record<string, any>;
@@ -210,10 +155,14 @@ const ActionSideMenu: React.FC = () => {
   const trigger = form?.trigger;
   const getValues = form?.getValues;
   
+  // Get execution inputs from the current document
+  const executionInputs = React.useMemo(() => {
+    return currentDocument?.execution?.inputs || {};
+  }, [currentDocument]);
+
   // Helper function to get input details from template
   const getInputDetails = (inputId: string): DocumentInput | undefined => {
-    // Use test inputs for now
-    return TEST_INPUTS[inputId as keyof typeof TEST_INPUTS] || executionInputs[inputId];
+    return executionInputs[inputId];
   };
 
   // Helper function to check if a transition's conditions are met
@@ -245,12 +194,10 @@ const ActionSideMenu: React.FC = () => {
     return result;
   }, [trigger, getValues, currentDocument?.variables]);
 
-  const executionInputs = currentDocument?.execution?.inputs || {};
-
   const nextActions = React.useMemo(() => {
     if (!currentAgreement) return null;
     return getNextStates(currentAgreement);
-  }, [currentAgreement])
+  }, [currentAgreement]);
   
   // Find initial state and its params  
   const initialParams = getInitialStateParams(currentDocument);
@@ -433,18 +380,19 @@ const ActionSideMenu: React.FC = () => {
       {/* Initial Action Section - Only show in draft mode */}
       {isInitializing && Object.keys(initialParams).length > 0 && (
         <Card className="p-4">
-          <View className="flex flex-col gap-2">
+          <View className="flex flex-col gap-4">
             <Text className="font-semibold">Initialize Agreement</Text>
-            <Text className="text-sm text-neutral-11">{"Initialize the agreement with the following parameters"}</Text>
+            <Text className="text-sm text-neutral-11 mb-3">{"Initialize the agreement with the following parameters"}</Text>
             
-            <Input
+            <InputField
+              label="Document Title"
               value={title}
-              variant="underline"
+              variant="soft"
               className="text-primary-12 text-xl font-semibold"
               {...{ onChangeText: handleTitleChange }}
             >
               <Input.Field />
-            </Input>
+            </InputField>
             
             {Object.entries(initialParams).map(([paramKey]) => {
               const variable = currentDocument?.variables?.[paramKey];
@@ -458,13 +406,14 @@ const ActionSideMenu: React.FC = () => {
                   rules={createValidationRules(variable)}
                   render={({ field: { onChange, value, onBlur } }) => (
                     <VariableInput
-                      name={paramKey}
+                      name={variable.name}
                       variable={variable}
                       value={value}
                       onChange={onChange}
                       onBlur={onBlur}
                       error={errors?.[paramKey]?.message}
                       className="w-full"
+                      variant="soft"
                     />
                   )}
                 />
@@ -505,7 +454,7 @@ const ActionSideMenu: React.FC = () => {
                 />
               </View>
               <Text className="font-semibold">{input.displayName}</Text>
-              <Text className="text-sm text-neutral-11">{input.description}</Text>
+              <Text className="text-sm text-neutral-11 mb-3">{input.description}</Text>
 
               {/* Input fields for variable references in data */}
               {Object.entries(input.data).map(([fieldKey]) => {
@@ -520,7 +469,7 @@ const ActionSideMenu: React.FC = () => {
                     rules={createValidationRules(variable)}
                     render={({ field: { onChange, value, onBlur } }) => (
                       <VariableInput
-                        name={fieldKey}
+                        name={variable.name}
                         variable={variable}
                         value={value}
                         onChange={onChange}
@@ -528,6 +477,7 @@ const ActionSideMenu: React.FC = () => {
                         error={errors?.[fieldKey]?.message}
                         className="w-full"
                         disabled={!transitionEnabled}
+                        variant="soft"
                       />
                     )}
                   />
@@ -589,7 +539,7 @@ const ActionSideMenu: React.FC = () => {
                             avatarClassName="w-5 h-5"
                           />
                         ) : (
-                          <Text className="text-sm">{value}</Text>
+                          <Text className="text-sm">{String(value)}</Text>
                         )}
                       </View>
                     );

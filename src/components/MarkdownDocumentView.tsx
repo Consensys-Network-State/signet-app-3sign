@@ -137,7 +137,6 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
               rules={createValidationRules(variable)}
               render={({ field: { onChange, value, onBlur } }) => (
                 <VariableInput
-                  name={variableName}
                   variable={variable}
                   value={value}
                   onChange={onChange}

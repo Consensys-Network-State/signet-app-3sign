@@ -56,7 +56,7 @@ export const createValidationRules = (variable: DocumentVariable) => {
 };
 
 export interface VariableInputProps {
-  name: string;
+  name?: string;
   variable: DocumentVariable;
   value: string;
   onChange: (value: string) => void;
@@ -64,6 +64,7 @@ export interface VariableInputProps {
   error?: { message?: string } | string | undefined;
   disabled?: boolean;
   className?: string;
+  variant?: 'soft' | 'underline';
 }
 
 const VariableInput: React.FC<VariableInputProps> = ({
@@ -74,7 +75,8 @@ const VariableInput: React.FC<VariableInputProps> = ({
   onBlur,
   error,
   disabled = false,
-  className = "w-[300px]"
+  className = "w-[300px]",
+  variant = 'underline'
 }) => {
   const inputRef = React.useRef<TextInput>(null);
   const [localValue, setLocalValue] = React.useState(value);
@@ -103,10 +105,11 @@ const VariableInput: React.FC<VariableInputProps> = ({
     return (
       <InputField
         // @ts-ignore - using RN TextInput interface
+        label={name}
         ref={inputRef}
         value={localValue}
         onChangeText={handleChange}
-        variant="underline"
+        variant={variant}
         placeholder={variable.name}
         error={errorMessage}
         className={className}
@@ -123,6 +126,7 @@ const VariableInput: React.FC<VariableInputProps> = ({
   if (variable.type === 'dateTime') {
     return (
       <DatePickerField
+        label={name}
         value={localValue ? dayjs(localValue) : undefined}
         onChange={(date) => handleChange(date ? date.format() : '')}
         placeholder="Select date"
@@ -148,10 +152,11 @@ const VariableInput: React.FC<VariableInputProps> = ({
   return (
     <InputField
       // @ts-ignore - using RN TextInput interface
+      label={name}
       ref={inputRef}
       value={localValue}
       onChangeText={handleChange}
-      variant="underline"
+      variant={variant}
       placeholder={variable.name}
       error={errorMessage}
       className={className}
