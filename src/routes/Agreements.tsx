@@ -24,7 +24,11 @@ const AgreementCard: React.FC<{
   onClick: () => void;
   onDelete?: () => void;
   updatedAt?: string;
-}> = ({ title, status, owner, onClick, onDelete, updatedAt }) => (
+  state?: {
+    name: string;
+    description: string;
+  };
+}> = ({ title, status, owner, onClick, onDelete, updatedAt, state }) => (
   <Pressable onPress={onClick}>
     <Card className="w-full hover:bg-neutral-3 transition-colors">
       <View className="flex flex-row items-center justify-between w-full p-4">
@@ -41,7 +45,10 @@ const AgreementCard: React.FC<{
           )}
         </View>
         <View className="flex flex-row items-center gap-2">
-          <StatusLabel status={status} />
+          <StatusLabel 
+            status={status === 'draft' ? 'warning' : undefined} 
+            text={status === 'draft' ? 'Draft' : state?.name || 'Published'} 
+          />
           {onDelete && (
             <DeleteDraftDialog onDelete={onDelete} />
           )}
@@ -108,6 +115,8 @@ const Agreements: React.FC = () => {
                 owner={address as EthereumAddress}
                 onClick={() => draft.id && handleDraftClick(draft.id)}
                 onDelete={() => draft.id && handleDeleteDraft(draft.id)}
+                state={{ name: 'Draft', description: 'Document is in draft state' }}
+                updatedAt={(draft as any).updatedAt || draft.metadata.createdAt}
               />
             ))}
           </>
@@ -121,8 +130,10 @@ const Agreements: React.FC = () => {
                 key={agreement.id}
                 title={agreement?.document?.metadata?.name}
                 status="signed"
-                owner="0x"
+                owner={agreement.contributors[0] as EthereumAddress}
                 onClick={() => handlePublishedClick(agreement.id)}
+                state={agreement.state.State}
+                updatedAt={agreement.updatedAt}
               />
             ))}
           </>
