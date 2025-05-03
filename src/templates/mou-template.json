@@ -95,7 +95,8 @@
         "description": "This state awaits until Party A supplies Party B's address, effective date, scope, duration, and their own name.",
         "isInitial": true,
         "initialParams": {
-          "partyAEthAddress": "${variables.partyAEthAddress}"
+          "partyAEthAddress": "${variables.partyAEthAddress}",
+          "partyBEthAddress": "${variables.partyBEthAddress}"
         }
       },
       "PENDING_PARTY_B_SIGNATURE": {
@@ -123,7 +124,6 @@
         "description": "EIP712 signature from Party A proposing the MOU terms including scope, duration, and effective date",
         "data": {
           "partyAName": "${variables.partyAName}",
-          "partyBEthAddress": "${variables.partyBEthAddress}",
           "scope": "${variables.scope}",
           "termDuration": "${variables.termDuration}",
           "effectiveDate": "${variables.effectiveDate}"
