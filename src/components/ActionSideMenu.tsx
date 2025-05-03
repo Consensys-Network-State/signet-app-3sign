@@ -551,10 +551,10 @@ const ActionSideMenu: React.FC = () => {
       })}
 
       {/* Completed Actions Section */}
-      {currentAgreement?.state?.ReceivedInputs?.length > 0 && (
+      {TEST_COMPLETED_VCS.length > 0 && (
         <>
           <Text className="text-sm font-medium text-neutral-11 mt-4">Completed Actions</Text>
-          {currentAgreement?.state?.ReceivedInputs.map(({ value: vc }, index) => {
+          {TEST_COMPLETED_VCS.map((vc, index) => {
             const input = getInputDetails(vc.credentialSubject.id);
             if (!input) return null;
 

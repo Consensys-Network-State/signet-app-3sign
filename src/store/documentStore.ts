@@ -89,11 +89,6 @@ export interface Agreement {
       name: string;
       isInitial: boolean;
     };
-    ReceievedInputs: {
-      id: string;
-      name: string;
-      value: any;
-    }[];
   };
   createdAt: string;
   updatedAt: string;
