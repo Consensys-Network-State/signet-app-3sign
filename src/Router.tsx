@@ -1,12 +1,10 @@
 import * as React from "react";
-import Home from "./routes/Home.tsx";
 import Login from "./routes/Login.tsx";
-import Document from "./routes/Document.tsx";
 import Agreements from "./routes/Agreements.tsx";
 import { Routes, Route } from 'react-router';
 import { useAccount } from "wagmi";
 import { Navigate, useLocation } from 'react-router';
-import DocumentView from "./components/DocumentView.tsx";
+import DocumentView from "./routes/Document.tsx";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isConnected } = useAccount();

@@ -12,7 +12,6 @@ interface DocumentSignatureProps {
 
 const DocumentSignature: FC<DocumentSignatureProps> = (props) => {
   const {
-    name,
     signature,
     onEdit,
     disabled

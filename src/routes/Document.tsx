@@ -2,11 +2,11 @@ import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
-import { useDocumentStore, Agreement } from '../store/documentStore';
-import MarkdownDocumentView from './MarkdownDocumentView';
+import { useDocumentStore } from '../store/documentStore';
+import MarkdownDocumentView from '../components/MarkdownDocumentView';
 import Layout from '../layouts/Layout';
 import { getAgreement } from '../api';
-import StatusLabel from './StatusLabel';
+import StatusLabel from '../components/StatusLabel';
 import { View } from 'react-native';
 import { FormContext } from '../contexts/FormContext';
 import { Spinner, Text } from '@ds3/react';
@@ -14,7 +14,7 @@ import { formCache } from '../utils/formCache';
 import { useAccount } from 'wagmi';
 import { getNextStates } from '../utils/agreementUtils';
 
-interface DocumentViewProps {
+interface DocumentProps {
   type: 'draft' | 'agreement';
 }
 
@@ -22,7 +22,7 @@ interface AgreementState {
   Variables: Record<string, { value: string }>;
 }
 
-const DocumentView: React.FC<DocumentViewProps> = ({ type }) => {
+const Document: React.FC<DocumentProps> = ({ type }) => {
   const { draftId, agreementId } = useParams();
   const documentId = type === 'draft' ? draftId : agreementId;
   const { addAgreements, getDraft, getAgreement: getAgreementFromStore } = useDocumentStore();
@@ -184,4 +184,4 @@ const DocumentView: React.FC<DocumentViewProps> = ({ type }) => {
   );
 };
 
-export default DocumentView; 
+export default Document; 

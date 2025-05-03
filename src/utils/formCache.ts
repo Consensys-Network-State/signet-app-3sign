@@ -1,4 +1,4 @@
-import { Document, Agreement } from '../store/documentStore';
+import { Document } from '../store/documentStore';
 
 const CACHE_PREFIX = 'document';
 
