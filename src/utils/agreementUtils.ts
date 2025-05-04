@@ -29,6 +29,13 @@ export const getVariableValue = (agreement: Agreement, variableReference: string
   }
 }
 
+export const getContractReference = (agreement: Agreement, contractReference: string) => {
+  if (agreement.document.contracts) {
+    return agreement.document.contracts.find((contract) => contract.id === contractReference);
+  }
+  return null;
+}
+
 export const getNextStates = (agreement: Agreement) => {
   const currentState = getCurrentState(agreement);
   return agreement.document.execution.transitions
@@ -37,27 +44,44 @@ export const getNextStates = (agreement: Agreement) => {
         to: agreement.document.execution.states[transition.to],
         conditions: transition.conditions.map((condition) => {
           const conditionInput = agreement.document.execution.inputs[condition.input];
-          return {
-            type: condition.type,
-            input: { 
-              ...conditionInput,
-              id: condition.input,
-              issuer: getVariableValue(agreement, conditionInput.issuer),
-              data: Object.entries(conditionInput.data).reduce((acc, [key, value]) => {
-                if (typeof value === 'string') {
-                  const match = value.match(/\$\{variables\.([^}]+)\}/);
-                  if (match && match[1]) {
-                    acc[key] = agreement.document.variables[match[1]];
+          if (conditionInput.type === 'VerifiedCredentialEIP712') {
+            return {
+              type: condition.type,
+              input: { 
+                ...conditionInput,
+                id: condition.input,
+                issuer: getVariableValue(agreement, conditionInput.issuer),
+                data: Object.entries(conditionInput.data).reduce((acc, [key, value]) => {
+                  if (typeof value === 'string') {
+                    const match = value.match(/\$\{variables\.([^}]+)\}/);
+                    if (match && match[1]) {
+                      acc[key] = agreement.document.variables[match[1]];
+                    } else {
+                      acc[key] = value;
+                    }
                   } else {
                     acc[key] = value;
                   }
-                } else {
-                  acc[key] = value;
+                  return acc;
+                }, {} as Record<string, any>)
+              }
+            }
+          } else if (conditionInput.type === 'EVMTransaction') {
+            return {
+              type: condition.type,
+              input: {
+                ...conditionInput,
+                signer: getVariableValue(agreement, conditionInput.signer),
+                txMetadata: {
+                  ...conditionInput.txMetadata,
+                  ...(conditionInput.txMetadata.transactionType === 'contractCall' && {
+                    contractReference: getContractReference(agreement, conditionInput.txMetadata.contractReference),
+                  }),
                 }
-                return acc;
-              }, {} as Record<string, any>)
+              }
             }
           }
-        })
+        }
+      )
     }));
 }
