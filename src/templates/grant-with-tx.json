@@ -99,30 +99,30 @@
   },
   "execution": {
     "states": {
-      "PENDING_GRANTOR_SIGNATURE": {
-        "name": "Pending Signature From Grantor",
-        "description": "This state awaits until Grantor supplies Recipient's address, effective date, scope, duration, and their own name.",
+      "AWAITING_TEMPLATE_VARIABLES": {
+        "name": "Awaiting Template Variables",
+        "description": "Grantor needs to fill out the template variables.",
         "isInitial": true,
         "initialParams": {
           "grantorEthAddress": "${variables.grantorEthAddress}",
           "recipientEthAddress": "${variables.recipientEthAddress}"
         }
       },
-      "PENDING_RECIPIENT_SIGNATURE": {
-        "name": "Pending Signature From Recipient",
-        "description": "This state awaits until Recipient confirms their identity by supplying their name."
+      "AWAITING_RECIPIENT_SIGNATURE": {
+        "name": "Pending Recipient Signature",
+        "description": "This state awaits until Recipient signing the agreement."
       },
-      "PENDING_ACCEPTANCE": {
-        "name": "Pending Final Acceptance",
+      "AWAITING_GRANTOR_SIGNATURE": {
+        "name": "Pending Grantor Signature",
         "description": "This state awaits Grantor's final acceptance of Recipient's data."
       },
       "AWAITING_WORK_SUBMISSION": {
-        "name": "Agreement accepted, awaiting work submission",
-        "description": "The agreement has been accepted by both parties. Awaiting work submission review and payment."
+        "name": "Awaiting Work Submission",
+        "description": "The agreement has been accepted by both parties. Awaiting work submission, review, and payment."
       },
       "WORK_ACCEPTED_AND_PAID": {
         "name": "Grant Payment Fullfilled",
-        "description": "The work has been submmitted and reviewed and payment has been sent."
+        "description": "The work has been submitted, reviewed, and payment has been successfully sent."
       },
       "REJECTED": {
         "name": "Agreement Rejected",
@@ -133,8 +133,8 @@
       "grantorData": {
         "type": "VerifiedCredentialEIP712",
         "schema": "verified-credential-eip712.schema.json",
-        "displayName": "Grantor Signature",
-        "description": "EIP712 signature from Grantor proposing the MOU terms including scope, duration, and effective date",
+        "displayName": "Template Variable Submission",
+        "description": "Grantor fills in terms, including scope, duration, and effective date.",
         "data": {
           "grantorName": "${variables.grantorName}",
           "scope": "${variables.scope}",
@@ -143,36 +143,36 @@
         },
         "issuer": "${variables.grantorEthAddress.value}"
       },
-      "recipientData": {
+      "recipientSigning": {
         "type": "VerifiedCredentialEIP712",
         "schema": "verified-credential-eip712.schema.json",
         "displayName": "Recipient Signature",
-        "description": "EIP712 signature from Recipient accepting the MOU terms",
+        "description": "Signature from Recipient accepting the grant terms.",
         "data": {
           "recipientName": "${variables.recipientName}",
           "recipientSignature": "${variables.recipientSignature}"
         },
         "issuer": "${variables.recipientEthAddress.value}"
       },
-      "accepted": {
+      "grantorSigning": {
         "type": "VerifiedCredentialEIP712",
         "schema": "verified-credential-eip712.schema.json",
-        "displayName": "Grantor Accepted Recipient's Data",
-        "description": "EIP712 signature from Grantor accepting Recipient's data",
+        "displayName": "Grantor Signature",
+        "description": "Signature from Grantor accepting grant terms.",
         "data": {
           "grantorSignature": "${variables.grantorSignature}"
         },
         "issuer": "${variables.grantorEthAddress.value}"
       },
-      "rejected": {
+      "grantorRejection": {
         "type": "VerifiedCredentialEIP712",
         "schema": "verified-credential-eip712.schema.json",
-        "displayName": "Grantor Rejected Recipient's Data",
-        "description": "EIP712 signature from Grantor rejecting Recipient's data",
+        "displayName": "Reject Signing",
+        "description": "Grantor rejects grant terms with a reason.",
         "data": {
-          "grantorRejectionSignature": {
-            "type": "signature",
-            "name": "Grantor Rejection Signature",
+          "grantorRejectionReason": {
+            "type": "string",
+            "name": "Grantor Rejection Reason",
             "validation": {
               "required": true
             }
@@ -184,8 +184,8 @@
         "id": "workTokenSentTx",
         "type": "EVMTransaction",
         "schema": "verified-credential-eip712.schema.json",
-        "displayName": "Work Approved Signature",
-        "description": "EIP712 signature from the token allocator attesting that work token has been transfered to the grantee",
+        "displayName": "Work Approved and Payment Proof",
+        "description": "Grantor confirms work has been accepted and payment has been sent.",
         "txMetadata": {
           "transactionType": "contractCall",
           "method": "transfer",
@@ -200,8 +200,8 @@
     },
     "transitions": [
       {
-        "from": "PENDING_GRANTOR_SIGNATURE",
-        "to": "PENDING_RECIPIENT_SIGNATURE",
+        "from": "AWAITING_TEMPLATE_VARIABLES",
+        "to": "AWAITING_RECIPIENT_SIGNATURE",
         "conditions": [
           {
             "type": "isValid",
@@ -210,22 +210,22 @@
         ]
       },
       {
-        "from": "PENDING_RECIPIENT_SIGNATURE",
-        "to": "PENDING_ACCEPTANCE",
+        "from": "AWAITING_RECIPIENT_SIGNATURE",
+        "to": "AWAITING_GRANTOR_SIGNATURE",
         "conditions": [
           {
             "type": "isValid",
-            "input": "recipientData"
+            "input": "recipientSigning"
           }
         ]
       },
       {
-        "from": "PENDING_ACCEPTANCE",
+        "from": "AWAITING_GRANTOR_SIGNATURE",
         "to": "AWAITING_WORK_SUBMISSION",
         "conditions": [
           {
             "type": "isValid",
-            "input": "accepted"
+            "input": "grantorSigning"
           }
         ]
       },
@@ -240,12 +240,12 @@
         ]
       },
       {
-        "from": "PENDING_ACCEPTANCE",
+        "from": "AWAITING_GRANTOR_SIGNATURE",
         "to": "REJECTED",
         "conditions": [
           {
             "type": "isValid",
-            "input": "rejected"
+            "input": "grantorRejection"
           }
         ]
       }
