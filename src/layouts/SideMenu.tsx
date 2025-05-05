@@ -7,7 +7,7 @@ interface SideMenuProps {
 
 const SideMenu: React.FC<SideMenuProps> = ({ children }) => {
   return (
-    <View className="h-full bg-white">
+    <View className="h-full">
       <View className="overflow-auto h-full p-4">
         {children}
       </View>
