@@ -17,15 +17,12 @@ interface TemplateInfo {
   smartContracts: {
     name: string;
     address: `0x${string}`;
-  };
+  }[];
   description: string;
 }
 
 interface TemplateOption {
   id: string;
-  title: string;
-  selected: boolean;
-  type: 'markdown';
   isCustom?: boolean;
   template: Document;
   category: 'default' | 'custom';
@@ -39,48 +36,15 @@ interface CreateAgreementModalProps {
 const DEFAULT_TEMPLATES: TemplateOption[] = [
   {
     id: 'mou',
-    title: 'Memorandum of Understanding',
-    selected: true,
-    type: 'markdown',
     category: 'default',
     template: mouTemplate as Document
   }, 
   {
     id: 'mou-with-payment',
-    title: 'Simple Grant Agreement ',
-    selected: true,
-    type: 'markdown',
     category: 'default',
     template: mouWithPaymentTemplate as Document
   }
 ];
-
-const TEMPLATE_INFO: Record<string, TemplateInfo> = {
-  mou: {
-    title: 'Memorandum of Understanding',
-    author: {
-      name: 'Agreements Protocol',
-      address: '0x1234567890123456789012345678901234567890',
-    },
-    smartContracts: {
-      name: 'None',
-      address: '0x1234567890123456789012345678901234567890',
-    },
-    description: 'A template for non-binding memorandum of understanding between two parties, with support for variable interpolation and markdown formatting.',
-  },
-  'mou-with-payment': {
-    title: 'Simple Grant Agreement',
-    author: {
-      name: 'Agreements Protocol',
-      address: '0x1234567890123456789012345678901234567890',
-    },
-    smartContracts: {
-      name: 'None',
-      address: '0x1234567890123456789012345678901234567890',
-    },
-    description: 'A template for a simple grant agreement between two parties, with support for variable interpolation and markdown formatting. Includes payment terms.',
-  },
-};
 
 interface DeleteTemplateDialogProps {
   onDelete: () => void;
@@ -205,9 +169,6 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
       // Create a new template option
       const newTemplate: TemplateOption = {
         id: `custom-${Date.now()}`,
-        title: parsedTemplate.metadata.name,
-        selected: false,
-        type: 'markdown',
         isCustom: true,
         template: parsedTemplate,
         category: 'custom'
@@ -289,21 +250,23 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
   }, [templateOptions]);
 
   const selectedTemplateInfo = templateOptions.find(opt => opt.id === selectedTemplate);
-  const templateContent = selectedTemplateInfo?.isCustom 
-    ? {
-        title: selectedTemplateInfo.template?.metadata.name || '',
-        author: {
-          name: selectedTemplateInfo.template?.metadata.author || '',
-          address: '0x0000000000000000000000000000000000000000' as `0x${string}`
-        },
-        smartContracts: {
-          name: 'None',
-          address: '0x0000000000000000000000000000000000000000' as `0x${string}`
-        },
-        description: selectedTemplateInfo.template?.metadata.description || ''
-      }
-    : TEMPLATE_INFO[selectedTemplate];
+  const templateContent = React.useMemo<TemplateInfo | null>(() => {
+    if (!selectedTemplateInfo) return null;
 
+    const smartContracts = selectedTemplateInfo.template.contracts || [{ id: 'None', address: '0x0000000000000000000000000000000000000000' as `0x${string}` }];
+    return {
+      title: selectedTemplateInfo.template.metadata.name || '',
+      author: {
+        name: selectedTemplateInfo.template.metadata.author || '',
+        address: '0x0000000000000000000000000000000000000000' as `0x${string}`
+      },
+      smartContracts: smartContracts.map((contract) => ({
+        name: contract.id,
+        address: contract.address as `0x${string}`
+      })),
+      description: selectedTemplateInfo.template?.metadata.description || ''
+    }
+  }, [selectedTemplateInfo])
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl p-0">
@@ -330,7 +293,7 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
                         onPress={() => setSelectedTemplate(option.id)}
                         className="flex-1 justify-start"
                       >
-                        <Text>{option.title}</Text>
+                        <Text>{option.template.metadata.name}</Text>
                       </Button>
                     </View>
                   ))}
@@ -349,7 +312,7 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
                         onPress={() => setSelectedTemplate(option.id)}
                         className="flex-1 justify-start"
                       >
-                        <Text>{option.title}</Text>
+                        <Text>{option.template.metadata.name}</Text>
                       </Button>
                       <DeleteTemplateDialog
                         onDelete={() => handleDeleteTemplate(option.id)}
@@ -364,7 +327,7 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
           {/* Main content */}
           <View className="flex-1 p-6">
             <Text className="text-2xl font-semibold mb-6">
-              {selectedTemplateInfo?.title}
+              {selectedTemplateInfo?.template?.metadata?.name}
             </Text>
 
             {templateContent && (
@@ -380,9 +343,13 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
 
                   <View className="flex-1">
                     <Text className="text-neutral-11 mb-2">Smart Contracts</Text>
-                    <View className="flex-row items-center gap-2">
-                      <AddressAvatar address={templateContent.smartContracts.address} className="w-6 h-6" />
-                      <Text>{templateContent.smartContracts.name}</Text>
+                    <View className="flex-1 gap-2">
+                      {templateContent.smartContracts.map((contract) => (
+                        <View className="flex-row items-center gap-2">
+                          <AddressAvatar address={contract.address} className="w-6 h-6" />
+                          <Text>{contract.name}</Text>
+                        </View>
+                      ))}
                     </View>
                   </View>
                 </View>
