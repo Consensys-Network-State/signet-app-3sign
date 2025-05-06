@@ -11,7 +11,7 @@ import { FormContext } from '../contexts/FormContext';
 import { useMutation } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { Document } from "../store/documentStore";
-import { createAgreementInitVC, createAgreementInputVC } from "../utils/veramoUtils";
+import { createAgreementInitVC, createAgreementInputVC, createAgreementInputVCWithTxProof } from "../utils/veramoUtils";
 import { postAgreement, postAgreementInput } from "../api/index";
 import { getInitialStateParams, getNextStates } from "../utils/agreementUtils";
 import { formCache } from "../utils/formCache";
@@ -267,8 +267,6 @@ const ActionSideMenu: React.FC = () => {
   const inputMutation = useMutation({
     mutationFn: async ({ values, transition } : { values: Record<string, string>, transition: any}) => {
       if (!currentAgreement || !address) throw new Error("Agreement or address not available");
-
-      let inputValues: any = {};
       let vc: string = "";
 
       if (transition.conditions[0].input.type === 'EVMTransaction') {
@@ -279,10 +277,9 @@ const ActionSideMenu: React.FC = () => {
           // TODO: How to handle error here?
           throw new Error("Transaction proof not found");
         }
-        inputValues["txProof"] = btoa(transactionProof);
-        vc = await createAgreementInputVC(address as `0x${string}`, transition.conditions[0].input.id, inputValues, true);
+        vc = await createAgreementInputVCWithTxProof(address as `0x${string}`, transition.conditions[0].input.id, btoa(transactionProof));
       } else {
-        inputValues = Object.fromEntries(
+        const inputValues = Object.fromEntries(
           Object.entries(values).filter(([key]) => key in transition.conditions[0].input.data)
         );
         vc = await createAgreementInputVC(address as `0x${string}`, transition.conditions[0].input.id, inputValues);
