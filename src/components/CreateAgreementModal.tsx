@@ -47,7 +47,7 @@ const DEFAULT_TEMPLATES: TemplateOption[] = [
   }, 
   {
     id: 'mou-with-payment',
-    title: 'Memorandum of Understanding with Payment',
+    title: 'Simple Grant Agreement ',
     selected: true,
     type: 'markdown',
     category: 'default',
@@ -69,7 +69,7 @@ const TEMPLATE_INFO: Record<string, TemplateInfo> = {
     description: 'A template for non-binding memorandum of understanding between two parties, with support for variable interpolation and markdown formatting.',
   },
   'mou-with-payment': {
-    title: 'Memorandum of Understanding with Payment',
+    title: 'Simple Grant Agreement',
     author: {
       name: 'Agreements Protocol',
       address: '0x1234567890123456789012345678901234567890',
@@ -78,7 +78,7 @@ const TEMPLATE_INFO: Record<string, TemplateInfo> = {
       name: 'None',
       address: '0x1234567890123456789012345678901234567890',
     },
-    description: 'A template for non-binding memorandum of understanding between two parties, with support for variable interpolation and markdown formatting. Includes payment terms.',
+    description: 'A template for a simple grant agreement between two parties, with support for variable interpolation and markdown formatting. Includes payment terms.',
   },
 };
 

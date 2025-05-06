@@ -447,7 +447,7 @@ const ActionSideMenu: React.FC = () => {
                 <Text className="text-sm text-neutral-11 mb-2">Next Action</Text>
                 <StatusLabel
                   status="info"
-                  text={Object.values(currentDocument.execution.states).find(state => state.isInitial)?.name || 'Next Action'} 
+                  text={Object.values(currentDocument.execution.states).find(state => state.isInitial)?.name || 'Next State'} 
                 />
               </View>
             )}
