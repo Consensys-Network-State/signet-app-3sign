@@ -13,7 +13,7 @@ export interface VariableValidation {
 
 export interface DocumentVariable {
   id?: string;
-  type: 'string' | 'number' | 'boolean' | 'address' | 'dateTime';
+  type: 'string' | 'number' | 'boolean' | 'address' | 'dateTime' | 'signature';
   name: string;
   description?: string;
   value?: string;

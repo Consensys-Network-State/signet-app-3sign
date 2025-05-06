@@ -13,6 +13,7 @@ import { Spinner, Text } from '@ds3/react';
 import { formCache } from '../utils/formCache';
 import { useAccount } from 'wagmi';
 import { getNextStates } from '../utils/agreementUtils';
+import { useAgreement } from '../store/selectors';
 
 interface DocumentProps {
   type: 'draft' | 'agreement';
@@ -25,14 +26,15 @@ interface AgreementState {
 const Document: React.FC<DocumentProps> = ({ type }) => {
   const { draftId, agreementId } = useParams();
   const documentId = type === 'draft' ? draftId : agreementId;
-  const { addAgreements, getDraft, getAgreement: getAgreementFromStore } = useDocumentStore();
+  const { addAgreements, getDraft } = useDocumentStore();
   const { address } = useAccount();
   const isInitialized = !!agreementId;
-  const [fetchedAndLoaded, setFetchedAndLoaded] = React.useState(false);
   const [fetchedValues, setFetchedValues] = React.useState<Record<string, string>>({});
 
+  const agreement = useAgreement(agreementId);
+
   // Load agreement data if needed
-  const { data: agreement, isLoading: isLoadingAgreement } = useQuery({
+  const { data: fetchedAgreement, isLoading: isLoadingAgreement } = useQuery({
     queryKey: ['agreement', documentId],
     queryFn: () => getAgreement(documentId!),
     enabled: type === 'agreement',
@@ -42,10 +44,9 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
 
   // Effect to handle agreement data
   React.useEffect(() => {
-    if (type === 'agreement' && !isLoadingAgreement && agreement) {
-      addAgreements([agreement]);
-      setFetchedAndLoaded(true);
-      const agreementState = agreement.state as unknown as AgreementState;
+    if (type === 'agreement' && !isLoadingAgreement && fetchedAgreement) {
+      addAgreements([fetchedAgreement]);
+      const agreementState = fetchedAgreement.state as unknown as AgreementState;
       if (agreementState.Variables) {
         setFetchedValues(
           Object.fromEntries(
@@ -56,17 +57,16 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
         );
       }
     }
-  }, [agreement, isLoadingAgreement, addAgreements, type]);
+  }, [fetchedAgreement, isLoadingAgreement, addAgreements, type]);
 
   // Get current document
   const document = React.useMemo(() => {
     if (type === 'draft') {
       return getDraft(documentId!);
-    } else if (fetchedAndLoaded) {
-      const agreement = getAgreementFromStore(documentId!);
-      return agreement?.document;
+    } else if (agreement) {
+      return agreement.document;
     }
-  }, [type, documentId, getDraft, getAgreementFromStore, fetchedAndLoaded]);
+  }, [type, documentId, getDraft, agreement]);
 
   // Get next actions
   const nextActions = React.useMemo(() => {
