@@ -1,141 +1,187 @@
 import * as React from 'react';
-import { useParams, useLocation } from "react-router";
-import {
-  Button, Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Text,
-  Spinner,
-} from "@ds3/react";
-import { useQuery } from '@tanstack/react-query'
-import { getDocument } from "../api";
-import { validateAndProcessDocumentVC } from "../utils/veramoUtils.ts";
-import { Block } from "../blocks/BlockNoteSchema.tsx";
-import { BlockNoteMode, useBlockNoteStore } from "../store/blockNoteStore.ts";
-import { useAccount } from "wagmi";
-import BNDocumentView from "../components/BNDocumentView.tsx";
-import { DocumentPayload } from "../types";
+import { useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { useQuery } from '@tanstack/react-query';
+import { useDocumentStore } from '../store/documentStore';
+import MarkdownDocumentView from '../components/MarkdownDocumentView';
+import Layout from '../layouts/Layout';
+import { getAgreement } from '../api';
+import StatusLabel from '../components/StatusLabel';
 import { View } from 'react-native';
-import AddressCard from "../web3/AddressCard.tsx";
-import AuthenticationLayout from "../layouts/AuthenticationLayout.tsx";
-import { InputClipboard } from "../components/InputClipboard.tsx";
-import DisconnectButton from "../web3/DisconnectButton.tsx";
+import { FormContext } from '../contexts/FormContext';
+import { Spinner, Text } from '@ds3/react';
+import { formCache } from '../utils/formCache';
+import { useAccount } from 'wagmi';
+import { getNextStates } from '../utils/agreementUtils';
+import { useAgreement } from '../store/selectors';
 
-const Document = () => {
-  const location = useLocation();
-  const { documentId } = useParams(); // Extracts :username from the URL
-  const { isPending, isError, data, error } = useQuery({ queryKey: ['documents', documentId], queryFn: () => getDocument(documentId!) });
-  const { setEditorMode } = useBlockNoteStore();
-  const [document, setDocument] = React.useState<Block[] | null>(null);
-  const [isInitialized, setIsInitialized] = React.useState<boolean>(false);
+interface DocumentProps {
+  type: 'draft' | 'agreement';
+}
+
+interface AgreementState {
+  Variables: Record<string, { value: string }>;
+}
+
+const Document: React.FC<DocumentProps> = ({ type }) => {
+  const { draftId, agreementId } = useParams();
+  const documentId = type === 'draft' ? draftId : agreementId;
+  const { addAgreements, getDraft } = useDocumentStore();
   const { address } = useAccount();
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const isInitialized = !!agreementId;
+  const [fetchedValues, setFetchedValues] = React.useState<Record<string, string>>({});
 
+  const agreement = useAgreement(agreementId);
+
+  // Load agreement data if needed
+  const { data: fetchedAgreement, isLoading: isLoadingAgreement } = useQuery({
+    queryKey: ['agreement', documentId],
+    queryFn: () => getAgreement(documentId!),
+    enabled: type === 'agreement',
+    refetchOnMount: 'always' as const,
+    retry: 2,
+  });
+
+  // Effect to handle agreement data
   React.useEffect(() => {
-    const queryHandler = async () => {
-      if (!address) return;
-      if (!isPending && !isError && data) {
-        const processedDocument = await validateAndProcessDocumentVC(JSON.parse(data.data.Document));
-        setDocument(processedDocument.document);
-
-        if (address.toLowerCase() === data.data.DocumentOwner) { // If you are the owner
-          setEditorMode(BlockNoteMode.VIEW);
-        } else if (data.data.Signatories.find((a: string) => a === address.toLowerCase())) { // If you are a signer ...
-          if (!!data.data.Signatures[address.toLowerCase()]) { // ... and you have signed
-            setEditorMode(BlockNoteMode.VIEW);
-          } else { // ... and you haven't signed
-            setEditorMode(BlockNoteMode.SIGNATURE);
-          }
-        }
-        setIsInitialized(true);
+    if (type === 'agreement' && !isLoadingAgreement && fetchedAgreement) {
+      addAgreements([fetchedAgreement]);
+      const agreementState = fetchedAgreement.state as unknown as AgreementState;
+      if (agreementState.Variables) {
+        setFetchedValues(
+          Object.fromEntries(
+            Object.entries(agreementState.Variables)
+              .filter(([_, value]) => value && value.value !== undefined)
+              .map(([key, value]) => [key, value.value])
+          )
+        );
       }
     }
-    queryHandler();
-  }, [isPending, isError, data, address, setEditorMode])
+  }, [fetchedAgreement, isLoadingAgreement, addAgreements, type]);
 
-  const isAuthorized = React.useMemo(() => {
-    if (!address) return false;
-    return !(address.toLowerCase() !== data?.data?.DocumentOwner && !(data?.data?.Signatories || []).find((a: string) => a === address.toLowerCase()));
-  }, [address, data]);
-
-  const isLoading = isPending || !isInitialized;
-
-  React.useEffect(() => {
-    // Check if we arrived here with showModal flag
-    if (location.state?.showModal && !isLoading) {
-      setIsModalOpen(true);
+  // Get current document
+  const document = React.useMemo(() => {
+    if (type === 'draft') {
+      return getDraft(documentId!);
+    } else if (agreement) {
+      return agreement.document;
     }
-  }, [location, isLoading]);
+  }, [type, documentId, getDraft, agreement]);
 
-  const FullView: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+  // Get next actions
+  const nextActions = React.useMemo(() => {
+    if (type === 'agreement' && agreement) {
+      return getNextStates(agreement);
+    }
+    // For drafts, use the initial state's transitions
+    if (type === 'draft' && document?.execution?.states) {
+      const initialState = Object.values(document.execution.states).find(state => state.isInitial);
+      if (initialState) {
+        return document.execution.transitions
+          .filter(transition => transition.from === initialState.name)
+          .map(transition => ({
+            conditions: transition.conditions.map(condition => ({
+              input: document.execution.inputs[condition.input]
+            }))
+          }));
+      }
+    }
+    return [];
+  }, [type, agreement, document]);
+
+  // Get initial params
+  const initialParams = React.useMemo(() => {
+    if (type === 'draft' && document?.execution?.states) {
+      const initialState = Object.values(document.execution.states).find(state => state.isInitial);
+      return initialState?.initialParams || {};
+    }
+    return {};
+  }, [type, document]);
+
+  // Form setup
+  const form = useForm({
+    defaultValues: formCache.getInitialValues(documentId, document || null),
+    mode: 'onBlur',
+    reValidateMode: 'onBlur'
+  });
+
+  const {
+    formState: { errors },
+    control,
+    watch,
+    reset
+  } = form;
+
+  // Need to reset the form values when the document is pulled from the query
+  React.useEffect(() => {
+    if (document && documentId) {
+      reset({
+        ...fetchedValues,
+        ...Object.fromEntries(
+          Object.entries(formCache.getInitialValues(documentId, document || null))
+            .filter(([key, value]) => !fetchedValues[key])
+        )
+      });
+    }
+  }, [document, documentId, reset, fetchedValues])
+
+  // Watch form values and update localStorage
+  React.useEffect(() => {
+    const subscription = watch((values) => {
+      if (!documentId) return;
+      formCache.set(documentId, values);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, documentId]);
+
+  // Show loading state while fetching agreement data
+  if (type === 'agreement' && (!isInitialized || isLoadingAgreement)) {
     return (
-      <View className="h-screen flex items-center justify-center">
-        <View className="flex items-center justify-center">
-          {children}
+      <Layout isLoading={true}>
+        <View className="h-full flex items-center justify-center">
+          <Spinner size="lg" />
+          <Text className="mt-4">Loading agreement...</Text>
         </View>
-      </View>
+      </Layout>
+    );
+  }
+
+  // Show not found state
+  if (!document) {
+    return (
+      <Layout>
+        <View className="h-full flex items-center justify-center">
+          <Text className="text-neutral-11">Document not found</Text>
+        </View>
+      </Layout>
     );
   }
 
   return (
-    <>
-      <Dialog open={isModalOpen}>
-        <DialogContent className='w-[520px] max-w-[520px]'>
-          <DialogHeader>
-            <DialogTitle>Success!</DialogTitle>
-            <DialogDescription>
-              <Text className="block pb-4">You have successfully published this agreement</Text>
-
-              <Text className="block">Copy and send this link to the parties that need to sign</Text>
-            </DialogDescription>
-          </DialogHeader>
-          <InputClipboard
-            value={`${window.location.origin}${location.pathname}`}
+    <FormContext.Provider value={form}>
+      <Layout>
+        <View className="h-full p-8">
+          <View className="mb-6 w-fit">
+            <StatusLabel 
+              status={type === 'draft' ? 'warning' : undefined} 
+              text={type === 'draft' ? 'Draft' : agreement?.state.State.name || 'Published'} 
+            />
+          </View>
+          <MarkdownDocumentView
+            content={document.content}
+            variables={document.variables}
+            control={control}
+            errors={errors}
+            nextActions={nextActions}
+            userAddress={address}
+            initialParams={initialParams}
+            isInitializing={type === 'draft'}
           />
-          <DialogFooter>
-            <Button variant='soft' color="primary" onPress={() => setIsModalOpen(false)}>
-              <Text>Close</Text>
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <>
-        { isLoading &&
-          <FullView>
-            <Spinner className="h-9 w-9" color="primary" />
-          </FullView>
-        }
-
-        { isError &&
-          <FullView>
-            <Text>Error: {error.message}</Text>
-            <DisconnectButton className="self-center" />
-          </FullView>
-        }
-
-        { !isLoading && !isError &&
-          (isAuthorized ?
-            <BNDocumentView
-              documentPayload={{ documentId, document, raw: data?.data } as DocumentPayload}
-            /> :
-            <AuthenticationLayout>
-              <Text className="text-neutral-11 mb-4">This agreement is only accessible by the following wallets</Text>
-              <View className="flex flex-row gap-4">
-                <AddressCard address={data?.data?.DocumentOwner}/>
-                <AddressCard address={data?.data?.Signatories?.[0] || null}/>
-              </View>
-              <Text className="text-neutral-11 mt-4 mb-4">Please connect using a different account with MetaMask</Text>
-              <DisconnectButton className="self-center" />
-            </AuthenticationLayout>
-          )
-        }
-      </>
-    </>
+        </View>  
+      </Layout>
+    </FormContext.Provider>
   );
 };
 
-export default Document;
+export default Document; 

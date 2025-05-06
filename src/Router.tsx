@@ -1,10 +1,10 @@
 import * as React from "react";
-import Home from "./routes/Home.tsx";
 import Login from "./routes/Login.tsx";
-import Document from "./routes/Document.tsx";
+import Agreements from "./routes/Agreements.tsx";
 import { Routes, Route } from 'react-router';
 import { useAccount } from "wagmi";
 import { Navigate, useLocation } from 'react-router';
+import DocumentView from "./routes/Document.tsx";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isConnected } = useAccount();
@@ -22,12 +22,17 @@ const Router: React.FC = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/" element={
         <ProtectedRoute>
-          <Home />
+          <Agreements />
         </ProtectedRoute>
       } />
-      <Route path="/:documentId" element={
+      <Route path="/drafts/:draftId" element={
         <ProtectedRoute>
-            <Document />
+          <DocumentView type="draft" />
+        </ProtectedRoute>
+      } />
+      <Route path="/agreements/:agreementId" element={
+        <ProtectedRoute>
+          <DocumentView type="agreement" />
         </ProtectedRoute>
       } />
     </Routes>
