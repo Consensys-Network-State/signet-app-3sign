@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Text } from "@ds3/react";
+import { Text } from "@ds3/ui";
 import { useLocation, useNavigate } from "react-router";
 import { useAccount } from "wagmi";
 import { View } from 'react-native';

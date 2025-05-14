@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, Pressable } from 'react-native';
-import { Text, Button, Card } from '@ds3/react';
+import { Text, Button, Card } from '@ds3/ui';
 import { useDocumentStore } from '../store/documentStore';
 import { useNavigate } from 'react-router';
 import Layout from '../layouts/Layout';

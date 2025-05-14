@@ -1,8 +1,8 @@
 import * as React from "react";
 import { View, ScrollView } from "react-native";
 import { useNavigate, useParams } from 'react-router';
-import { Text, Card, Button, Input, InputField } from "@ds3/react";
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@ds3/react";
+import { Text, Card, Button, Input, InputField } from "@ds3/ui";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@ds3/ui";
 import { DocumentVariable, useDocumentStore } from "../store/documentStore";
 import { Controller } from "react-hook-form";
 import { isAddress } from 'viem';

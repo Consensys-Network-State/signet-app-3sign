@@ -3,7 +3,8 @@ import { View } from 'react-native';
 import AddressAvatar from "./AddressAvatar.tsx";
 import Address from "./Address.tsx";
 import { useEnsName } from "wagmi";
-import { cn, Button, Icons, copyToClipboard } from "@ds3/react";
+import { cn, Button, copyToClipboard } from "@ds3/ui";
+import { Copy } from 'lucide-react-native';
 
 interface AddressDisplayProps {
   address: `0x${string}`,
@@ -36,7 +37,7 @@ const AddressCard: React.FC<AddressDisplayProps> = ({
           size="sm"
           onPress={() => copyToClipboard(address)}
         >
-          <Button.Icon icon={Icons.Copy} className="text-neutral-11" />
+          <Button.Icon icon={Copy} className="text-neutral-11" />
         </Button>
       )}
     </View> : null

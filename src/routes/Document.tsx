@@ -9,7 +9,7 @@ import { getAgreement } from '../api';
 import StatusLabel from '../components/StatusLabel';
 import { View } from 'react-native';
 import { FormContext } from '../contexts/FormContext';
-import { Spinner, Text } from '@ds3/react';
+import { Spinner, Text } from '@ds3/ui';
 import { formCache } from '../utils/formCache';
 import { useAccount } from 'wagmi';
 import { getNextStates } from '../utils/agreementUtils';

@@ -9,14 +9,14 @@ import {
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuGroup,
-  Icons,
+  Icon,
   cn,
   openLink,
   copyToClipboard
-} from "@ds3/react";
+} from "@ds3/ui";
 import { useAccount, useDisconnect } from "wagmi";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronDown } from 'lucide-react-native';
+import { ChevronDown, Copy, SquareArrowOutUpLeft, LogOut } from 'lucide-react-native';
 import AddressAvatar from "./AddressAvatar.tsx";
 import Address from "./Address.tsx";
 
@@ -27,7 +27,6 @@ interface AccountProps {
 const Account: React.FC<AccountProps> = ({ className }) => {
   const { address } = useAccount()
   const { disconnect } = useDisconnect()
-
   const insets = useSafeAreaInsets();
   const contentInsets = {
     top: insets.top,
@@ -50,15 +49,15 @@ const Account: React.FC<AccountProps> = ({ className }) => {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem onPress={() => copyToClipboard(address as string) }>
-            <Icons.Copy className='text-foreground' size={14} />
+            <Icon icon={Copy} />
             <Text>Copy address</Text>
           </DropdownMenuItem>
           <DropdownMenuItem onPress={() => openLink(`https://etherscan.io/address/${address}`)}>
-            <Icons.SquareArrowOutUpLeft className='text-foreground' size={14} />
+            <Icon icon={SquareArrowOutUpLeft} />
             <Text>View on explorer</Text>
           </DropdownMenuItem>
           <DropdownMenuItem onPress={() => disconnect()}>
-            <Icons.LogOut className='text-foreground' size={14} />
+            <Icon icon={LogOut} />
             <Text>Disconnect</Text>
           </DropdownMenuItem>
         </DropdownMenuGroup>

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEnsAvatar, useEnsName } from "wagmi";
 import { normalize } from 'viem/ens'
-import { Avatar, AvatarImage, cn } from "@ds3/react";
+import { Avatar, AvatarImage, cn } from "@ds3/ui";
 import makeBlockie from 'ethereum-blockies-base64';
 
 // todo: add fallback if there is nothing

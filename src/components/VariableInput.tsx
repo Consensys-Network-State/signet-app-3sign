@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { TextInput } from 'react-native';
-import { InputField, Input } from '@ds3/react';
+import { InputField, Input } from '@ds3/ui';
 import { isAddress } from 'viem';
 import AddressAvatar from "../web3/AddressAvatar";
 import { DatePickerField } from './DatePickerField';

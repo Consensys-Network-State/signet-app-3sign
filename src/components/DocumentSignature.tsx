@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Text, Button } from "@ds3/react";
+import { Text, Button } from "@ds3/ui";
 import { View } from 'react-native';
 import { Edit2 as EditIcon } from 'lucide-react-native';
 

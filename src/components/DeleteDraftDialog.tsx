@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@ds3/react';
+} from '@ds3/ui';
 import * as React from 'react';
 import { Trash2 } from 'lucide-react-native';
 

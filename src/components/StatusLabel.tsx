@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Text } from '@ds3/react';
+import { Text } from '@ds3/ui';
 
 export type Status = 'success' | 'error' | 'warning' | 'info';
 

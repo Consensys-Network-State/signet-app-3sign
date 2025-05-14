@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEnsName } from "wagmi";
-import { Text } from '@ds3/react';
+import { Text } from '@ds3/ui';
 import truncateEthAddress from 'truncate-eth-address';
 
 interface AddressProps {

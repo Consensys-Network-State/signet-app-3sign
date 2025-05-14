@@ -1,6 +1,6 @@
 import React from 'react';
 import { polygon, optimism, arbitrum, linea } from 'viem/chains';
-import { Avatar, AvatarImage, cn } from "@ds3/react";
+import { Avatar, AvatarImage, cn } from "@ds3/ui";
 
 interface ChainAvatarProps {
   chainId: number;

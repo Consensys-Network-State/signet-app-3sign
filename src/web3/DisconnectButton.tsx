@@ -1,4 +1,4 @@
-import { Button, ButtonRootProps } from "@ds3/react";
+import { Button, ButtonRootProps } from "@ds3/ui";
 import { useDisconnect } from 'wagmi';
 
 const DisconnectButton: React.FC<ButtonRootProps> = ({ children, ...otherProps }) => {

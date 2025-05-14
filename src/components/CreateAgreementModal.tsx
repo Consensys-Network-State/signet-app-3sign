@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View } from 'react-native';
-import { Button, Text, Card, CardContent, Dialog, DialogContent, DialogFooter, Alert, DialogHeader, DialogTitle, DialogDescription, DialogClose, DialogTrigger } from '@ds3/react';
+import { Button, Text, Card, CardContent, Dialog, DialogContent, DialogFooter, Alert, DialogHeader, DialogTitle, DialogDescription, DialogClose, DialogTrigger } from '@ds3/ui';
 import AddressAvatar from '../web3/AddressAvatar';
 import { useNavigate } from 'react-router';
 import { useDocumentStore, Document } from '../store/documentStore';

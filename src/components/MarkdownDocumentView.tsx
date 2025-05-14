@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View } from 'react-native';
-import { Text } from '@ds3/react';
+import { Text } from '@ds3/ui';
 import { DocumentVariable, DocumentInput } from '../store/documentStore';
 import { unified } from 'unified';
 import remarkStringify from 'remark-stringify';

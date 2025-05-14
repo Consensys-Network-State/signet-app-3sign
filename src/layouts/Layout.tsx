@@ -1,8 +1,7 @@
 import * as React from "react";
 import { View } from "react-native";
-import {Icon, ModeToggle, Text, Button, Input} from "@ds3/react";
+import { Icon, ModeToggle, Text, Button, Input, H4 } from "@ds3/ui";
 import Account from "../web3/Account.tsx";
-import { H4 } from "@ds3/react/src/components/Heading.tsx";
 import { Info, ChevronLeft } from 'lucide-react-native';
 import { useNavigate, useLocation, useParams } from 'react-router';
 import { useDocumentStore } from '../store/documentStore';

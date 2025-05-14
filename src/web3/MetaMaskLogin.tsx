@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Button, Text, cn } from "@ds3/react";
+import { Button, Text, cn } from "@ds3/ui";
 import { useConnect, Connector } from "wagmi";
 import MetaMaskLogo from "../assets/metamask.svg?react";
 

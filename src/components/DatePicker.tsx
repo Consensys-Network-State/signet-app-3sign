@@ -7,12 +7,13 @@ import {
   Select,
   SelectTrigger,
   SelectContent,
-  Icons,
-  useTheme,
-} from "@ds3/react";
+  Icon,
+  useThemeContext,
+} from "@ds3/ui";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootProps as SelectProps } from '@rn-primitives/select';
 import {COLOR_MODES} from "@ds3/config";
+import { ChevronRight, ChevronLeft } from 'lucide-react-native';
 
 // TODO: There's a weird issue where you get the error: React is not defined when using the DateTimePicker Component
 //  from react-native-ui-datepicker. Setting window.React = React fixes it.
@@ -42,7 +43,7 @@ const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, Date
   const [triggerWidth, setTriggerWidth] = React.useState(0);
   const insets = useSafeAreaInsets();
   const triggerRef = React.useRef<React.ElementRef<typeof SelectTrigger>>(null);
-  const { mode } = useTheme();
+  const { mode } = useThemeContext();
 
   const textColor = mode === COLOR_MODES.Dark ? '#FFFFFF' : '#000000';
   const bgColor = mode === COLOR_MODES.Dark ? '#222' : '#FFF'
@@ -141,8 +142,8 @@ const DatePicker = React.forwardRef<React.ElementRef<typeof SelectTrigger>, Date
           {...style}
           date={value || dayjs()}
           onChange={onSelectDate}
-          buttonNextIcon={<Icons.ChevronRight />}
-          buttonPrevIcon={<Icons.ChevronLeft />}
+          buttonNextIcon={<Icon icon={ChevronRight} />}
+          buttonPrevIcon={<Icon icon={ChevronLeft} />}
         />
       </SelectContent>
     </Select>
