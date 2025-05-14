@@ -1,5 +1,5 @@
 import { defineConfig, UserConfigExport } from 'vite'
-import ds3Plugin from '@ds3/config/vite';
+import ds3Plugin from '@ds3/core/vite';
 import ds3Config from "./ds3.config";
 import svgr from "vite-plugin-svgr";
 
