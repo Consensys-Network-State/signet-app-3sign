@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogD
 import { DocumentVariable, useDocumentStore } from "../store/documentStore";
 import { Controller } from "react-hook-form";
 import { isAddress } from 'viem';
-import AddressCard from "../web3/AddressCard";
+import { AddressCard } from "@ds3/web3";
 import { FormContext } from '../contexts/FormContext';
 import { useMutation } from "@tanstack/react-query";
 import { useAccount } from "wagmi";

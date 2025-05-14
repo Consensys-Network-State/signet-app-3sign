@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { View } from 'react-native';
 import { Button, Text, Card, CardContent, Dialog, DialogContent, DialogFooter, Alert, DialogHeader, DialogTitle, DialogDescription, DialogClose, DialogTrigger } from '@ds3/ui';
-import AddressAvatar from '../web3/AddressAvatar';
+import { AddressAvatar }from '@ds3/web3';
 import { useNavigate } from 'react-router';
 import { useDocumentStore, Document } from '../store/documentStore';
 import mouTemplate from '../templates/mou-template.json';

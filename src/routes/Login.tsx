@@ -3,7 +3,7 @@ import { Text } from "@ds3/ui";
 import { useLocation, useNavigate } from "react-router";
 import { useAccount } from "wagmi";
 import { View } from 'react-native';
-import MetaMaskLogin from "../web3/MetaMaskLogin.tsx";
+import { MetaMaskLogin } from "@ds3/web3";
 import AuthenticationLayout from "../layouts/AuthenticationLayout.tsx";
 
 const Login: React.FC = () => {

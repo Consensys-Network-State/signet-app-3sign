@@ -5,7 +5,7 @@ import { useDocumentStore } from '../store/documentStore';
 import { useNavigate } from 'react-router';
 import Layout from '../layouts/Layout';
 import { Plus } from 'lucide-react-native';
-import AddressAvatar from '../web3/AddressAvatar';
+import { AddressAvatar } from '@ds3/web3';
 import CreateAgreementModal from '../components/CreateAgreementModal';
 import StatusLabel from '../components/StatusLabel';
 import { useAccount } from 'wagmi';
