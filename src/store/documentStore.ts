@@ -118,6 +118,7 @@ export interface Document {
 export interface Agreement {
   id: string;
   document: Document;
+  documentHash: string;
   contributors: `0x${string}`[];
   state: {
     IsComplete: boolean;

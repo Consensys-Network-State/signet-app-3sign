@@ -277,12 +277,12 @@ const ActionSideMenu: React.FC = () => {
           // TODO: How to handle error here?
           throw new Error("Transaction proof not found");
         }
-        vc = await createAgreementInputVCWithTxProof(address as `0x${string}`, transition.conditions[0].input.id, btoa(transactionProof));
+        vc = await createAgreementInputVCWithTxProof(address as `0x${string}`, transition.conditions[0].input.id, btoa(transactionProof), currentAgreement.documentHash);
       } else {
         const inputValues = Object.fromEntries(
           Object.entries(values).filter(([key]) => key in transition.conditions[0].input.data)
         );
-        vc = await createAgreementInputVC(address as `0x${string}`, transition.conditions[0].input.id, inputValues);
+        vc = await createAgreementInputVC(address as `0x${string}`, transition.conditions[0].input.id, inputValues, currentAgreement.documentHash);
       }
 
       if (!vc) throw new Error("Failed to create verifiable credential"); 
