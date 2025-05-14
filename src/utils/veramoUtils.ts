@@ -101,7 +101,7 @@ export async function createAgreementInitVC(address: `0x${string}`, agreement: D
   return JSON.stringify(vc);
 }
 
-export async function createAgreementInputVC(address: `0x${string}`, inputId: string, values: Record<string, any>) {
+export async function createAgreementInputVC(address: `0x${string}`, inputId: string, values: Record<string, any>, documentHash: string) {
   const agent = await setupAgent();
   const did = await agent.didManagerGet({did: `did:pkh:eip155:1:${address}`});
 
@@ -120,7 +120,8 @@ export async function createAgreementInputVC(address: `0x${string}`, inputId: st
     ],
     issuanceDate: new Date().toISOString(),
     credentialSubject: {
-      id: inputId,
+      inputId,
+      documentHash,
       type: "signedFields",
       values: filteredValues,
     },
@@ -136,7 +137,7 @@ export async function createAgreementInputVC(address: `0x${string}`, inputId: st
   return JSON.stringify(vc);
 }
 
-export async function createAgreementInputVCWithTxProof(address: `0x${string}`, inputId: string, txProof: string) {
+export async function createAgreementInputVCWithTxProof(address: `0x${string}`, inputId: string, txProof: string, documentHash: string) {
   const agent = await setupAgent();
   const did = await agent.didManagerGet({did: `did:pkh:eip155:1:${address}`});
 
@@ -150,7 +151,8 @@ export async function createAgreementInputVCWithTxProof(address: `0x${string}`, 
     ],
     issuanceDate: new Date().toISOString(),
     credentialSubject: {
-      id: inputId,
+      inputId,
+      documentHash,
       type: "signedFields",
       txProof,
     },
