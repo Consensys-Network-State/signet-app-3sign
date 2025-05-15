@@ -98,7 +98,7 @@ const Agreements: React.FC = () => {
   return (
     <Layout
       rightHeader={
-        <Button variant="soft" color="primary" onPress={handleCreateNew}>
+        <Button variant="soft" color="primary" onClick={handleCreateNew}>
           <Button.Icon icon={Plus} />
           <Button.Text>Create Agreement</Button.Text>
         </Button>

@@ -26,7 +26,7 @@ const DocumentSignature: FC<DocumentSignatureProps> = (props) => {
           </div>
           {onEdit && !disabled && (
             <div className="flex items-center justify-center ml-3">
-              <Button variant="ghost" size="sm" onPress={onEdit}>
+              <Button variant="ghost" size="sm" onClick={onEdit}>
                 <Button.Icon icon={EditIcon} />
               </Button>
             </div>

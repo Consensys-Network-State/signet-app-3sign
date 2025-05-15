@@ -108,7 +108,7 @@ const DocumentSignatureDialog: React.FC<DocumentSignatureDialogProps> = (props: 
         <Button
           variant="soft"
           color="primary"
-          onPress={handleSubmit(onSubmit)}
+          onClick={handleSubmit(onSubmit)}
           disabled={!isValid}
         >
           <Button.Text>Adopt Signature</Button.Text>

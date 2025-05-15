@@ -63,7 +63,7 @@ const DeleteDraftDialog: React.FC<DeleteDraftDialogProps> = ({
           <Button 
             variant="soft" 
             color="error" 
-            onPress={handleDelete} 
+            onClick={handleDelete} 
             loading={isLoading}
           >
             <Button.Text>{isLoading ? 'Deleting...' : 'Delete'}</Button.Text>

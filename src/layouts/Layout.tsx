@@ -94,7 +94,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, isLoadin
             <div className="flex flex-row items-center gap-2">
               <Button
                 variant="ghost"
-                onPress={() => navigate('/')}
+                onClick={() => navigate('/')}
                 className="flex items-center justify-center h-10"
               >
                 <Button.Icon icon={ChevronLeft} />

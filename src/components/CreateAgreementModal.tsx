@@ -73,7 +73,7 @@ const DeleteTemplateDialog: React.FC<DeleteTemplateDialogProps> = ({
         <Button 
           variant="ghost" 
           color="error" 
-          onPress={() => setIsOpen(true)}
+          onClick={() => setIsOpen(true)}
         >
           <Button.Icon icon={Trash2} />
         </Button>
@@ -87,14 +87,14 @@ const DeleteTemplateDialog: React.FC<DeleteTemplateDialogProps> = ({
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant='ghost' onPress={() => setIsOpen(false)}>
+            <Button variant='ghost' onClick={() => setIsOpen(false)}>
               <Button.Text>Cancel</Button.Text>
             </Button>
           </DialogClose>
           <Button 
             variant="soft" 
             color="error" 
-            onPress={handleDelete} 
+            onClick={handleDelete} 
             loading={isLoading}
           >
             <Button.Text>{isLoading ? 'Deleting...' : 'Delete'}</Button.Text>
@@ -289,7 +289,7 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
                       <Button
                         variant={selectedTemplate === option.id ? "soft" : "ghost"}
                         color={selectedTemplate === option.id ? "primary" : "neutral"}
-                        onPress={() => setSelectedTemplate(option.id)}
+                        onClick={() => setSelectedTemplate(option.id)}
                         className="flex-1 justify-start"
                       >
                         <Button.Text>{option.template.metadata.name}</Button.Text>
@@ -308,7 +308,7 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
                       <Button
                         variant={selectedTemplate === option.id ? "soft" : "ghost"}
                         color={selectedTemplate === option.id ? "primary" : "neutral"}
-                        onPress={() => setSelectedTemplate(option.id)}
+                        onClick={() => setSelectedTemplate(option.id)}
                         className="flex-1 justify-start"
                       >
                         <Button.Text>{option.template.metadata.name}</Button.Text>
@@ -374,14 +374,14 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
         )}
 
         <DialogFooter className="border-t border-neutral-6 p-4">
-          <Button variant="soft" color="neutral" className="mr-auto" onPress={handleImportClick}>
+          <Button variant="soft" color="neutral" className="mr-auto" onClick={handleImportClick}>
             <Button.Text>Import Template</Button.Text>
           </Button>
           <div className="flex-row gap-2">
-            <Button variant="ghost" onPress={onClose}>
+            <Button variant="ghost" onClick={onClose}>
               <Button.Text>Cancel</Button.Text>
             </Button>
-            <Button variant="soft" color="primary" onPress={handleCreate}>
+            <Button variant="soft" color="primary" onClick={handleCreate}>
               <Button.Text>Create</Button.Text>
             </Button>
           </div>

@@ -44,7 +44,7 @@ const InputClipboard = React.forwardRef<React.ElementRef<typeof Input>, InputCli
           variant="ghost"
           accessibilityLabel={copied ? "Copied" : "Copy to clipboard"}
           accessibilityHint="Click to copy text to clipboard"
-          onPress={handleCopy}
+          onClick={handleCopy}
         >
           <Input.Icon
             icon={copied ? Check : Copy}

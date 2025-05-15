@@ -29,7 +29,7 @@ const ConfirmActionDialog: React.FC<ConfirmActionDialogProps> = ({ open, onOpenC
         <Button
           variant="solid"
           color="primary"
-          onPress={onConfirm}
+          onClick={onConfirm}
           loading={loading}
         >
           <Button.Spinner />

@@ -457,7 +457,7 @@ const ActionSideMenu: React.FC = () => {
                 variant="soft" 
                 color="primary" 
                 size="sm"
-                onPress={() => handleConfirm('publish')}
+                onClick={() => handleConfirm('publish')}
                 loading={isInitializingAction}
               >
                 <Button.Spinner />
@@ -563,7 +563,7 @@ const ActionSideMenu: React.FC = () => {
                   variant="soft" 
                   color="primary" 
                   size="sm"
-                  onPress={() => handleConfirm('transition', action as TransitionAction)}
+                  onClick={() => handleConfirm('transition', action as TransitionAction)}
                   loading={isExecuting}
                   disabled={!transitionEnabled}
                 >
@@ -648,7 +648,7 @@ const ActionSideMenu: React.FC = () => {
                       variant="ghost" 
                       color="neutral" 
                       size="sm"
-                      onPress={() => setSelectedVC(vc)}
+                      onClick={() => setSelectedVC(vc)}
                     >
                       <Button.Text>View Details</Button.Text>
                     </Button>
