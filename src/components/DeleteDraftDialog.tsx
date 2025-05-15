@@ -1,5 +1,4 @@
 import {
-  Text,
   Button,
   Dialog,
   DialogClose,
@@ -38,12 +37,11 @@ const DeleteDraftDialog: React.FC<DeleteDraftDialogProps> = ({
   };
 
   return (
-    <Dialog open={isOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild disabled={disabled}>
         <Button 
           variant="ghost" 
           color="error" 
-          onPress={() => setIsOpen(true)} 
           {...triggerProps}
         >
           <Button.Icon icon={Trash2} />
@@ -58,8 +56,8 @@ const DeleteDraftDialog: React.FC<DeleteDraftDialogProps> = ({
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant='ghost' onPress={() => setIsOpen(false)}>
-              <Text>Cancel</Text>
+            <Button variant='ghost'>
+              <Button.Text>Cancel</Button.Text>
             </Button>
           </DialogClose>
           <Button 

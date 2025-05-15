@@ -7,9 +7,8 @@ import MarkdownDocumentView from '../components/MarkdownDocumentView';
 import Layout from '../layouts/Layout';
 import { getAgreement } from '../api';
 import StatusLabel from '../components/StatusLabel';
-import { View } from 'react-native';
 import { FormContext } from '../contexts/FormContext';
-import { Spinner, Text } from '@ds3/ui';
+import { Spinner } from '@ds3/ui';
 import { formCache } from '../utils/formCache';
 import { useAccount } from 'wagmi';
 import { getNextStates } from '../utils/agreementUtils';
@@ -139,10 +138,10 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
   if (type === 'agreement' && (!isInitialized || isLoadingAgreement)) {
     return (
       <Layout isLoading={true}>
-        <View className="h-full flex items-center justify-center">
+        <div className="h-full flex items-center justify-center">
           <Spinner size="lg" />
-          <Text className="mt-4">Loading agreement...</Text>
-        </View>
+          <p className="mt-4">Loading agreement...</p>
+        </div>
       </Layout>
     );
   }
@@ -151,9 +150,9 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
   if (!document) {
     return (
       <Layout>
-        <View className="h-full flex items-center justify-center">
-          <Text className="text-neutral-11">Document not found</Text>
-        </View>
+        <div className="h-full flex items-center justify-center">
+          <p className="text-neutral-11">Document not found</p>
+        </div>
       </Layout>
     );
   }
@@ -161,13 +160,13 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
   return (
     <FormContext.Provider value={form}>
       <Layout>
-        <View className="h-full p-8">
-          <View className="mb-6 w-fit">
+        <div className="h-full p-8">
+          <div className="mb-6 w-fit">
             <StatusLabel 
               status={type === 'draft' ? 'warning' : undefined} 
               text={type === 'draft' ? 'Draft' : agreement?.state.State.name || 'Published'} 
             />
-          </View>
+          </div>
           <MarkdownDocumentView
             content={document.content}
             variables={document.variables}
@@ -178,7 +177,7 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
             initialParams={initialParams}
             isInitializing={type === 'draft'}
           />
-        </View>  
+        </div>  
       </Layout>
     </FormContext.Provider>
   );

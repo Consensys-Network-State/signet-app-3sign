@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Text } from '@ds3/ui';
 
 export type Status = 'success' | 'error' | 'warning' | 'info';
 
@@ -8,7 +7,7 @@ interface StatusLabelProps {
   text?: string;
 }
 
-const StatusLabel: React.FC<StatusLabelProps> = ({ status, text = 'Status' }) => {  
+const StatusLabel: React.FC<StatusLabelProps> = ({ status = 'info', text = 'Status' }) => {  
   const getStatusStyles = (status: Status) => {
     switch (status) {
       case 'success':
@@ -25,11 +24,9 @@ const StatusLabel: React.FC<StatusLabelProps> = ({ status, text = 'Status' }) =>
   };
   
   return (
-    <Text 
-      className={`px-2 py-1 rounded-full text-sm ${getStatusStyles(status)}`}
-    >
+    <div className={`px-2 py-1 rounded-full text-sm ${getStatusStyles(status)}`}>
       {text}
-    </Text>
+    </div>
   );
 };
 

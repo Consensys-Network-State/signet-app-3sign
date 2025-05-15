@@ -1,6 +1,5 @@
 import * as React from "react";
-import { View } from "react-native";
-import { Icon, ModeToggle, Text, Button, Input, H4 } from "@ds3/ui";
+import { Icon, ModeToggle, Button, Input, H4 } from "@ds3/ui";
 import { Account } from "@ds3/web3";
 import { Info, ChevronLeft } from 'lucide-react-native';
 import { useNavigate, useLocation, useParams } from 'react-router';
@@ -72,27 +71,27 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, isLoadin
   const showTitleInput = isEditMode || isDraftMode || isDocumentMode;
 
   return (
-    <View className="h-screen bg-neutral-1 flex flex-col">
+    <div className="h-screen bg-neutral-1 flex flex-col">
       {/* Navbar */}
-      <View className="bg-neutral-1 shadow-md z-20">
+      <div className="bg-neutral-1 shadow-md z-20">
         {/* Status Message */}
         {status && (
-          <View className={`w-full flex flex-row h-14 items-center justify-between px-8 py-2 ${getStatusBackgroundColor(status.type)}`}>
-            <View className="flex flex-row items-center">
+          <div className={`w-full flex flex-row h-14 items-center justify-between px-8 py-2 ${getStatusBackgroundColor(status.type)}`}>
+            <div className="flex flex-row items-center">
               <Icon className="mr-2" icon={Info} />
-              <Text>{status.message}</Text>
-            </View>
+              <p>{status.message}</p>
+            </div>
             { status.actions &&
-              <View className="flex flex-row items-center px-4 gap-2">
+              <div className="flex flex-row items-center px-4 gap-2">
                 {status.actions}
-              </View>
+              </div>
             }
-          </View>
+          </div>
         )}
 
-        <View className="flex flex-row items-center justify-between px-8 py-6">
+        <div className="flex flex-row items-center justify-between px-8 py-6">
           {showTitleInput ? (
-            <View className="flex flex-row items-center gap-2">
+            <div className="flex flex-row items-center gap-2">
               <Button
                 variant="ghost"
                 onPress={() => navigate('/')}
@@ -100,7 +99,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, isLoadin
               >
                 <Button.Icon icon={ChevronLeft} />
               </Button>
-              <View className="flex flex-row items-center gap-2">
+              <div className="flex flex-row items-center gap-2">
                 <Input
                   value={title}
                   variant="ghost"
@@ -110,41 +109,41 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, isLoadin
                 >
                   <Input.Field />
                 </Input>
-              </View>
-            </View>
+              </div>
+            </div>
           ) : (
             <H4 className="text-primary-12">Agreements</H4>
           )}
 
-          <View className="flex flex-row items-center px-4 gap-2">
+          <div className="flex flex-row items-center px-4 gap-2">
             {rightHeader}
             <Account />
             <ModeToggle />
-          </View>
-        </View>
-      </View>
+          </div>
+        </div>
+      </div>
 
       {/* Main Content Area */}
-      <View className="flex-1 min-h-0">
-        <View className={`h-full mx-auto w-full transition-all duration-300 ease-in-out ${showSideMenu ? 'max-w-[1520px]' : 'max-w-[1200px]'}`}>
-          <View className="flex flex-row gap-2 h-full">
+      <div className="flex-1 min-h-0">
+        <div className={`h-full mx-auto w-full transition-all duration-300 ease-in-out ${showSideMenu ? 'max-w-[1520px]' : 'max-w-[1200px]'}`}>
+          <div className="flex flex-row gap-2 h-full">
             {/* Content */}
-            <View className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-auto">
               {children}
-            </View>
+            </div>
 
             {/* Side Menu */}
             {showSideMenu && (
-              <View className="w-[320px] overflow-hidden">
+              <div className="w-[320px] overflow-hidden">
                 <SideMenu>
                   <ActionSideMenu />
                 </SideMenu>
-              </View>
+              </div>
             )}
-          </View>
-        </View>
-      </View>
-    </View>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

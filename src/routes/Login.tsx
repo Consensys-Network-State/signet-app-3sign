@@ -1,8 +1,6 @@
 import * as React from "react";
-import { Text } from "@ds3/ui";
 import { useLocation, useNavigate } from "react-router";
 import { useAccount } from "wagmi";
-import { View } from 'react-native';
 import { MetaMaskLogin } from "@ds3/web3";
 import AuthenticationLayout from "../layouts/AuthenticationLayout.tsx";
 
@@ -20,11 +18,11 @@ const Login: React.FC = () => {
 
   return (
     <AuthenticationLayout>
-      <View className="mb-12 w-full">
+      <div className="mb-12 w-full">
         <MetaMaskLogin />
-      </View>
-      <Text className="font-bold">Putting blockchain power into the 'Power Suit'*</Text>
-      <Text className="text-neutral-11">*Suit and tie remain optional in crypto</Text>
+      </div>
+      <p className="font-bold mb-0">Putting blockchain power into the 'Power Suit'*</p>
+      <p className="text-neutral-11">*Suit and tie remain optional in crypto</p>
     </AuthenticationLayout>
   );
 }

@@ -6,3 +6,9 @@
   color-scheme: light dark;
   @apply bg-neutral-1;
 }
+
+@layer base {
+  p {
+    @apply text-base text-neutral-12;
+  }
+}

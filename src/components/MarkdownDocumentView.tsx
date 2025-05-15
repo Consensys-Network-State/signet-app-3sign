@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { View } from 'react-native';
-import { Text } from '@ds3/ui';
 import { DocumentVariable, DocumentInput } from '../store/documentStore';
 import { unified } from 'unified';
 import remarkStringify from 'remark-stringify';
@@ -77,58 +75,58 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
 
   // Create stable components
   const components = React.useMemo<Components>(() => ({
-    h1: ({ children }) => <Text className="text-4xl font-bold mb-4">{children}</Text>,
-    h2: ({ children }) => <Text className="text-3xl font-bold mb-3">{children}</Text>,
-    h3: ({ children }) => <Text className="text-2xl font-bold mb-2">{children}</Text>,
-    p: ({ children }) => <Text className="text-base mb-4">{children}</Text>,
+    h1: ({ children }) => <h1 className="text-4xl font-bold mb-4">{children}</h1>,
+    h2: ({ children }) => <h2 className="text-3xl font-bold mb-3">{children}</h2>,
+    h3: ({ children }) => <h3 className="text-2xl font-bold mb-2">{children}</h3>,
+    p: ({ children, ...props }) => <p className="text-base mb-4" {...props}>{children}</p>,
     ul: ({ children }) => (
-      <View className="mb-4">
+      <ul className="mb-4">
         {React.Children.map(children, (child) => {
           if (typeof child === 'string') {
-            return <Text>{child}</Text>;
+            return <li>{child}</li>;
           }
           return child;
         })}
-      </View>
+      </ul>
     ),
     ol: ({ children }) => (
-      <View className="mb-4">
+      <ol className="mb-4">
         {React.Children.map(children, (child) => {
           if (typeof child === 'string') {
-            return <Text>{child}</Text>;
+            return <li>{child}</li>;
           }
           return child;
         })}
-      </View>
+      </ol>
     ),
     li: ({ children }) => {
       const content = React.Children.map(children, (child) => {
         if (typeof child === 'string') {
-          return <Text className="text-base">{child}</Text>;
+          return <span className="text-base">{child}</span>;
         }
         return child;
       });
 
       return (
-        <View className="flex-row">
-          <Text className="text-base">• </Text>
+        <li className="flex-row">
+          <span className="text-base">• </span>
           {content}
-        </View>
+        </li>
       );
     },
     blockquote: ({ children }) => (
-      <View className="border-l-4 border-gray-300 pl-4 italic mb-4">{children}</View>
+      <blockquote className="border-l-4 border-gray-300 pl-4 italic mb-4">{children}</blockquote>
     ),
     code: ({ children }) => (
-      <Text className="bg-gray-100 dark:bg-gray-800 rounded px-2 py-1 font-mono text-sm">{children}</Text>
+      <code className="bg-gray-100 dark:bg-gray-800 rounded px-2 py-1 font-mono text-sm">{children}</code>
     ),
     pre: ({ children }) => (
-      <View className="bg-gray-100 dark:bg-gray-800 rounded p-4 mb-4">{children}</View>
+      <pre className="bg-gray-100 dark:bg-gray-800 rounded p-4 mb-4">{children}</pre>
     ),
-    a: ({ children }) => <Text className="text-blue-600 dark:text-blue-400 hover:underline">{children}</Text>,
-    strong: ({ children }) => <Text className="font-bold">{children}</Text>,
-    em: ({ children }) => <Text className="italic">{children}</Text>,
-    u: ({ children }) => <Text className="underline">{children}</Text>,
+    a: ({ children, href }) => <a href={href} className="text-blue-600 dark:text-blue-400 hover:underline">{children}</a>,
+    strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+    em: ({ children }) => <em className="italic">{children}</em>,
+    u: ({ children }) => <u className="underline">{children}</u>,
     span: ({ className, children, ...props }: SpanProps) => {
       if (className === 'variable-input' && props['data-name']) {
         const variableName = props['data-name'];
@@ -155,7 +153,7 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
           );
         }
       }
-      return <Text className={className}>{children}</Text>;
+      return <span className={className}>{children}</span>;
     }
   }), [variables, control, errors, isFieldEnabled]);
 
@@ -201,14 +199,14 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
     );
 
     return (
-      <View className="prose dark:prose-invert max-w-none">
+      <article className="prose dark:prose-invert max-w-none">
         <ReactMarkdown 
           components={components}
           rehypePlugins={[rehypeRaw]}
         >
           {processedContent}
         </ReactMarkdown>
-      </View>
+      </article>
     );
   }, [content, variables, components]);
 

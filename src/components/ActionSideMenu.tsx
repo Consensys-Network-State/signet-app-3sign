@@ -1,7 +1,6 @@
 import * as React from "react";
-import { View, ScrollView } from "react-native";
 import { useNavigate, useParams } from 'react-router';
-import { Text, Card, Button, Input, InputField } from "@ds3/ui";
+import { Card, Button, Input, InputField } from "@ds3/ui";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@ds3/ui";
 import { DocumentVariable, useDocumentStore } from "../store/documentStore";
 import { Controller } from "react-hook-form";
@@ -80,15 +79,15 @@ const VCDetailsModal: React.FC<{
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollView className="max-h-[60vh]">
-          <View className="mt-4">
-            <View className="bg-neutral-2 p-4 rounded-md">
-              <Text className="font-mono text-sm whitespace-pre-wrap">
+        <div className="max-h-[60vh] overflow-y-auto">
+          <div className="mt-4">
+            <div className="bg-neutral-2 p-4 rounded-md">
+              <p className="font-mono text-sm whitespace-pre-wrap">
                 {JSON.stringify(vc, null, 2)}
-              </Text>
-            </View>
-          </View>
-        </ScrollView>
+              </p>
+            </div>
+          </div>
+        </div>
 
         <DialogFooter>
           <DialogClose asChild>
@@ -389,21 +388,21 @@ const ActionSideMenu: React.FC = () => {
   const { control } = form;
 
   return (
-    <View className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       {currentAgreement && currentAgreement.state.IsComplete
         ? <>
-          <Text className="text-md font-medium text-neutral-11">{currentAgreement.state.State.name}</Text>
-          <Text className="text-sm font-medium text-neutral-11">{currentAgreement.state.State.description}</Text>
+          <p className="text-md font-medium text-neutral-11">{currentAgreement.state.State.name}</p>
+          <p className="text-sm font-medium text-neutral-11">{currentAgreement.state.State.description}</p>
         </>
-        : <Text className="text-sm font-medium text-neutral-11">Actions</Text> 
+        : <p className="text-sm font-medium text-neutral-11">Actions</p> 
       }
 
       {/* Initial Action Section - Only show in draft mode */}
       {isInitializing && Object.keys(initialParams).length > 0 && (
         <Card className="p-4">
-          <View className="flex flex-col gap-4">
-            <Text className="font-semibold">Publish Agreement</Text>
-            <Text className="text-sm text-neutral-11 mb-3">{"This agreement will be published and stored on Arweave."}</Text>
+          <div className="flex flex-col gap-4">
+            <p className="font-semibold">Publish Agreement</p>
+            <p className="text-sm text-neutral-11 mb-3">{"This agreement will be published and stored on Arweave."}</p>
             
             <InputField
               label="Agreement Name"
@@ -443,17 +442,17 @@ const ActionSideMenu: React.FC = () => {
 
             {/* Next Action Section */}
             {currentDocument?.execution?.states && (
-              <View>
-                <Text className="text-sm text-neutral-11 mb-2">Next Action</Text>
+              <div>
+                <p className="text-sm text-neutral-11 mb-2">Next Action</p>
                 <StatusLabel
                   status="info"
                   text={Object.values(currentDocument.execution.states).find(state => state.isInitial)?.name || 'Next State'} 
                 />
-              </View>
+              </div>
             )}
 
 
-            <View className="flex flex-row justify-end mt-2">
+            <div className="flex flex-row justify-end mt-2">
               <Button 
                 variant="soft" 
                 color="primary" 
@@ -464,8 +463,8 @@ const ActionSideMenu: React.FC = () => {
                 <Button.Spinner />
                 <Button.Text>{isInitializingAction ? 'Publishing...' : 'Continue'}</Button.Text>
               </Button>
-            </View>
-          </View>
+            </div>
+          </div>
         </Card>
       )}
 
@@ -477,18 +476,18 @@ const ActionSideMenu: React.FC = () => {
         const isEVMTransaction = input.type === 'EVMTransaction';
         return (
           <Card key={index} className="p-4">
-            <View className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2">
               {/* Responsible Party at the top */}
-              <View className="mb-2">
-                <Text className="text-xs text-neutral-11 mb-3">Responsible Party</Text>
+              <div className="mb-2">
+                <p className="text-xs text-neutral-11 mb-3">Responsible Party</p>
                 <AddressCard
                   address={(isEVMTransaction ? input.signer : input.issuer) as `0x${string}`}
                   className="h-8"
                   avatarClassName="w-5 h-5"
                 />
-              </View>
-              <Text className="font-semibold">{input.displayName}</Text>
-              <Text className="text-sm text-neutral-11 mb-3">{input.description}</Text>
+              </div>
+              <p className="font-semibold">{input.displayName}</p>
+              <p className="text-sm text-neutral-11 mb-3">{input.description}</p>
 
               {/* Input fields for variable references in data */}
               {isEVMTransaction 
@@ -550,16 +549,16 @@ const ActionSideMenu: React.FC = () => {
 
                {/* Next Action Section */}
                {action.to && (
-                <View className="mt-0">
-                  <Text className="text-sm text-neutral-11 mb-2">Next Action</Text>
+                <div className="mt-0">
+                  <p className="text-sm text-neutral-11 mb-2">Next Action</p>
                   <StatusLabel 
                     status="info"
                     text={action.to.name} 
                   />
-                </View>
+                </div>
               )}
 
-              <View className="flex flex-row justify-end mt-2">
+              <div className="flex flex-row justify-end mt-2">
                 <Button 
                   variant="soft" 
                   color="primary" 
@@ -571,8 +570,8 @@ const ActionSideMenu: React.FC = () => {
                   <Button.Spinner />
                   <Button.Text>{isExecuting ? 'Updating...' : 'Continue'}</Button.Text>
                 </Button>
-              </View>
-            </View>
+              </div>
+            </div>
           </Card>
         );
       })}
@@ -580,7 +579,7 @@ const ActionSideMenu: React.FC = () => {
       {/* Completed Actions Section */}
       {currentAgreement?.state?.ReceivedInputs && currentAgreement.state.ReceivedInputs.length > 0 && (
         <>
-          <Text className="text-sm font-medium text-neutral-11 mt-4">Completed Actions</Text>
+          <p className="text-sm font-medium text-neutral-11 mt-4">Completed Actions</p>
           {currentAgreement.state.ReceivedInputs.map(({ value: vc }, index) => {
             const input = getInputDetails(vc.credentialSubject.id);
             if (!input) return null;
@@ -591,13 +590,13 @@ const ActionSideMenu: React.FC = () => {
 
             return (
               <Card key={index} className="p-4 bg-neutral-3">
-                <View className="flex flex-col gap-2">
-                  <View className="flex flex-row items-center justify-between">
-                    <Text className="font-semibold">{input.displayName}</Text>
-                    <Text className="text-xs text-neutral-11">
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-row items-center justify-between">
+                    <p className="font-semibold">{input.displayName}</p>
+                    <p className="text-xs text-neutral-11">
                       {new Date(vc.issuanceDate).toLocaleDateString()}
-                    </Text>
-                  </View>
+                    </p>
+                  </div>
                   
                   {/* Show the actual values that were signed */}
                   {vc.credentialSubject.values && Object.entries(vc.credentialSubject.values).map(([key, value]) => {
@@ -605,8 +604,8 @@ const ActionSideMenu: React.FC = () => {
                     const isAddressValue = typeof value === 'string' && isAddress(value);
                     
                     return (
-                      <View key={key} className="flex flex-col gap-1">
-                        <Text className="text-sm text-neutral-11">{key}</Text>
+                      <div key={key} className="flex flex-col gap-1">
+                        <p className="text-sm text-neutral-11">{key}</p>
                         {isAddressValue ? (
                           <AddressCard 
                             address={value as `0x${string}`} 
@@ -614,9 +613,9 @@ const ActionSideMenu: React.FC = () => {
                             avatarClassName="w-5 h-5"
                           />
                         ) : (
-                          <Text className="text-sm">{String(value)}</Text>
+                          <p className="text-sm">{String(value)}</p>
                         )}
-                      </View>
+                      </div>
                     );
                   })}
 
@@ -624,16 +623,16 @@ const ActionSideMenu: React.FC = () => {
                     // Check if the value looks like an Ethereum address
                     const proofData = JSON.parse(atob(vc.credentialSubject.txProof));
                     return (
-                      <View key={proofData.TxHash} className="flex flex-col gap-1">
-                        <Text className="text-sm text-neutral-11">Transaction Hash</Text>
-                        <Text className="text-sm">{String(proofData.TxHash)}</Text>
-                      </View>
+                      <div key={proofData.TxHash} className="flex flex-col gap-1">
+                        <p className="text-sm text-neutral-11">Transaction Hash</p>
+                        <p className="text-sm">{String(proofData.TxHash)}</p>
+                      </div>
                     );
                   })()}
 
                   {/* Show who signed it */}
-                  <View className="mt-2">
-                    <Text className="text-xs text-neutral-11 mb-1">Signed by</Text>
+                  <div className="mt-2">
+                    <p className="text-xs text-neutral-11 mb-1">Signed by</p>
                     {isValidAddress && (
                       <AddressCard 
                         address={address as `0x${string}`} 
@@ -641,10 +640,10 @@ const ActionSideMenu: React.FC = () => {
                         avatarClassName="w-5 h-5"
                       />
                     )}
-                  </View>
+                  </div>
 
                   {/* View Details Button */}
-                  <View className="flex flex-row justify-end mt-2">
+                  <div className="flex flex-row justify-end mt-2">
                     <Button 
                       variant="ghost" 
                       color="neutral" 
@@ -653,8 +652,8 @@ const ActionSideMenu: React.FC = () => {
                     >
                       <Button.Text>View Details</Button.Text>
                     </Button>
-                  </View>
-                </View>
+                  </div>
+                </div>
               </Card>
             );
           })}
@@ -676,7 +675,7 @@ const ActionSideMenu: React.FC = () => {
         loading={isInitializingAction || isExecuting}
         type={confirmDialog?.type || 'publish'}
       />
-    </View>
+    </div>
   );
 };
 
