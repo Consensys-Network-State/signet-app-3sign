@@ -92,11 +92,11 @@ const VariableInput: React.FC<VariableInputProps> = ({
     return result === true ? undefined : result;
   }, [variable]);
 
-  const handleChange = React.useCallback((newValue: string) => {
-    setLocalValue(newValue);
-    const validationError = validateValue(newValue);
+  const handleChange = React.useCallback((e: any) => {
+    setLocalValue(e.target.value);
+    const validationError = validateValue(e.target.value);
     setLocalError(validationError);
-    onChange(newValue);
+    onChange(e.target.value);
   }, [onChange, validateValue]);
 
   const errorMessage = localError || (typeof error === 'string' ? error : error?.message);
@@ -108,7 +108,7 @@ const VariableInput: React.FC<VariableInputProps> = ({
         label={name}
         ref={inputRef}
         value={localValue}
-        onChangeText={handleChange}
+        onChange={handleChange}
         variant={variant}
         placeholder={variable.name}
         error={errorMessage}
@@ -155,7 +155,7 @@ const VariableInput: React.FC<VariableInputProps> = ({
       label={name}
       ref={inputRef}
       value={localValue}
-      onChangeText={handleChange}
+      onChange={handleChange}
       variant={variant}
       placeholder={variable.name}
       error={errorMessage}

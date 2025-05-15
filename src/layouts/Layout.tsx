@@ -56,10 +56,10 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, isLoadin
     }
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    setTitle(newTitle);
+  const handleTitleChange = (e: any) => {
+    setTitle(e.target.value);
     if (draft?.id) {
-      updateDraftTitle(draft.id, newTitle);
+      updateDraftTitle(draft.id, e.target.value);
     }
   };
 
@@ -104,7 +104,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, isLoadin
                   value={title}
                   variant="ghost"
                   className="text-primary-12 text-xl font-semibold h-10"
-                  {...{ onChangeText: handleTitleChange }}
+                  onChange={handleTitleChange}
                   readOnly={isDocumentMode}
                 >
                   <Input.Field />

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useNavigate, useParams } from 'react-router';
-import { Card, Button, Input, InputField } from "@ds3/ui";
+import { Card, Button, Input, InputField, WebChangeEvent } from "@ds3/ui";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@ds3/ui";
 import { DocumentVariable, useDocumentStore } from "../store/documentStore";
 import { Controller } from "react-hook-form";
@@ -126,10 +126,10 @@ const ActionSideMenu: React.FC = () => {
     }
   }, [draft]);
 
-  const handleTitleChange = (newTitle: string) => {
-    setTitle(newTitle);
+  const handleTitleChange = (e: any) => {
+    setTitle(e.target.value);
     if (draft?.id) {
-      updateDraftTitle(draft.id, newTitle);
+      updateDraftTitle(draft.id, e.target.value);
     }
   };
 
@@ -409,7 +409,7 @@ const ActionSideMenu: React.FC = () => {
               value={title}
               variant="soft"
               className="text-primary-12 text-xl font-semibold"
-              {...{ onChangeText: handleTitleChange }}
+              onChange={handleTitleChange}
             >
               <Input.Field />
             </InputField>
