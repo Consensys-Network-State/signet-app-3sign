@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { TextInput } from 'react-native';
-import { InputField, Input } from '@ds3/react';
+import { InputField, Input } from '@ds3/ui';
 import { isAddress } from 'viem';
-import AddressAvatar from "../web3/AddressAvatar";
+import { AddressAvatar } from "@ds3/web3";
 import { DatePickerField } from './DatePickerField';
 import dayjs from 'dayjs';
 import DocumentSignatureDialog from './DocumentSignatureDialog';
@@ -72,7 +72,6 @@ const VariableInput: React.FC<VariableInputProps> = ({
   variable,
   value,
   onChange,
-  onBlur,
   error,
   disabled = false,
   className = "w-[300px]",
@@ -92,12 +91,17 @@ const VariableInput: React.FC<VariableInputProps> = ({
     return result === true ? undefined : result;
   }, [variable]);
 
-  const handleChange = React.useCallback((newValue: string) => {
-    setLocalValue(newValue);
-    const validationError = validateValue(newValue);
+  const handleChange = React.useCallback((value: any) => {
+    setLocalValue(value);
+    const validationError = validateValue(value);
     setLocalError(validationError);
-    onChange(newValue);
+    onChange(value);
   }, [onChange, validateValue]);
+
+
+  const handleInputChange = React.useCallback((e: any) => {
+    handleChange(e.target.value);
+  }, [handleChange]);
 
   const errorMessage = localError || (typeof error === 'string' ? error : error?.message);
 
@@ -108,7 +112,7 @@ const VariableInput: React.FC<VariableInputProps> = ({
         label={name}
         ref={inputRef}
         value={localValue}
-        onChangeText={handleChange}
+        onChange={handleInputChange}
         variant={variant}
         placeholder={variable.name}
         error={errorMessage}
@@ -155,7 +159,7 @@ const VariableInput: React.FC<VariableInputProps> = ({
       label={name}
       ref={inputRef}
       value={localValue}
-      onChangeText={handleChange}
+      onChange={handleInputChange}
       variant={variant}
       placeholder={variable.name}
       error={errorMessage}

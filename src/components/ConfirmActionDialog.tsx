@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose, Button } from "@ds3/react";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose, Button } from "@ds3/ui";
 
 interface ConfirmActionDialogProps {
   open: boolean;
@@ -29,7 +29,7 @@ const ConfirmActionDialog: React.FC<ConfirmActionDialogProps> = ({ open, onOpenC
         <Button
           variant="solid"
           color="primary"
-          onPress={onConfirm}
+          onClick={onConfirm}
           loading={loading}
         >
           <Button.Spinner />

@@ -1,9 +1,9 @@
 import { defineConfig, UserConfigExport } from 'vite'
-import ds3Plugin from '@ds3/config/vite';
+import ds3Plugin from '@ds3/core/vite';
 import ds3Config from "./ds3.config";
 import svgr from "vite-plugin-svgr";
 
-export default defineConfig((({ command }) => {
+export default defineConfig(({ command }) => {
   return {
     resolve: {
       alias: {
@@ -17,7 +17,7 @@ export default defineConfig((({ command }) => {
       'process.env': {},
     },
     plugins: [
-      ...(ds3Plugin(command, ds3Config)),
+      ds3Plugin(command, ds3Config),
       svgr(),
     ],
     build: { // https://stackoverflow.com/questions/77421447/how-to-solve-require-is-not-defined-in-vite
@@ -43,4 +43,4 @@ export default defineConfig((({ command }) => {
       include: ['buffer'],
     }
   }
-}) as UserConfigExport);
+}) as UserConfigExport;

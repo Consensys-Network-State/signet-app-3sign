@@ -1,11 +1,10 @@
 import * as React from 'react';
-import { View, Pressable } from 'react-native';
-import { Text, Button, Card } from '@ds3/react';
+import { Button, Card } from '@ds3/ui';
 import { useDocumentStore } from '../store/documentStore';
 import { useNavigate } from 'react-router';
 import Layout from '../layouts/Layout';
 import { Plus } from 'lucide-react-native';
-import AddressAvatar from '../web3/AddressAvatar';
+import { AddressAvatar } from '@ds3/web3';
 import CreateAgreementModal from '../components/CreateAgreementModal';
 import StatusLabel from '../components/StatusLabel';
 import { useAccount } from 'wagmi';
@@ -29,33 +28,35 @@ const AgreementCard: React.FC<{
     description: string;
   };
 }> = ({ title, status, owner, onClick, onDelete, updatedAt, state }) => (
-  <Pressable onPress={onClick}>
+  <div onClick={onClick} className="cursor-pointer">
     <Card className="w-full hover:bg-neutral-3 transition-colors">
-      <View className="flex flex-row items-center justify-between w-full p-4">
-        <View className="flex flex-col gap-2 items-start flex-1">
-          <Text className="text-lg">{title}</Text>
-          <View className="flex flex-row items-center gap-2">
+      <div className="flex flex-row items-center justify-between w-full p-4">
+        <div className="flex flex-col gap-2 items-start flex-1">
+          <p className="text-lg">{title}</p>
+          <div className="flex flex-row items-center gap-2">
             <AddressAvatar address={owner} className="w-5 h-5" />
-            <Text className="text-sm text-neutral-11">{owner}</Text>
-          </View>
+            <p className="text-sm text-neutral-11">{owner}</p>
+          </div>
           {updatedAt && (
-            <Text className="text-xs text-neutral-11">
+            <p className="text-xs text-neutral-11">
               Last edited {new Date(updatedAt).toLocaleDateString()}
-            </Text>
+            </p>
           )}
-        </View>
-        <View className="flex flex-row items-center gap-2">
+        </div>
+        <div className="flex flex-row items-center gap-2">
           <StatusLabel 
             status={status === 'draft' ? 'warning' : undefined} 
             text={status === 'draft' ? 'Draft' : state?.name || 'Published'} 
           />
           {onDelete && (
+            <div onClick={(e) => e.stopPropagation() }>
             <DeleteDraftDialog onDelete={onDelete} />
+            </div>
           )}
-        </View>
-      </View>
+        </div>
+      </div>
     </Card>
-  </Pressable>
+  </div>
 );
 
 const Agreements: React.FC = () => {
@@ -97,16 +98,16 @@ const Agreements: React.FC = () => {
   return (
     <Layout
       rightHeader={
-        <Button variant="soft" color="primary" onPress={handleCreateNew}>
+        <Button variant="soft" color="primary" onClick={handleCreateNew}>
           <Button.Icon icon={Plus} />
           <Button.Text>Create Agreement</Button.Text>
         </Button>
       }
     >
-      <View className="flex flex-col gap-4 pt-8 pb-8 px-8">
+      <div className="flex flex-col gap-4 pt-8 pb-8 px-8">
         {drafts.length > 0 && (
           <>
-            <Text className="text-lg font-semibold">Drafts</Text>
+            <p className="text-lg font-semibold">Drafts</p>
             {drafts.map((draft: Document) => (
               <AgreementCard
                 key={draft.id}
@@ -124,7 +125,7 @@ const Agreements: React.FC = () => {
 
         {savedAgreements.length > 0 && (
           <>
-            <Text className="text-lg font-semibold mt-4">Published</Text>
+            <p className="text-lg font-semibold mt-4">Published</p>
             {savedAgreements.map(agreement => (
               <AgreementCard
                 key={agreement.id}
@@ -140,9 +141,9 @@ const Agreements: React.FC = () => {
         )}
 
         {drafts.length === 0 && savedAgreements.length === 0 && (
-          <Text className="text-neutral-11">No agreements found</Text>
+          <p className="text-neutral-11">No agreements found</p>
         )}
-      </View>
+      </div>
 
       <CreateAgreementModal 
         open={isCreateModalOpen}

@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { View } from 'react-native';
-import { Button, Text, Card, CardContent, Dialog, DialogContent, DialogFooter, Alert, DialogHeader, DialogTitle, DialogDescription, DialogClose, DialogTrigger } from '@ds3/react';
-import AddressAvatar from '../web3/AddressAvatar';
+import { Button, Card, CardContent, Dialog, DialogContent, DialogFooter, Alert, DialogHeader, DialogTitle, DialogDescription, DialogClose, DialogTrigger } from '@ds3/ui';
+import { AddressAvatar }from '@ds3/web3';
 import { useNavigate } from 'react-router';
 import { useDocumentStore, Document } from '../store/documentStore';
 import mouTemplate from '../templates/mou-template.json';
@@ -74,7 +73,7 @@ const DeleteTemplateDialog: React.FC<DeleteTemplateDialogProps> = ({
         <Button 
           variant="ghost" 
           color="error" 
-          onPress={() => setIsOpen(true)}
+          onClick={() => setIsOpen(true)}
         >
           <Button.Icon icon={Trash2} />
         </Button>
@@ -88,14 +87,14 @@ const DeleteTemplateDialog: React.FC<DeleteTemplateDialogProps> = ({
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant='ghost' onPress={() => setIsOpen(false)}>
-              <Text>Cancel</Text>
+            <Button variant='ghost' onClick={() => setIsOpen(false)}>
+              <Button.Text>Cancel</Button.Text>
             </Button>
           </DialogClose>
           <Button 
             variant="soft" 
             color="error" 
-            onPress={handleDelete} 
+            onClick={handleDelete} 
             loading={isLoading}
           >
             <Button.Text>{isLoading ? 'Deleting...' : 'Delete'}</Button.Text>
@@ -269,7 +268,10 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
   }, [selectedTemplateInfo])
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl p-0">
+      <DialogContent className="max-w-5xl p-0 gap-0">
+        <DialogHeader className="p-5 border-b border-neutral-6">
+          <DialogTitle>Create Agreement</DialogTitle>
+        </DialogHeader>
         <input
           type="file"
           ref={fileInputRef}
@@ -277,115 +279,115 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
           accept=".json"
           style={{ display: 'none' }}
         />
-        <View className="flex-row flex-1">
+        <div className="flex flex-row flex-1">
           {/* Left sidebar */}
-          <View className="w-64 border-r border-neutral-6 p-4">
-            <View className="flex-col gap-4">
+          <div className="w-64 border-r border-neutral-6 p-4">
+            <div className="flex-col gap-4">
               {/* Default Templates */}
               {groupedTemplates.default.length > 0 && (
-                <View className="flex-col gap-2">
-                  <Text className="text-sm font-medium text-neutral-11">Default Templates</Text>
+                <div className="flex-col gap-2">
+                  <p className="text-sm font-medium text-neutral-11">Default Templates</p>
                   {groupedTemplates.default.map((option) => (
-                    <View key={option.id} className="flex-row items-center gap-2">
+                    <div key={option.id} className="flex-row items-center gap-2">
                       <Button
                         variant={selectedTemplate === option.id ? "soft" : "ghost"}
                         color={selectedTemplate === option.id ? "primary" : "neutral"}
-                        onPress={() => setSelectedTemplate(option.id)}
-                        className="flex-1 justify-start"
+                        onClick={() => setSelectedTemplate(option.id)}
+                        className="flex-1 justify-start w-full"
                       >
-                        <Text>{option.template.metadata.name}</Text>
+                        <Button.Text>{option.template.metadata.name}</Button.Text>
                       </Button>
-                    </View>
+                    </div>
                   ))}
-                </View>
+                </div>
               )}
 
               {/* Custom Templates */}
               {groupedTemplates.custom.length > 0 && (
-                <View className="flex-col gap-2">
-                  <Text className="text-sm font-medium text-neutral-11">Custom Templates</Text>
+                <div className="flex-col gap-2">
+                  <p className="text-sm font-medium text-neutral-11">Custom Templates</p>
                   {groupedTemplates.custom.map((option) => (
-                    <View key={option.id} className="flex-row items-center gap-2">
+                    <div key={option.id} className="flex-row items-center gap-2">
                       <Button
                         variant={selectedTemplate === option.id ? "soft" : "ghost"}
                         color={selectedTemplate === option.id ? "primary" : "neutral"}
-                        onPress={() => setSelectedTemplate(option.id)}
+                        onClick={() => setSelectedTemplate(option.id)}
                         className="flex-1 justify-start"
                       >
-                        <Text>{option.template.metadata.name}</Text>
+                        <Button.Text>{option.template.metadata.name}</Button.Text>
                       </Button>
                       <DeleteTemplateDialog
                         onDelete={() => handleDeleteTemplate(option.id)}
                       />
-                    </View>
+                    </div>
                   ))}
-                </View>
+                </div>
               )}
-            </View>
-          </View>
+            </div>
+          </div>
 
           {/* Main content */}
-          <View className="flex-1 p-6">
-            <Text className="text-2xl font-semibold mb-6">
+          <div className="flex-1 p-6">
+            <p className="text-2xl font-semibold mb-6">
               {selectedTemplateInfo?.template?.metadata?.name}
-            </Text>
+            </p>
 
             {templateContent && (
               <>
-                <View className="flex-row gap-8 mb-6">
-                  <View className="flex-1">
-                    <Text className="text-neutral-11 mb-2">Author</Text>
-                    <View className="flex-row items-center gap-2">
+                <div className="flex flex-row gap-8 mb-6">
+                  <div className="flex-1">
+                    <p className="text-neutral-11 mb-2">Author</p>
+                    <div className="flex flex-row items-center gap-2">
                       <AddressAvatar address={templateContent.author.address} className="w-6 h-6" />
-                      <Text>{templateContent.author.name}</Text>
-                    </View>
-                  </View>
+                      <p>{templateContent.author.name}</p>
+                    </div>
+                  </div>
 
-                  <View className="flex-1">
-                    <Text className="text-neutral-11 mb-2">Smart Contracts</Text>
-                    <View className="flex-1 gap-2">
+                  <div className="flex-1">
+                    <p className="text-neutral-11 mb-2">Smart Contracts</p>
+                    <div className="flex-1 gap-2">
                       {templateContent.smartContracts.map((contract) => (
-                        <View className="flex-row items-center gap-2">
+                        <div className="flex flex-row items-center gap-2" key={contract.address}>
                           <AddressAvatar address={contract.address} className="w-6 h-6" />
-                          <Text>{contract.name}</Text>
-                        </View>
+                          <p>{contract.name}</p>
+                        </div>
                       ))}
-                    </View>
-                  </View>
-                </View>
+                    </div>
+                  </div>
+                </div>
 
-                <View className="bg-neutral-3 rounded-lg p-4 mb-6">
-                  <Text className="text-neutral-11">{templateContent.description}</Text>
-                </View>
+                <div className="bg-neutral-3 rounded-lg p-4 mb-6">
+                  <p className="text-neutral-11">{templateContent.description}</p>
+                </div>
               </>
             )}
 
             <Card className="mb-6">
               <CardContent>
-                <Text className="text-neutral-11">Preview</Text>
+                <p className="text-neutral-11">Preview</p>
               </CardContent>
             </Card>
-          </View>
-        </View>
+          </div>
+        </div>
 
         {importError && (
           <Alert variant="error" className="m-4">
-            <Text>{importError}</Text>
+            <p>{importError}</p>
           </Alert>
         )}
 
         <DialogFooter className="border-t border-neutral-6 p-4">
-          <Button variant="soft" color="neutral" className="mr-auto" onPress={handleImportClick}>
-            <Text>Import Template</Text>
+          <Button variant="soft" color="neutral" className="mr-auto" onClick={handleImportClick}>
+            <Button.Text>Import Template</Button.Text>
           </Button>
-          <View className="flex-row gap-2">
-            <Button variant="ghost" onPress={onClose}>
-              <Text>Cancel</Text>
+          <div className="flex flex-row gap-2">
+            <Button variant="ghost" onClick={onClose}>
+              <Button.Text>Cancel</Button.Text>
             </Button>
-            <Button variant="soft" color="primary" onPress={handleCreate}>
-              <Text>Create</Text>
+            <Button variant="soft" color="primary" onClick={handleCreate}>
+              <Button.Text>Create</Button.Text>
             </Button>
-          </View>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
