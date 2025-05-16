@@ -72,7 +72,6 @@ const VariableInput: React.FC<VariableInputProps> = ({
   variable,
   value,
   onChange,
-  onBlur,
   error,
   disabled = false,
   className = "w-[300px]",

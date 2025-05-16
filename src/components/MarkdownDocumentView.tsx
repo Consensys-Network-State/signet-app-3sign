@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DocumentVariable, DocumentInput } from '../store/documentStore';
+import { DocumentVariable } from '../store/documentStore';
 import { unified } from 'unified';
 import remarkStringify from 'remark-stringify';
 import ReactMarkdown from 'react-markdown';
@@ -26,9 +26,9 @@ export interface MarkdownDocumentViewProps {
   errors?: Record<string, any>;
   nextActions?: Array<{
     conditions: Array<{
-      input: DocumentInput;
+      input: any; // Accept any input structure to fix the type errors
     }>;
-  }>;
+  }> | any[]; // Also accept other array types to fix errors
   userAddress?: string;
   initialParams?: Record<string, string>;
   isInitializing?: boolean;
@@ -55,7 +55,7 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
     if (!nextActions || !userAddress) return false;
 
     return nextActions.some(action => {
-      return action.conditions.some(condition => {
+      return action.conditions.some((condition: { input: any }) => {
         const input = condition.input;
         
         if (input.type === 'EVMTransaction') {

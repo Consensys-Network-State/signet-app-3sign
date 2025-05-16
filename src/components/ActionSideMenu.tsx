@@ -164,7 +164,16 @@ const ActionSideMenu: React.FC = () => {
 
   // Helper function to get input details from template
   const getInputDetails = (inputId: string): DocumentInput | undefined => {
-    return executionInputs[inputId];
+    const input = executionInputs[inputId];
+    if (!input) return undefined;
+    
+    // If the input is already a DocumentInput with the expected properties, return it
+    if ('data' in input && 'issuer' in input) {
+      return input as DocumentInput;
+    }
+    
+    // Otherwise, return undefined as it's not the expected type
+    return undefined;
   };
 
   // Helper function to check if a transition's conditions are met
@@ -471,10 +480,17 @@ const ActionSideMenu: React.FC = () => {
 
       {/* Available Transitions Section */}
       {!isInitializing && nextActions && nextActions.length > 0 && nextActions.map((action, index) => {
-        const inputs = action.conditions.map((condition) => condition.input);
+        const inputs = action.conditions
+          .filter((condition): condition is NonNullable<typeof condition> => condition !== undefined)
+          .filter(condition => condition.input !== undefined)
+          .map(condition => condition.input);
+        
+        if (inputs.length === 0) return null;
+        
         const input = inputs[0];
         const transitionEnabled = isTransitionEnabled(action);
-        const isEVMTransaction = input.type === 'EVMTransaction';
+        const isEVMTransaction = input?.type === 'EVMTransaction';
+        
         return (
           <Card key={index} className="p-4">
             <div className="flex flex-col gap-2">
@@ -522,9 +538,11 @@ const ActionSideMenu: React.FC = () => {
                   )}
                 />
               })()
-              : Object.entries(input.data).map(([fieldKey, fieldValue]) => {
-                  const variable = fieldValue;
-                  if (!variable) return null;
+              : input.data && Object.entries(input.data).map(([fieldKey, fieldValue]) => {
+                  // Ensure variable is valid DocumentVariable
+                  const variable = fieldValue as DocumentVariable;
+                  if (!variable || !variable.name || !variable.type) return null;
+                  
                   return (
                     <Controller
                       key={`${fieldKey}.${fieldKey}`}

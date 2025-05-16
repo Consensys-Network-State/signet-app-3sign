@@ -70,8 +70,16 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
   // Get next actions
   const nextActions = React.useMemo(() => {
     if (type === 'agreement' && agreement) {
-      return getNextStates(agreement);
+      const actions = getNextStates(agreement);
+      // Map to the expected type for MarkdownDocumentView
+      return actions.map(action => ({
+        conditions: action.conditions
+          .filter((condition): condition is NonNullable<typeof condition> => 
+            condition !== undefined && condition.input !== undefined)
+          .map(condition => ({ input: condition.input }))
+      }));
     }
+    
     // For drafts, use the initial state's transitions
     if (type === 'draft' && document?.execution?.states) {
       const initialState = Object.values(document.execution.states).find(state => state.isInitial);
@@ -118,7 +126,7 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
         ...fetchedValues,
         ...Object.fromEntries(
           Object.entries(formCache.getInitialValues(documentId, document || null))
-            .filter(([key, value]) => !fetchedValues[key])
+            .filter(([key]) => !fetchedValues[key])
         )
       });
     }
