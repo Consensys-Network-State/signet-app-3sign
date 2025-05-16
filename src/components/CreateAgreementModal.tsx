@@ -269,6 +269,9 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl p-0">
+        <DialogHeader>
+          <DialogTitle>Create Agreement</DialogTitle>
+        </DialogHeader>
         <input
           type="file"
           ref={fileInputRef}

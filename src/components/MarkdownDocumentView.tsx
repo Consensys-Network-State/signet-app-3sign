@@ -127,6 +127,34 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
     strong: ({ children }) => <strong className="font-bold">{children}</strong>,
     em: ({ children }) => <em className="italic">{children}</em>,
     u: ({ children }) => <u className="underline">{children}</u>,
+    div: ({ className, children, ...props }: any) => {
+      if (className === 'variable-input' && props['data-name']) {
+        const variableName = props['data-name'];
+        const variable = variables[variableName];
+        const enabled = isFieldEnabled(variableName);
+        
+        if (variable) {
+          return (
+            <Controller
+              control={control}
+              name={variableName}
+              rules={createValidationRules(variable)}
+              render={({ field: { onChange, value, onBlur } }) => (
+                <VariableInput
+                  variable={variable}
+                  value={value}
+                  onChange={onChange}
+                  onBlur={onBlur}
+                  error={errors[variableName]}
+                  disabled={!enabled}
+                />
+              )}
+            />
+          );
+        }
+      }
+      return <div className={className}>{children}</div>;
+    },
     span: ({ className, children, ...props }: SpanProps) => {
       if (className === 'variable-input' && props['data-name']) {
         const variableName = props['data-name'];
@@ -194,7 +222,8 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
         }
 
         // For top-level variables in editable mode, render as input field
-        return `<span class="variable-input" data-name="${variableName}"></span>`;
+        // Use a div instead of span to avoid nesting issues
+        return `<div class="variable-input" data-name="${variableName}"></div>`;
       }
     );
 

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useNavigate, useParams } from 'react-router';
-import { Card, Button, Input, InputField, WebChangeEvent } from "@ds3/ui";
+import { Card, Button, Input, InputField } from "@ds3/ui";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@ds3/ui";
 import { DocumentVariable, useDocumentStore } from "../store/documentStore";
 import { Controller } from "react-hook-form";
@@ -18,6 +18,7 @@ import VariableInput, { createValidationRules } from './VariableInput';
 import ConfirmActionDialog from './ConfirmActionDialog';
 import StatusLabel from './StatusLabel';
 import { getTransactionProofData } from "../utils/ethereumUtils";
+import type {WebChangeEvent } from "@ds3/ui";
 
 interface DocumentInput {
   type: string;
@@ -126,7 +127,7 @@ const ActionSideMenu: React.FC = () => {
     }
   }, [draft]);
 
-  const handleTitleChange = (e: any) => {
+  const handleTitleChange = (e: WebChangeEvent) => {
     setTitle(e.target.value);
     if (draft?.id) {
       updateDraftTitle(draft.id, e.target.value);
