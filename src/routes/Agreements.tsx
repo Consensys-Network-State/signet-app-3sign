@@ -35,7 +35,7 @@ const AgreementCard: React.FC<{
         <View className="flex flex-col gap-2 items-start flex-1">
           <Text className="text-lg">{title}</Text>
           <View className="flex flex-row items-center gap-2">
-            <AddressAvatar address={owner} className="w-5 h-5" />
+            {owner && <AddressAvatar address={owner} className="w-5 h-5" />}
             <Text className="text-sm text-neutral-11">{owner}</Text>
           </View>
           {updatedAt && (

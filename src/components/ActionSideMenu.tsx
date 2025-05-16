@@ -582,7 +582,7 @@ const ActionSideMenu: React.FC = () => {
         <>
           <Text className="text-sm font-medium text-neutral-11 mt-4">Completed Actions</Text>
           {currentAgreement.state.ReceivedInputs.map(({ value: vc }, index) => {
-            const input = getInputDetails(vc.credentialSubject.id);
+            const input = getInputDetails(vc.credentialSubject.inputId);
             if (!input) return null;
 
             // Extract the Ethereum address from the DID

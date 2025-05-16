@@ -6,10 +6,10 @@ export const getInitialState = (document: Document) =>
 
 export const getInitialStateParams = (document: Document | null) => {
   if (!document) return {};
-  const initialState = getInitialState(document);
-  if (!initialState?.initialParams) return {};
+  const initialParams = document.execution.initialize?.data;
+  if (!initialParams) return {};
   
-  return Object.entries(initialState.initialParams).reduce((acc, [key, value]) => {
+  return Object.entries(initialParams).reduce((acc, [key, value]) => {
     const match = typeof value === 'string' && value.match(/\$\{variables\.([^}]+)\}/);
     if (match && match[1]) {
       acc[match[1]] = key;
@@ -40,17 +40,19 @@ export const getNextStates = (agreement: Agreement) => {
   const currentState = getCurrentState(agreement);
   return agreement.document.execution.transitions
     .filter((transition) => transition.from === currentState!.id)
-    .map((transition) => ({
+    .map((transition) => {
+      const trans = {
         to: agreement.document.execution.states[transition.to],
         conditions: transition.conditions.map((condition) => {
           const conditionInput = agreement.document.execution.inputs[condition.input];
           if (conditionInput.type === 'VerifiedCredentialEIP712') {
+            const issuer = getVariableValue(agreement, conditionInput.issuer);
             return {
               type: condition.type,
               input: { 
                 ...conditionInput,
                 id: condition.input,
-                issuer: getVariableValue(agreement, conditionInput.issuer),
+                issuer,
                 data: Object.entries(conditionInput.data).reduce((acc, [key, value]) => {
                   if (typeof value === 'string') {
                     const match = value.match(/\$\{variables\.([^}]+)\}/);
@@ -83,5 +85,7 @@ export const getNextStates = (agreement: Agreement) => {
           }
         }
       )
-    }));
+    }
+    return trans;
+  });
 }

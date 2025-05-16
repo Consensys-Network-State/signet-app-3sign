@@ -92,12 +92,7 @@
     "states": {
       "PENDING_PARTY_A_SIGNATURE": {
         "name": "Pending Signature From A",
-        "description": "This state awaits until Party A supplies Party B's address, effective date, scope, duration, and their own name.",
-        "isInitial": true,
-        "initialParams": {
-          "partyAEthAddress": "${variables.partyAEthAddress}",
-          "partyBEthAddress": "${variables.partyBEthAddress}"
-        }
+        "description": "This state awaits until Party A supplies Party B's address, effective date, scope, duration, and their own name."
       },
       "PENDING_PARTY_B_SIGNATURE": {
         "name": "Pending Signature From B",
@@ -114,6 +109,14 @@
       "REJECTED": {
         "name": "Agreement Rejected",
         "description": "The agreement has been rejected by Party A and will not proceed."
+      }
+    },
+    "initialize": {
+      "name": "Initialize",
+      "description": "Initialize the grant",
+      "data": {
+        "partyAEthAddress": "${variables.partyAEthAddress}",
+        "partyBEthAddress": "${variables.partyBEthAddress}"
       }
     },
     "inputs": {

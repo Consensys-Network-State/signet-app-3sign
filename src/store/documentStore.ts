@@ -93,6 +93,9 @@ export interface DocumentExecution {
   states: Record<string, DocumentState>;
   inputs: Record<string, DocumentInput>;
   transitions: Transition[];
+  initialize: {
+    data: Record<string, string>;
+  }
 }
 
 export interface Contract {
