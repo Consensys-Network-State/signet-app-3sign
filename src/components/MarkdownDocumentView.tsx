@@ -58,31 +58,48 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
 }) => {
   // Helper function to check if a field should be enabled
   const isFieldEnabled = React.useCallback((variableName: string) => {
-    // If we're initializing, only enable fields in initialParams
-    if (isInitializing) {
-      return Object.keys(initialParams).includes(variableName);
-    }
+    try {
+      // If we're initializing, only enable fields in initialParams
+      if (isInitializing) {
+        return Object.keys(initialParams || {}).includes(variableName);
+      }
 
-    // Otherwise check next actions
-    if (!nextActions || !userAddress) return false;
+      // Otherwise check next actions
+      if (!nextActions || !Array.isArray(nextActions) || nextActions.length === 0 || !userAddress) {
+        return false;
+      }
 
-    return nextActions.some(action => {
-      return action.conditions.some((condition: { input: any }) => {
-        const input = condition.input;
-        
-        if (input.type === 'EVMTransaction') {
-          // TODO: Handle EVMTransaction Input types in markdown if applicable
+      return nextActions.some(action => {
+        if (!action || !action.conditions || !Array.isArray(action.conditions)) {
           return false;
         }
-
-        // Check if this variable is in the input's data requirements
-        const isFieldInInput = Object.keys(input.data).includes(variableName);
-        // Check if the current user is the required issuer
-        const isCorrectIssuer = input.issuer.toLowerCase() === userAddress.toLowerCase();
         
-        return isFieldInInput && isCorrectIssuer;
+        return action.conditions.some((condition: { input: any }) => {
+          const input = condition?.input;
+          
+          if (!input) {
+            return false;
+          }
+          
+          if (input.type === 'EVMTransaction') {
+            // TODO: Handle EVMTransaction Input types in markdown if applicable
+            return false;
+          }
+
+          // Check if this variable is in the input's data requirements
+          const isFieldInInput = Object.keys(input.data || {}).includes(variableName);
+          // Check if the current user is the required issuer
+          const isCorrectIssuer = userAddress && input.issuer ? 
+            input.issuer.toLowerCase() === userAddress.toLowerCase() : 
+            false;
+          
+          return isFieldInInput && isCorrectIssuer;
+        }) || false;
       });
-    });
+    } catch (error) {
+      console.error("Error in isFieldEnabled:", error);
+      return false;
+    }
   }, [nextActions, userAddress, isInitializing, initialParams]);
 
   // Create stable components
@@ -164,6 +181,8 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
             />
           );
         }
+        // Return a fallback when variable is not found
+        return <div className={className}>Unknown variable: {variableName}</div>;
       }
       return <div className={className}>{children}</div>;
     },
@@ -192,6 +211,8 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
             />
           );
         }
+        // Return a fallback when variable is not found
+        return <span className={className}>Unknown variable: {variableName}</span>;
       }
       return <span className={className}>{children}</span>;
     }
@@ -215,42 +236,58 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
     const processedContent = markdownContent.replace(
       /\$\{variables\.([^}]+)\}/g,
       (match, variablePath) => {
-        // Split the path into parts (e.g. "partyAName.name" -> ["partyAName", "name"])
-        const parts = variablePath.split('.');
-        const variableName = parts[0];
-        
-        // If there are sub-properties, try to access them directly
-        if (parts.length > 1) {
-          const variable = variables[variableName];
-          if (!variable) return match;
+        try {
+          // Split the path into parts (e.g. "partyAName.name" -> ["partyAName", "name"])
+          const parts = variablePath.split('.');
+          const variableName = parts[0];
           
-          // Traverse the object to get the nested value
-          let nestedValue: any = variable;
-          for (let i = 1; i < parts.length; i++) {
-            nestedValue = nestedValue[parts[i]];
-            if (nestedValue === undefined) return match;
+          if (!variableName || !variables) {
+            console.warn(`Missing variable name or variables object: ${match}`);
+            return match;
           }
-          return String(nestedValue);
-        }
+          
+          // If there are sub-properties, try to access them directly
+          if (parts.length > 1) {
+            const variable = variables[variableName];
+            if (!variable) {
+              console.warn(`Variable not found: ${variableName}`);
+              return match;
+            }
+            
+            // Traverse the object to get the nested value
+            let nestedValue: any = variable;
+            for (let i = 1; i < parts.length; i++) {
+              if (nestedValue === null || nestedValue === undefined) {
+                console.warn(`Nested property path broken at: ${parts.slice(0, i).join('.')}`);
+                return match;
+              }
+              nestedValue = nestedValue[parts[i]];
+            }
+            return nestedValue !== undefined ? String(nestedValue) : match;
+          }
 
-        // For top-level variables in editable mode, render as input field
-        // Use a div instead of span to avoid nesting issues
-        return `<div class="variable-input" data-name="${variableName}"></div>`;
+          // For top-level variables in editable mode, render as input field
+          // Use a div instead of span to avoid nesting issues
+          return `<div class="variable-input" data-name="${variableName}"></div>`;
+        } catch (error) {
+          console.error(`Error processing variable: ${match}`, error);
+          return match;
+        }
       }
     );
 
     return (
       <article className="prose dark:prose-invert max-w-none">
-<ErrorBoundary 
+        <ErrorBoundary 
           fallback={(error: Error) => <MarkdownErrorFallback error={error} />}
         >
-        <ReactMarkdown 
-          components={components}
-          rehypePlugins={[rehypeRaw]}
-        >
-          {processedContent}
-        </ReactMarkdown>
-</ErrorBoundary>
+          <ReactMarkdown 
+            components={components}
+            rehypePlugins={[rehypeRaw]}
+          >
+            {processedContent}
+          </ReactMarkdown>
+        </ErrorBoundary>
       </article>
     );
   }, [content, variables, components]);

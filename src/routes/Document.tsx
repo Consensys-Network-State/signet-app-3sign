@@ -190,18 +190,18 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
               text={type === 'draft' ? 'Draft' : agreement?.state.State.name || 'Published'} 
             />
           </div>
-<ErrorBoundary fallback={<MarkdownFallback />}>
-          <MarkdownDocumentView
-            content={document.content}
-            variables={document.variables}
-            control={control}
-            errors={errors}
-            nextActions={nextActions}
-            userAddress={address}
-            initialParams={initialParams}
-            isInitializing={type === 'draft'}
-          />
-</ErrorBoundary>
+          <ErrorBoundary fallback={<MarkdownFallback />}>
+            <MarkdownDocumentView
+              content={document.content || { type: 'md', data: 'No content available' }}
+              variables={document.variables || {}}
+              control={control}
+              errors={errors || {}}
+              nextActions={nextActions || []}
+              userAddress={address || ''}
+              initialParams={initialParams || {}}
+              isInitializing={type === 'draft'}
+            />
+          </ErrorBoundary>
         </div>  
       </Layout>
     </FormContext.Provider>
