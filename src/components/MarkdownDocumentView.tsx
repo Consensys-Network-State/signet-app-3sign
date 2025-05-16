@@ -8,6 +8,8 @@ import type { Root } from 'mdast';
 import type { Components } from 'react-markdown';
 import { Controller } from 'react-hook-form';
 import VariableInput, { createValidationRules } from './VariableInput';
+import ErrorBoundary from './ErrorBoundary';
+import ErrorCard from './ErrorCard';
 
 interface SpanProps {
   className?: string;
@@ -33,6 +35,16 @@ export interface MarkdownDocumentViewProps {
   initialParams?: Record<string, string>;
   isInitializing?: boolean;
 }
+
+// Markdown-specific error fallback
+const MarkdownErrorFallback = ({ error }: { error: Error }) => (
+  <ErrorCard
+    title="Error Rendering Document"
+    message="There was a problem displaying this content. Please check that all variables are defined correctly."
+    details={error}
+    className="w-full"
+  />
+);
 
 const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
   control,
@@ -229,12 +241,16 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
 
     return (
       <article className="prose dark:prose-invert max-w-none">
+<ErrorBoundary 
+          fallback={(error: Error) => <MarkdownErrorFallback error={error} />}
+        >
         <ReactMarkdown 
           components={components}
           rehypePlugins={[rehypeRaw]}
         >
           {processedContent}
         </ReactMarkdown>
+</ErrorBoundary>
       </article>
     );
   }, [content, variables, components]);

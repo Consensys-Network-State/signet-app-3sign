@@ -13,6 +13,7 @@ import { formCache } from '../utils/formCache';
 import { useAccount } from 'wagmi';
 import { getNextStates } from '../utils/agreementUtils';
 import { useAgreement } from '../store/selectors';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 interface DocumentProps {
   type: 'draft' | 'agreement';
@@ -21,6 +22,20 @@ interface DocumentProps {
 interface AgreementState {
   Variables: Record<string, { value: string }>;
 }
+
+// Custom fallback for the markdown content section
+const MarkdownFallback = () => (
+  <div className="p-4 border border-error-7 rounded bg-error-3">
+    <h3 className="font-bold">Document Rendering Error</h3>
+    <p className="my-2">There was a problem displaying the document content.</p>
+    <button 
+      onClick={() => window.location.reload()} 
+      className="px-4 py-2 bg-primary-9 text-white rounded hover:bg-primary-10 transition-colors"
+    >
+      Reload Document
+    </button>
+  </div>
+);
 
 const Document: React.FC<DocumentProps> = ({ type }) => {
   const { draftId, agreementId } = useParams();
@@ -175,6 +190,7 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
               text={type === 'draft' ? 'Draft' : agreement?.state.State.name || 'Published'} 
             />
           </div>
+<ErrorBoundary fallback={<MarkdownFallback />}>
           <MarkdownDocumentView
             content={document.content}
             variables={document.variables}
@@ -185,6 +201,7 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
             initialParams={initialParams}
             isInitializing={type === 'draft'}
           />
+</ErrorBoundary>
         </div>  
       </Layout>
     </FormContext.Provider>
