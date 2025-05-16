@@ -14,6 +14,7 @@ import { useAccount } from 'wagmi';
 import { getNextStates } from '../utils/agreementUtils';
 import { useAgreement } from '../store/selectors';
 import ErrorBoundary from '../components/ErrorBoundary';
+import ErrorCard from '../components/ErrorCard';
 
 interface DocumentProps {
   type: 'draft' | 'agreement';
@@ -25,16 +26,12 @@ interface AgreementState {
 
 // Custom fallback for the markdown content section
 const MarkdownFallback = () => (
-  <div className="p-4 border border-error-7 rounded bg-error-3">
-    <h3 className="font-bold">Document Rendering Error</h3>
-    <p className="my-2">There was a problem displaying the document content.</p>
-    <button 
-      onClick={() => window.location.reload()} 
-      className="px-4 py-2 bg-primary-9 text-white rounded hover:bg-primary-10 transition-colors"
-    >
-      Reload Document
-    </button>
-  </div>
+  <ErrorCard
+    title="Document Rendering Error"
+    message="There was a problem displaying the document content."
+    onRetry={() => window.location.reload()}
+    retryText="Reload Document"
+  />
 );
 
 const Document: React.FC<DocumentProps> = ({ type }) => {
