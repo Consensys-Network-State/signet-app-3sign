@@ -268,8 +268,8 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
   }, [selectedTemplateInfo])
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl p-0">
-        <DialogHeader>
+      <DialogContent className="max-w-5xl p-0 gap-0">
+        <DialogHeader className="p-5 border-b border-neutral-6">
           <DialogTitle>Create Agreement</DialogTitle>
         </DialogHeader>
         <input
@@ -279,7 +279,7 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
           accept=".json"
           style={{ display: 'none' }}
         />
-        <div className="flex-row flex-1">
+        <div className="flex flex-row flex-1">
           {/* Left sidebar */}
           <div className="w-64 border-r border-neutral-6 p-4">
             <div className="flex-col gap-4">
@@ -293,7 +293,7 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
                         variant={selectedTemplate === option.id ? "soft" : "ghost"}
                         color={selectedTemplate === option.id ? "primary" : "neutral"}
                         onClick={() => setSelectedTemplate(option.id)}
-                        className="flex-1 justify-start"
+                        className="flex-1 justify-start w-full"
                       >
                         <Button.Text>{option.template.metadata.name}</Button.Text>
                       </Button>
@@ -334,10 +334,10 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
 
             {templateContent && (
               <>
-                <div className="flex-row gap-8 mb-6">
+                <div className="flex flex-row gap-8 mb-6">
                   <div className="flex-1">
                     <p className="text-neutral-11 mb-2">Author</p>
-                    <div className="flex-row items-center gap-2">
+                    <div className="flex flex-row items-center gap-2">
                       <AddressAvatar address={templateContent.author.address} className="w-6 h-6" />
                       <p>{templateContent.author.name}</p>
                     </div>
@@ -347,7 +347,7 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
                     <p className="text-neutral-11 mb-2">Smart Contracts</p>
                     <div className="flex-1 gap-2">
                       {templateContent.smartContracts.map((contract) => (
-                        <div className="flex-row items-center gap-2" key={contract.address}>
+                        <div className="flex flex-row items-center gap-2" key={contract.address}>
                           <AddressAvatar address={contract.address} className="w-6 h-6" />
                           <p>{contract.name}</p>
                         </div>
@@ -380,7 +380,7 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
           <Button variant="soft" color="neutral" className="mr-auto" onClick={handleImportClick}>
             <Button.Text>Import Template</Button.Text>
           </Button>
-          <div className="flex-row gap-2">
+          <div className="flex flex-row gap-2">
             <Button variant="ghost" onClick={onClose}>
               <Button.Text>Cancel</Button.Text>
             </Button>
