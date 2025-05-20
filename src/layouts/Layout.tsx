@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Icon, ModeToggle, Button, Input, H4 } from "@ds3/ui";
+import { Icon, ModeToggle, Button, Input, H4, WebChangeEvent } from "@ds3/ui";
 import { Account } from "@ds3/web3";
 import { Info, ChevronLeft } from 'lucide-react-native';
 import { useNavigate, useLocation, useParams } from 'react-router';
@@ -56,7 +56,7 @@ const Layout: React.FC<LayoutProps> = ({ children, rightHeader, status, isLoadin
     }
   };
 
-  const handleTitleChange = (e: any) => {
+  const handleTitleChange = (e: WebChangeEvent) => {
     setTitle(e.target.value);
     if (draft?.id) {
       updateDraftTitle(draft.id, e.target.value);
