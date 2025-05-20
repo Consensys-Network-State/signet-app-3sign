@@ -7,13 +7,14 @@ import MarkdownDocumentView from '../components/MarkdownDocumentView';
 import Layout from '../layouts/Layout';
 import { getAgreement } from '../api';
 import StatusLabel from '../components/StatusLabel';
-import { View } from 'react-native';
 import { FormContext } from '../contexts/FormContext';
-import { Spinner, Text } from '@ds3/react';
+import { Spinner } from '@ds3/ui';
 import { formCache } from '../utils/formCache';
 import { useAccount } from 'wagmi';
 import { getNextStates } from '../utils/agreementUtils';
 import { useAgreement } from '../store/selectors';
+import ErrorBoundary from '../components/ErrorBoundary';
+import ErrorCard from '../components/ErrorCard';
 
 interface DocumentProps {
   type: 'draft' | 'agreement';
@@ -22,6 +23,16 @@ interface DocumentProps {
 interface AgreementState {
   Variables: Record<string, { value: string }>;
 }
+
+// Custom fallback for the markdown content section
+const MarkdownFallback = () => (
+  <ErrorCard
+    title="Document Rendering Error"
+    message="There was a problem displaying the document content."
+    onRetry={() => window.location.reload()}
+    retryText="Reload Document"
+  />
+);
 
 const Document: React.FC<DocumentProps> = ({ type }) => {
   const { draftId, agreementId } = useParams();
@@ -71,8 +82,16 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
   // Get next actions
   const nextActions = React.useMemo(() => {
     if (type === 'agreement' && agreement) {
-      return getNextStates(agreement);
+      const actions = getNextStates(agreement);
+      // Map to the expected type for MarkdownDocumentView
+      return actions.map(action => ({
+        conditions: action.conditions
+          .filter((condition): condition is NonNullable<typeof condition> => 
+            condition !== undefined && condition.input !== undefined)
+          .map(condition => ({ input: condition.input }))
+      }));
     }
+    
     // For drafts, use the initial state's transitions
     if (type === 'draft' && document?.execution?.states) {
       const initialState = Object.values(document.execution.states).find(state => state.isInitial);
@@ -119,7 +138,7 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
         ...fetchedValues,
         ...Object.fromEntries(
           Object.entries(formCache.getInitialValues(documentId, document || null))
-            .filter(([key, value]) => !fetchedValues[key])
+            .filter(([key]) => !fetchedValues[key])
         )
       });
     }
@@ -139,10 +158,10 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
   if (type === 'agreement' && (!isInitialized || isLoadingAgreement)) {
     return (
       <Layout isLoading={true}>
-        <View className="h-full flex items-center justify-center">
+        <div className="h-full flex items-center justify-center">
           <Spinner size="lg" />
-          <Text className="mt-4">Loading agreement...</Text>
-        </View>
+          <p className="mt-4">Loading agreement...</p>
+        </div>
       </Layout>
     );
   }
@@ -151,9 +170,9 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
   if (!document) {
     return (
       <Layout>
-        <View className="h-full flex items-center justify-center">
-          <Text className="text-neutral-11">Document not found</Text>
-        </View>
+        <div className="h-full flex items-center justify-center">
+          <p className="text-neutral-11">Document not found</p>
+        </div>
       </Layout>
     );
   }
@@ -161,24 +180,26 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
   return (
     <FormContext.Provider value={form}>
       <Layout>
-        <View className="h-full p-8">
-          <View className="mb-6 w-fit">
+        <div className="h-full p-8">
+          <div className="mb-6 w-fit">
             <StatusLabel 
               status={type === 'draft' ? 'warning' : undefined} 
               text={type === 'draft' ? 'Draft' : agreement?.state.State.name || 'Published'} 
             />
-          </View>
-          <MarkdownDocumentView
-            content={document.content}
-            variables={document.variables}
-            control={control}
-            errors={errors}
-            nextActions={nextActions}
-            userAddress={address}
-            initialParams={initialParams}
-            isInitializing={type === 'draft'}
-          />
-        </View>  
+          </div>
+          <ErrorBoundary fallback={<MarkdownFallback />}>
+            <MarkdownDocumentView
+              content={document.content || { type: 'md', data: 'No content available' }}
+              variables={document.variables || {}}
+              control={control}
+              errors={errors || {}}
+              nextActions={nextActions || []}
+              userAddress={address || ''}
+              initialParams={initialParams || {}}
+              isInitializing={type === 'draft'}
+            />
+          </ErrorBoundary>
+        </div>  
       </Layout>
     </FormContext.Provider>
   );

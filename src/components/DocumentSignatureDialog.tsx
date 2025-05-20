@@ -1,6 +1,5 @@
 import { useForm, Controller } from 'react-hook-form';
 import {
-  Text,
   Button,
   Dialog,
   DialogClose,
@@ -14,11 +13,10 @@ import {
   Card,
   CardContent,
   Label,
-} from '@ds3/react';
+} from '@ds3/ui';
 import DocumentSignature from "./DocumentSignature";
 import React from "react";
 import { Signature as SignatureIcon } from 'lucide-react-native';
-import { View } from 'react-native';
 
 interface DocumentSignatureDialogProps {
   children?: React.ReactNode;
@@ -70,7 +68,7 @@ const DocumentSignatureDialog: React.FC<DocumentSignatureDialogProps> = (props: 
       <DialogHeader>
         <DialogTitle>Adopt Your Signature</DialogTitle>
         <DialogDescription>
-          <View className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4">
             <Controller
               control={control}
               name="signature"
@@ -87,33 +85,33 @@ const DocumentSignatureDialog: React.FC<DocumentSignatureDialogProps> = (props: 
               )}
             />
 
-            <Label><Text>Preview</Text></Label>
+            <Label><p>Preview</p></Label>
 
             <Card className='w-full'>
               <CardContent className='p-4'>
                 {signature ?
                   <DocumentSignature name={signature} signature={signature} /> :
-                  <Text className="text-center">Enter your signature to preview.</Text>
+                  <p className="text-center">Enter your signature to preview.</p>
                 }
               </CardContent>
             </Card>
-          </View>
+          </div>
         </DialogDescription>
       </DialogHeader>
 
       <DialogFooter>
         <DialogClose asChild>
           <Button variant='ghost'>
-            <Text>Cancel</Text>
+            <Button.Text>Cancel</Button.Text>
           </Button>
         </DialogClose>
         <Button
           variant="soft"
           color="primary"
-          onPress={handleSubmit(onSubmit)}
+          onClick={handleSubmit(onSubmit)}
           disabled={!isValid}
         >
-          <Text>Adopt Signature</Text>
+          <Button.Text>Adopt Signature</Button.Text>
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -130,7 +128,7 @@ const DocumentSignatureDialog: React.FC<DocumentSignatureDialogProps> = (props: 
           disabled={props.disabled}
         />
         {props.error && (
-          <Text className="text-error-10 text-xs mt-2">{props.error}</Text>
+          <p className="text-error-10 text-xs mt-2">{props.error}</p>
         )}
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           {dialogContent}
@@ -149,7 +147,7 @@ const DocumentSignatureDialog: React.FC<DocumentSignatureDialogProps> = (props: 
         </Button>
       </DialogTrigger>
       {props.error && (
-        <Text className="text-error-10 text-sm mt-2">{props.error}</Text>
+        <p className="text-error-10 text-sm mt-2">{props.error}</p>
       )}
       {dialogContent}
     </Dialog>

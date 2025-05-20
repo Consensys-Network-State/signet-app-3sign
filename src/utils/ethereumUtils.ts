@@ -115,10 +115,27 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
         const tx = block.transactions[i];
         const key = RLP.encode(i);
         
+        // Skip if tx is a string (hash only)
+        if (typeof tx === 'string') {
+            continue;
+        }
+        
         // Normalize transaction type
-        const txType = typeof tx.type === 'string' ? 
-            parseInt(tx.type.slice(2), 16) : 
-            (tx.type === undefined ? 0 : Number(tx.type));
+        let txType = 0;
+        if (tx.type !== undefined) {
+            if (typeof tx.type === 'string') {
+                // For hex string types like '0x2'
+                const typeStr = tx.type as string;
+                if (typeStr.startsWith('0x')) {
+                    txType = parseInt(typeStr.slice(2), 16);
+                } else {
+                    txType = parseInt(typeStr, 10);
+                }
+            } else {
+                // For numeric types
+                txType = Number(tx.type);
+            }
+        }
         
         let serializedTx;
         
@@ -127,7 +144,7 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
             const txData = {
                 nonce: tx.nonce,
                 gasLimit: tx.gas,
-                to: tx.to || undefined, // Convert empty to to undefined
+                to: tx.to ? tx.to.toString() : undefined, // Convert empty to to undefined
                 value: tx.value,
                 data: tx.input || tx.data || '0x',
                 v: tx.v,
@@ -143,20 +160,22 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
                     ...txData,
                     maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
                     maxFeePerGas: tx.maxFeePerGas,
-                    accessList: tx.accessList || []
+                    accessList: tx.accessList ? tx.accessList : []
                 };
 
-                const eip1559Tx = FeeMarketEIP1559Transaction.fromTxData(eip1559TxData, { common });
+                // Cast the transaction data to the expected type
+                const eip1559Tx = FeeMarketEIP1559Transaction.fromTxData(eip1559TxData as any, { common });
                 serializedTx = eip1559Tx.serialize();
             } else if (txType === 1) {
                 // EIP-2930 transaction
                 const eip2930TxData = {
                     ...txData,
                     gasPrice: tx.gasPrice,
-                    accessList: tx.accessList || []
+                    accessList: tx.accessList ? tx.accessList : []
                 };
                 
-                const eip2930Tx = AccessListEIP2930Transaction.fromTxData(eip2930TxData, { common });
+                // Cast the transaction data to the expected type
+                const eip2930Tx = AccessListEIP2930Transaction.fromTxData(eip2930TxData as any, { common });
                 serializedTx = eip2930Tx.serialize();
             } else {
                 // Legacy transaction
@@ -165,7 +184,8 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
                     gasPrice: tx.gasPrice
                 };
 
-                const legacyTx = LegacyTransaction.fromTxData(legacyTxData, { common });
+                // Cast the transaction data to the expected type
+                const legacyTx = LegacyTransaction.fromTxData(legacyTxData as any, { common });
                 serializedTx = legacyTx.serialize();
             }
             
@@ -173,9 +193,11 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
             await trie.put(key, serializedTx);
             
             // Log for debugging
-            if (i === parseInt(txRaw.transactionIndex)) {
+            if (typeof txRaw.transactionIndex === 'string' ? 
+                i === parseInt(txRaw.transactionIndex) : 
+                i === Number(txRaw.transactionIndex)) {
                 if (LOGGING_ENABLED) {
-                    console.log(`Added target transaction ${tx.hash} at index ${i}`);
+                    console.log(`Added target transaction ${typeof tx === 'string' ? tx : tx.hash} at index ${i}`);
                 }
             }
         } catch (error) {
@@ -187,7 +209,10 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
     }
 
     // 5. Generate Proof
-    const txIndex = RLP.encode(parseInt(txRaw.transactionIndex));
+    const txIdx = typeof txRaw.transactionIndex === 'string' ? 
+        parseInt(txRaw.transactionIndex) : 
+        Number(txRaw.transactionIndex);
+    const txIndex = RLP.encode(txIdx);
     const proof = await trie.createProof(txIndex);
     const value = await trie.get(txIndex);
 
@@ -217,14 +242,16 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
         // Check if the first few transactions are serialized correctly
         for (let i = 0; i < Math.min(3, block.transactions.length); i++) {
             const tx = block.transactions[i];
-            console.log(`Transaction ${i} hash: ${tx.hash}`);
-            
-            // Try to get the raw transaction
-            try {
-                const rawTx = await web3.eth.getTransaction(tx.hash);
-                if (LOGGING_ENABLED) console.log(`Raw transaction ${i}:`, rawTx);
-            } catch (e) {
-                if (LOGGING_ENABLED) console.log(`Could not get raw transaction ${i}`);
+            if (typeof tx !== 'string') {
+                console.log(`Transaction ${i} hash: ${tx.hash}`);
+                
+                // Try to get the raw transaction
+                try {
+                    const rawTx = await web3.eth.getTransaction(tx.hash);
+                    if (LOGGING_ENABLED) console.log(`Raw transaction ${i}:`, rawTx);
+                } catch (e) {
+                    if (LOGGING_ENABLED) console.log(`Could not get raw transaction ${i}`);
+                }
             }
         }
     }
@@ -236,7 +263,7 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
         return;
     }
 
-    if (txRaw.transactionIndex !== txReceipt.transactionIndex) {
+    if (Number(txRaw.transactionIndex) !== Number(txReceipt.transactionIndex)) {
         console.error("❌ Transaction index mismatch");
         return;
     }
@@ -246,7 +273,13 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
 
     // 4. Get all transaction receipts for the block
     const receipts = await Promise.all(
-        block.transactions.map(tx => web3.eth.getTransactionReceipt(tx.hash))
+        block.transactions.map(tx => {
+            if (typeof tx === 'string') {
+                return web3.eth.getTransactionReceipt(tx);
+            } else {
+                return web3.eth.getTransactionReceipt(tx.hash);
+            }
+        })
     );
     
     // 5. Insert receipts into the trie
@@ -290,10 +323,13 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
     };
 }
 
-async function verifyTransactionProof(txHash: `0x${string}`, transactionIndex: string, block: any, proof: any, value: any) {
+async function verifyTransactionProof(txHash: `0x${string}`, transactionIndex: number | string | bigint, block: any, proof: any, value: any) {
     
     // 1. The key is the RLP encoded transaction index
-    const key = RLP.encode(parseInt(transactionIndex));
+    const txIdx = typeof transactionIndex === 'string' ? 
+        parseInt(transactionIndex) : 
+        Number(transactionIndex);
+    const key = RLP.encode(txIdx);
 
     // 2. Convert the block's transactionsRoot to Buffer
     const expectedRoot = typeof block.transactionsRoot === 'string' && block.transactionsRoot.startsWith('0x')
@@ -315,8 +351,8 @@ async function verifyTransactionProof(txHash: `0x${string}`, transactionIndex: s
         
         if (!valueMatches) {
             console.error("❌ Proof verification failed - value mismatch");
-            console.log("Expected:", value.toString('hex'));
-            console.log("Got:", verifiedValue.toString('hex'));
+            console.log("Expected:", value?.toString?.() || "null");
+            console.log("Got:", verifiedValue?.toString?.() || "null");
             return false;
         }
         
@@ -326,7 +362,7 @@ async function verifyTransactionProof(txHash: `0x${string}`, transactionIndex: s
         }
         return true;
     } catch (error) {
-        console.error("❌ Proof verification error:", error.message);
+        console.error("❌ Proof verification error:", (error as Error).message);
         return false;
     }
 }
@@ -351,7 +387,13 @@ export async function getTransactionProofData(txHash: `0x${string}`, chainId: nu
             throw new Error("Proof data not found");
         }
 
-        const isValid = await verifyTransactionProof(proofData.txHash, proofData.txReceipt.transactionIndex, proofData.block, proofData.txProof, proofData.txEncodedValue);
+        const isValid = await verifyTransactionProof(
+            proofData.txHash, 
+            proofData.txReceipt.transactionIndex, 
+            proofData.block, 
+            proofData.txProof, 
+            proofData.txEncodedValue
+        );
 
         if (!isValid) {
             throw new Error("Proof is invalid");
@@ -363,11 +405,11 @@ export async function getTransactionProofData(txHash: `0x${string}`, chainId: nu
             TxIndex: proofData.txReceipt.transactionIndex.toString(),
             TxRaw: proofData.txRaw,
             TxReceipt: proofData.txReceipt,
-            TxProof: proofData.txProof.map((n: any) => Array.from(n)),
-            TxEncodedValue: Array.from(proofData.txEncodedValue),
+            TxProof: proofData.txProof?.map((n: any) => Array.from(n)) || [],
+            TxEncodedValue: proofData.txEncodedValue ? Array.from(proofData.txEncodedValue) : [],
             ReceiptRoot: proofData.block.receiptsRoot,
-            ReceiptProof: proofData.receiptProof.map((n: any) => Array.from(n)),
-            ReceiptEncodedValue: Array.from(proofData.receiptEncodedValue)
+            ReceiptProof: proofData.receiptProof?.map((n: any) => Array.from(n)) || [],
+            ReceiptEncodedValue: proofData.receiptEncodedValue ? Array.from(proofData.receiptEncodedValue) : []
         });
 
     } catch (error) {
