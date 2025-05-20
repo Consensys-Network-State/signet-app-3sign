@@ -252,7 +252,12 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
   const templateContent = React.useMemo<TemplateInfo | null>(() => {
     if (!selectedTemplateInfo) return null;
 
-    const smartContracts = selectedTemplateInfo.template.contracts || [{ id: 'None', address: '0x0000000000000000000000000000000000000000' as `0x${string}` }];
+    const smartContracts = selectedTemplateInfo.template.contracts
+      ? Object.entries(selectedTemplateInfo.template.contracts).map(([key, value]) => ({
+          ...value,
+          id: key,
+        }))
+      : [{ id: 'None', address: '0x0000000000000000000000000000000000000000' as `0x${string}` }];
     return {
       title: selectedTemplateInfo.template.metadata.name || '',
       author: {

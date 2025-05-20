@@ -7,6 +7,7 @@ import { DatePickerField } from './DatePickerField';
 import dayjs from 'dayjs';
 import DocumentSignatureDialog from './DocumentSignatureDialog';
 import { DocumentVariable } from '../store/documentStore';
+import { isTxHash } from '../utils/ethereumUtils';
 
 // Create a shared validation function
 export const createValidationRules = (variable: DocumentVariable) => {
@@ -25,6 +26,10 @@ export const createValidationRules = (variable: DocumentVariable) => {
 
     if (variable.type === 'dateTime' && !dayjs(value).isValid()) {
       return 'Invalid date';
+    }
+
+    if (variable.type === 'txHash' && !isTxHash(value)) {
+      return 'Invalid Transaction Hash';
     }
 
     const { validation } = variable;
