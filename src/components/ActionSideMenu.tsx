@@ -12,7 +12,7 @@ import { useAccount } from "wagmi";
 import { Document } from "../store/documentStore";
 import { createAgreementInitVC, createAgreementInputVC, createAgreementInputVCWithTxProof } from "../utils/veramoUtils";
 import { postAgreement, postAgreementInput } from "../api/index";
-import { getInitialStateParams, getNextStates } from "../utils/agreementUtils";
+import { getInitialState, getInitialStateParams, getNextStates } from "../utils/agreementUtils";
 import { formCache } from "../utils/formCache";
 import VariableInput, { createValidationRules } from './VariableInput';
 import ConfirmActionDialog from './ConfirmActionDialog';
@@ -62,7 +62,6 @@ interface DocumentState {
   description: string;
   id: string;
   name: string;
-  isInitial: boolean;
 }
 
 const VCDetailsModal: React.FC<{
@@ -456,7 +455,7 @@ const ActionSideMenu: React.FC = () => {
                 <p className="text-sm text-neutral-11 mb-2">Next Action</p>
                 <StatusLabel
                   status="info"
-                  text={Object.values(currentDocument.execution.states).find(state => state.isInitial)?.name || 'Next State'} 
+                  text={getInitialState(currentDocument)?.name || 'Next State'} 
                 />
               </div>
             )}

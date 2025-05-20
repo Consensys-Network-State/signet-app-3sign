@@ -33,7 +33,6 @@ export interface DocumentMetadata {
 export interface DocumentState {
   name: string;
   description: string;
-  isInitial?: boolean;
   initialParams?: Record<string, string>;
 }
 
@@ -129,7 +128,6 @@ export interface Agreement {
       description: string;
       id: string;
       name: string;
-      isInitial: boolean;
     };
     ReceivedInputs: {
       id: string;

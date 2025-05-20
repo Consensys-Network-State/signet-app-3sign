@@ -1,8 +1,14 @@
 // TODO: Some functions here may become part of the SDK
-import { Agreement, Document, DocumentState } from "../store/documentStore";
+import { Agreement, Document } from "../store/documentStore";
 
-export const getInitialState = (document: Document) => 
-    Object.values(document.execution.states).find((stateObj: DocumentState) => stateObj.isInitial);
+export const getInitialState = (document: Document) => {
+  const stateKeys = Object.keys(document.execution.states);
+  const toStates = new Set(
+    document.execution.transitions.map((transition) => transition.to)
+  );
+  const initialStateKey = stateKeys.find((key) => !toStates.has(key));
+  return initialStateKey ? document.execution.states[initialStateKey] : undefined;
+}
 
 export const getInitialStateParams = (document: Document | null) => {
   if (!document) return {};
