@@ -13,7 +13,7 @@ import {
   Card,
   CardContent,
   Label,
-} from '@ds3/ui';
+} from '@consensys/ui';
 import DocumentSignature from "./DocumentSignature";
 import React from "react";
 import { Signature as SignatureIcon } from 'lucide-react-native';

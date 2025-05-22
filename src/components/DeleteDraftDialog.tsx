@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@ds3/ui';
+} from '@consensys/ui';
 import * as React from 'react';
 import { Trash2 } from 'lucide-react-native';
 

@@ -1,6 +1,6 @@
 import { defineConfig, UserConfigExport } from 'vite'
-import ds3Plugin from '@ds3/config/vite';
-import ds3Config from "./ds3.config";
+import cui from '@consensys/ui-config/vite';
+import themeConfig from "./theme.config";
 import svgr from "vite-plugin-svgr";
 
 export default defineConfig(({ command }) => {
@@ -17,7 +17,7 @@ export default defineConfig(({ command }) => {
       'process.env': {},
     },
     plugins: [
-      ds3Plugin(command, ds3Config),
+      cui(command, themeConfig),
       svgr(),
     ],
     build: { // https://stackoverflow.com/questions/77421447/how-to-solve-require-is-not-defined-in-vite

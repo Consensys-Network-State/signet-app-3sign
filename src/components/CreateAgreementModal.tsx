@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Button, Card, CardContent, Dialog, DialogContent, DialogFooter, Alert, DialogHeader, DialogTitle, DialogDescription, DialogClose, DialogTrigger } from '@ds3/ui';
-import { AddressAvatar }from '@ds3/web3';
+import { Button, Card, CardContent, Dialog, DialogContent, DialogFooter, Alert, DialogHeader, DialogTitle, DialogDescription, DialogClose, DialogTrigger } from '@consensys/ui';
+import { AddressAvatar }from '@consensys/ui-web3';
 import { useNavigate } from 'react-router';
 import { useDocumentStore, Document } from '../store/documentStore';
 import mouTemplate from '../templates/mou-template.json';
