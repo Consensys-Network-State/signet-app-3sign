@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { TextInput } from 'react-native';
-import { InputField, Input } from '@ds3/ui';
+import { InputField, Input } from '@consensys/ui';
 import { isAddress } from 'viem';
-import { AddressAvatar } from "@ds3/web3";
+import { AddressAvatar } from "@consensys/ui-web3";
 import { DatePickerField } from './DatePickerField';
 import dayjs from 'dayjs';
 import DocumentSignatureDialog from './DocumentSignatureDialog';

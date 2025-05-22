@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { Button, Card } from '@ds3/ui';
+import { Button, Card } from '@consensys/ui';
 import { useDocumentStore } from '../store/documentStore';
 import { useNavigate } from 'react-router';
 import Layout from '../layouts/Layout';
 import { Plus } from 'lucide-react-native';
-import { AddressAvatar } from '@ds3/web3';
+import { AddressAvatar } from '@consensys/ui-web3';
 import CreateAgreementModal from '../components/CreateAgreementModal';
 import StatusLabel from '../components/StatusLabel';
 import { useAccount } from 'wagmi';

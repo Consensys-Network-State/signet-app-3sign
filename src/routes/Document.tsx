@@ -8,7 +8,7 @@ import Layout from '../layouts/Layout';
 import { getAgreement } from '../api';
 import StatusLabel from '../components/StatusLabel';
 import { FormContext } from '../contexts/FormContext';
-import { Spinner } from '@ds3/ui';
+import { Spinner } from '@consensys/ui';
 import { formCache } from '../utils/formCache';
 import { useAccount } from 'wagmi';
 import { getNextStates } from '../utils/agreementUtils';

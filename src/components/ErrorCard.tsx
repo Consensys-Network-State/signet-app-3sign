@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, Button } from '@ds3/ui';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, Button } from '@consensys/ui';
 import { AlertTriangle, RefreshCw } from 'lucide-react-native';
 
 export interface ErrorCardProps {

@@ -1,11 +1,11 @@
 import * as React from "react";
 import { useNavigate, useParams } from 'react-router';
-import { Card, Button, Input, InputField } from "@ds3/ui";
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@ds3/ui";
+import { Card, Button, Input, InputField } from "@consensys/ui";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "@consensys/ui";
 import { DocumentVariable, useDocumentStore } from "../store/documentStore";
 import { Controller } from "react-hook-form";
 import { isAddress } from 'viem';
-import { AddressCard } from "@ds3/web3";
+import { AddressCard } from "@consensys/ui-web3";
 import { FormContext } from '../contexts/FormContext';
 import { useMutation } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
@@ -18,7 +18,7 @@ import VariableInput, { createValidationRules } from './VariableInput';
 import ConfirmActionDialog from './ConfirmActionDialog';
 import StatusLabel from './StatusLabel';
 import { getTransactionProofData } from "../utils/ethereumUtils";
-import type {WebChangeEvent } from "@ds3/ui";
+import type {WebChangeEvent } from "@consensys/ui";
 
 interface DocumentInput {
   type: string;
