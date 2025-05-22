@@ -416,3 +416,7 @@ export async function getTransactionProofData(txHash: `0x${string}`, chainId: nu
         console.error("Error:", error);
     }
 }
+
+export function isTxHash(value: string): boolean {
+    return /^0x([A-Fa-f0-9]{64})$/.test(value);
+}

@@ -10,9 +10,9 @@ import { FormContext } from '../contexts/FormContext';
 import { useMutation } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { Document } from "../store/documentStore";
-import { createAgreementInitVC, createAgreementInputVC, createAgreementInputVCWithTxProof } from "../utils/veramoUtils";
+import { createAgreementInitVC, createAgreementInputVC } from "../utils/veramoUtils";
 import { postAgreement, postAgreementInput } from "../api/index";
-import { getInitialStateParams, getNextStates } from "../utils/agreementUtils";
+import { getInitialState, getInitialStateParams, getNextStates } from "../utils/agreementUtils";
 import { formCache } from "../utils/formCache";
 import VariableInput, { createValidationRules } from './VariableInput';
 import ConfirmActionDialog from './ConfirmActionDialog';
@@ -62,7 +62,6 @@ interface DocumentState {
   description: string;
   id: string;
   name: string;
-  isInitial: boolean;
 }
 
 const VCDetailsModal: React.FC<{
@@ -178,7 +177,7 @@ const ActionSideMenu: React.FC = () => {
 
   // Helper function to check if a transition's conditions are met
   const isTransitionEnabled = React.useCallback((transition: any) => {
-    return transition.conditions.every((condition: any) => (condition.input.issuer?.toLowerCase() || condition.input.signer?.toLowerCase()) === address?.toLowerCase());
+    return transition.conditions.every((condition: any) => condition.input.issuer?.toLowerCase() === address?.toLowerCase());
   }, [address]);
 
   // Helper to check if fields for a transition are valid
@@ -186,9 +185,7 @@ const ActionSideMenu: React.FC = () => {
     if (!trigger) return true; // If no form context, assume valid
     
     // Get all fields that need to be validated from the input data
-    const fieldsToValidate = transition.conditions[0].input.type === 'EVMTransaction'
-      ? [transition.conditions[0].input.id]
-      : Object.keys(transition.conditions[0].input.data)
+    const fieldsToValidate = Object.keys(transition.conditions[0].input.data)
     
     // Validate all required fields
     const result = await trigger(fieldsToValidate, { shouldFocus: true });
@@ -276,24 +273,25 @@ const ActionSideMenu: React.FC = () => {
   const inputMutation = useMutation({
     mutationFn: async ({ values, transition } : { values: Record<string, string>, transition: any}) => {
       if (!currentAgreement || !address) throw new Error("Agreement or address not available");
-      let vc: string = "";
 
-      if (transition.conditions[0].input.type === 'EVMTransaction') {
-        const transactionFieldId = transition.conditions[0].input.id;
-        // TODO: Need to support native transfers as well
-        const transactionProof = await getTransactionProofData(values[transactionFieldId] as `0x${string}`, transition.conditions[0].input.txMetadata.contractReference.chainId)
-        if (!transactionProof) {
-          // TODO: How to handle error here?
-          throw new Error("Transaction proof not found");
+      const inputValues = Object.fromEntries(
+        Object.entries(values).filter(([key]) => key in transition.conditions[0].input.data)
+      );
+
+      const aggregatedVariables = Object.fromEntries(await Promise.all(Object.entries(inputValues).map(async ([key, value]) => {
+        const variable = currentDocument?.variables?.[key];
+        if (variable && variable.type === 'txHash') {
+          const proof = await getTransactionProofData(value as `0x${string}`, transition.conditions[0].input.data[key].txMetadata.contractReference.chainId);
+          if (!proof) throw new Error(`Failed to get transaction proof for txHash ${value}`);
+          return [key, {
+            value,
+            proof: btoa(proof)
+          }]
         }
-        vc = await createAgreementInputVCWithTxProof(address as `0x${string}`, transition.conditions[0].input.id, btoa(transactionProof), currentAgreement.documentHash);
-      } else {
-        const inputValues = Object.fromEntries(
-          Object.entries(values).filter(([key]) => key in transition.conditions[0].input.data)
-        );
-        vc = await createAgreementInputVC(address as `0x${string}`, transition.conditions[0].input.id, inputValues, currentAgreement.documentHash);
-      }
+        return [key, value]
+      })))
 
+      let vc = await createAgreementInputVC(address as `0x${string}`, transition.conditions[0].input.id, aggregatedVariables, currentAgreement.documentHash);
       if (!vc) throw new Error("Failed to create verifiable credential"); 
 
       const input = {
@@ -371,9 +369,7 @@ const ActionSideMenu: React.FC = () => {
       setConfirmDialog({ type });
     } else if (type === 'transition' && transition) {
       if (!trigger || !getValues) return;
-      const fieldsToValidate = transition.conditions[0].input.type === 'EVMTransaction'
-        ? [transition.conditions[0].input.id]
-        : Object.keys(transition.conditions[0].input.data);
+      const fieldsToValidate = Object.keys(transition.conditions[0].input.data);
       const isValid = await trigger(fieldsToValidate, { shouldFocus: true });
       if (!isValid) return;
       setConfirmDialog({ type, transition });
@@ -427,7 +423,7 @@ const ActionSideMenu: React.FC = () => {
             {Object.entries(initialParams).map(([paramKey]) => {
               const variable = currentDocument?.variables?.[paramKey];
               if (!variable) return null;
-              
+
               return (
                 <Controller
                   key={paramKey}
@@ -456,7 +452,7 @@ const ActionSideMenu: React.FC = () => {
                 <p className="text-sm text-neutral-11 mb-2">Next Action</p>
                 <StatusLabel
                   status="info"
-                  text={Object.values(currentDocument.execution.states).find(state => state.isInitial)?.name || 'Next State'} 
+                  text={getInitialState(currentDocument)?.name || 'Next State'} 
                 />
               </div>
             )}
@@ -489,7 +485,6 @@ const ActionSideMenu: React.FC = () => {
         
         const input = inputs[0];
         const transitionEnabled = isTransitionEnabled(action);
-        const isEVMTransaction = input?.type === 'EVMTransaction';
         
         return (
           <Card key={index} className="p-4">
@@ -498,7 +493,7 @@ const ActionSideMenu: React.FC = () => {
               <div className="mb-2">
                 <p className="text-xs text-neutral-11 mb-3">Responsible Party</p>
                 <AddressCard
-                  address={(isEVMTransaction ? input.signer : input.issuer) as `0x${string}`}
+                  address={(input.issuer) as `0x${string}`}
                   className="h-8"
                   avatarClassName="w-5 h-5"
                 />
@@ -507,42 +502,11 @@ const ActionSideMenu: React.FC = () => {
               <p className="text-sm text-neutral-11 mb-3">{input.description}</p>
 
               {/* Input fields for variable references in data */}
-              {isEVMTransaction 
-              ? (() => {
-                const pseudoVariable: DocumentVariable = {
-                  id: input.id,
-                  type: 'string',
-                  name: "Transaction Hash",
-                  validation: {
-                    required: true,
-                    minLength: 1,
-                  }
-                };
-                return <Controller
-                  key={input.id}
-                  control={control}
-                  name={input.id}
-                  rules={createValidationRules(pseudoVariable)}
-                  render={({ field: { onChange, value, onBlur } }) => (
-                    <VariableInput
-                      name="Transaction Hash"
-                      variable={pseudoVariable}
-                      value={value}
-                      onChange={onChange}
-                      onBlur={onBlur}
-                      error={errors?.[input.id]?.message}
-                      className="w-full"
-                      disabled={!transitionEnabled}
-                      variant="soft"
-                    />
-                  )}
-                />
-              })()
-              : input.data && Object.entries(input.data).map(([fieldKey, fieldValue]) => {
+              { input.data && Object.entries(input.data).map(([fieldKey, fieldValue]) => {
                   // Ensure variable is valid DocumentVariable
                   const variable = fieldValue as DocumentVariable;
                   if (!variable || !variable.name || !variable.type) return null;
-                  
+
                   return (
                     <Controller
                       key={`${fieldKey}.${fieldKey}`}
@@ -622,9 +586,18 @@ const ActionSideMenu: React.FC = () => {
                     // Check if the value looks like an Ethereum address
                     const isAddressValue = typeof value === 'string' && isAddress(value);
                     
+                    if (currentDocument?.variables[key]?.type === 'txHash') {
+                      // TODO: how to display transaction hash values
+                      // Truncate the txHash value to 0x0000...0000 format
+                      const txValue = (value as { value: string, proof: string }).value;
+                      value = txValue
+                        ? `${txValue.slice(0, 6)}...${txValue.slice(-4)}`
+                        : '';
+                    }
+
                     return (
                       <div key={key} className="flex flex-col gap-1">
-                        <p className="text-sm text-neutral-11">{key}</p>
+                        <p className="text-sm text-neutral-11">{currentDocument?.variables[key]?.name || key}</p>
                         {isAddressValue ? (
                           <AddressCard 
                             address={value as `0x${string}`} 

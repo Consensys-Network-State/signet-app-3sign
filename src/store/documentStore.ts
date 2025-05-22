@@ -13,11 +13,12 @@ export interface VariableValidation {
 
 export interface DocumentVariable {
   id?: string;
-  type: 'string' | 'number' | 'boolean' | 'address' | 'dateTime' | 'signature';
+  type: 'string' | 'number' | 'boolean' | 'address' | 'dateTime' | 'signature' | 'txHash';
   name: string;
   description?: string;
   value?: string;
-  validation?: VariableValidation
+  validation?: VariableValidation;
+  txMetadata?: TxMetadata;
 }
 
 export interface DocumentMetadata {
@@ -33,7 +34,6 @@ export interface DocumentMetadata {
 export interface DocumentState {
   name: string;
   description: string;
-  isInitial?: boolean;
   initialParams?: Record<string, string>;
 }
 
@@ -54,8 +54,9 @@ export interface StandardDocumentInput {
 export interface ContractCallTxMetadata {
   transactionType: 'contractCall';
   method: string;
-  params: any[];
+  params: Record<string, any>;
   contractReference: string;
+  signer?: string;
 }
 
 export interface NativeTransferTxMetadata {
@@ -68,17 +69,7 @@ export interface NativeTransferTxMetadata {
 
 export type TxMetadata = ContractCallTxMetadata | NativeTransferTxMetadata;
 
-export interface EVMTransactionInput {
-  id: string;
-  type: 'EVMTransaction';
-  schema?: string;
-  displayName: string;
-  description: string;
-  txMetadata: TxMetadata;
-  signer: string;
-}
-
-export type DocumentInput = StandardDocumentInput | EVMTransactionInput;
+export type DocumentInput = StandardDocumentInput;
 
 export interface Transition {
   from: string;
@@ -99,8 +90,8 @@ export interface DocumentExecution {
 }
 
 export interface Contract {
-  id: string;
-  description: string;
+  name?: string;
+  descriptio?: string;
   address: string;
   chainId: string;
   abi: string;
@@ -110,7 +101,7 @@ export interface Document {
   id?: string;
   metadata: DocumentMetadata;
   variables: Record<string, DocumentVariable>;
-  contracts?: Contract[],
+  contracts?: Record<string, Contract>,
   content: {
     type: 'md' | 'mdast';
     data: string | any;
@@ -129,7 +120,6 @@ export interface Agreement {
       description: string;
       id: string;
       name: string;
-      isInitial: boolean;
     };
     ReceivedInputs: {
       id: string;
@@ -153,6 +143,9 @@ const emptyExecution: DocumentExecution = {
   states: {},
   inputs: {},
   transitions: [],
+  initialize: {
+    data: {}
+  },
 };
 
 export const useDocumentStore = create(
@@ -169,7 +162,7 @@ export const useDocumentStore = create(
           getAgreement: (id: string) => {
             return get().agreements.find(agreement => agreement.id === id);
           },
-          createDraft: (title: string, content: string, variables: Record<string, DocumentVariable> = {}, contracts: Contract[] = [], execution: DocumentExecution = emptyExecution) => {
+          createDraft: (title: string, content: string, variables: Record<string, DocumentVariable> = {}, contracts: Record<string, Contract> = {}, execution: DocumentExecution = emptyExecution) => {
             const id = crypto.randomUUID();
             const now = new Date().toISOString();
             const draft: Document = {

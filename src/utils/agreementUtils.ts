@@ -1,8 +1,14 @@
 // TODO: Some functions here may become part of the SDK
-import { Agreement, Document, DocumentState } from "../store/documentStore";
+import { Agreement, Document } from "../store/documentStore";
 
-export const getInitialState = (document: Document) => 
-    Object.values(document.execution.states).find((stateObj: DocumentState) => stateObj.isInitial);
+export const getInitialState = (document: Document) => {
+  const stateKeys = Object.keys(document.execution.states);
+  const toStates = new Set(
+    document.execution.transitions.map((transition) => transition.to)
+  );
+  const initialStateKey = stateKeys.find((key) => !toStates.has(key));
+  return initialStateKey ? document.execution.states[initialStateKey] : undefined;
+}
 
 export const getInitialStateParams = (document: Document | null) => {
   if (!document) return {};
@@ -30,8 +36,9 @@ export const getVariableValue = (agreement: Agreement, variableReference: string
 }
 
 export const getContractReference = (agreement: Agreement, contractReference: string) => {
-  if (agreement.document.contracts) {
-    return agreement.document.contracts.find((contract) => contract.id === contractReference);
+  const match = contractReference.match(/\$\{contracts\.([^.}]+)}/);
+  if (agreement.document.contracts && match && match[1]) {
+    return agreement.document.contracts[match[1]];
   }
   return null;
 }
@@ -57,7 +64,26 @@ export const getNextStates = (agreement: Agreement) => {
                   if (typeof value === 'string') {
                     const match = value.match(/\$\{variables\.([^}]+)\}/);
                     if (match && match[1]) {
-                      acc[key] = agreement.document.variables[match[1]];
+                      const variable = agreement.document.variables[match[1]];
+                      if (
+                        variable &&
+                        variable.txMetadata &&
+                        variable.txMetadata.transactionType === 'contractCall' &&
+                        variable.txMetadata.contractReference
+                      ) {
+                        acc[key] = {
+                          ...variable,
+                          txMetadata: {
+                            ...variable.txMetadata,
+                            contractReference: getContractReference(
+                              agreement,
+                              variable.txMetadata.contractReference
+                            ),
+                          },
+                        };
+                      } else {
+                        acc[key] = variable;
+                      }
                     } else {
                       acc[key] = value;
                     }
@@ -66,20 +92,6 @@ export const getNextStates = (agreement: Agreement) => {
                   }
                   return acc;
                 }, {} as Record<string, any>)
-              }
-            }
-          } else if (conditionInput.type === 'EVMTransaction') {
-            return {
-              type: condition.type,
-              input: {
-                ...conditionInput,
-                signer: getVariableValue(agreement, conditionInput.signer),
-                txMetadata: {
-                  ...conditionInput.txMetadata,
-                  ...(conditionInput.txMetadata.transactionType === 'contractCall' && {
-                    contractReference: getContractReference(agreement, conditionInput.txMetadata.contractReference),
-                  }),
-                }
               }
             }
           }

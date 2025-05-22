@@ -137,37 +137,6 @@ export async function createAgreementInputVC(address: `0x${string}`, inputId: st
   return JSON.stringify(vc);
 }
 
-export async function createAgreementInputVCWithTxProof(address: `0x${string}`, inputId: string, txProof: string, documentHash: string) {
-  const agent = await setupAgent();
-  const did = await agent.didManagerGet({did: `did:pkh:eip155:1:${address}`});
-
-  const credential = {
-    id: uuidv4(),
-    issuer: { id: did.did },
-    '@context': ['https://www.w3.org/2018/credentials/v1'],
-    type: [
-      'VerifiableCredential',
-      'Agreement',
-    ],
-    issuanceDate: new Date().toISOString(),
-    credentialSubject: {
-      inputId,
-      documentHash,
-      type: "signedFields",
-      txProof,
-    },
-  }
-
-  const vc = await agent.createVerifiableCredential({
-    credential,
-    proofFormat: 'EthereumEip712Signature2021',
-  });
-
-  const verificationResult = await agent.verifyCredential({ credential: vc });
-  if (!verificationResult.verified) throw new Error('Failed to sign with wallet');
-  return JSON.stringify(vc);
-}
-
 export async function createSignatureVC(address: `0x${string}`, document: Document, documentVC: string) {
   const did = await getDIDFromAddress(address);
 

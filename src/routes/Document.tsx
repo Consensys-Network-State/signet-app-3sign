@@ -11,7 +11,7 @@ import { FormContext } from '../contexts/FormContext';
 import { Spinner } from '@consensys/ui';
 import { formCache } from '../utils/formCache';
 import { useAccount } from 'wagmi';
-import { getNextStates } from '../utils/agreementUtils';
+import { getInitialStateParams, getNextStates } from '../utils/agreementUtils';
 import { useAgreement } from '../store/selectors';
 import ErrorBoundary from '../components/ErrorBoundary';
 import ErrorCard from '../components/ErrorCard';
@@ -91,28 +91,12 @@ const Document: React.FC<DocumentProps> = ({ type }) => {
           .map(condition => ({ input: condition.input }))
       }));
     }
-    
-    // For drafts, use the initial state's transitions
-    if (type === 'draft' && document?.execution?.states) {
-      const initialState = Object.values(document.execution.states).find(state => state.isInitial);
-      if (initialState) {
-        return document.execution.transitions
-          .filter(transition => transition.from === initialState.name)
-          .map(transition => ({
-            conditions: transition.conditions.map(condition => ({
-              input: document.execution.inputs[condition.input]
-            }))
-          }));
-      }
-    }
-    return [];
   }, [type, agreement, document]);
 
   // Get initial params
   const initialParams = React.useMemo(() => {
-    if (type === 'draft' && document?.execution?.states) {
-      const initialState = Object.values(document.execution.states).find(state => state.isInitial);
-      return initialState?.initialParams || {};
+    if (type === 'draft' && document) {
+      return getInitialStateParams(document);
     }
     return {};
   }, [type, document]);
