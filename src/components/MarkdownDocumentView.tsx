@@ -80,11 +80,6 @@ const MarkdownDocumentView: React.FC<MarkdownDocumentViewProps> = ({
           if (!input) {
             return false;
           }
-          
-          if (input.type === 'EVMTransaction') {
-            // TODO: Handle EVMTransaction Input types in markdown if applicable
-            return false;
-          }
 
           // Check if this variable is in the input's data requirements
           const isFieldInInput = Object.keys(input.data || {}).includes(variableName);
