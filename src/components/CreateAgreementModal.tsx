@@ -3,8 +3,9 @@ import { Button, Card, CardContent, Dialog, DialogContent, DialogFooter, Alert, 
 import { AddressAvatar }from '@consensys/ui-web3';
 import { useNavigate } from 'react-router';
 import { useDocumentStore, Document } from '../store/documentStore';
-import mouTemplate from '../templates/mou-template.json';
-import mouWithPaymentTemplate from '../templates/grant-with-tx.json';
+import mouTemplate from '../templates/mou.json';
+import grantSimpleTemplate from '../templates/grant-simple.json';
+import grantWithReviewTemplate from '../templates/grant-with-review.json';
 import { Trash2 } from 'lucide-react-native';
 
 interface TemplateInfo {
@@ -39,9 +40,14 @@ const DEFAULT_TEMPLATES: TemplateOption[] = [
     template: mouTemplate as Document
   }, 
   {
-    id: 'mou-with-payment',
+    id: 'grant-simple',
     category: 'default',
-    template: mouWithPaymentTemplate as Document
+    template: grantSimpleTemplate as Document
+  },
+  {
+    id: 'grant-with-review',
+    category: 'default',
+    template: grantWithReviewTemplate as Document
   }
 ];
 
