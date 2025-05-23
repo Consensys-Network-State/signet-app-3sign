@@ -281,7 +281,7 @@ const ActionSideMenu: React.FC = () => {
       const aggregatedVariables = Object.fromEntries(await Promise.all(Object.entries(inputValues).map(async ([key, value]) => {
         const variable = currentDocument?.variables?.[key];
         if (variable && variable.type === 'txHash') {
-          const proof = await getTransactionProofData(value as `0x${string}`, transition.conditions[0].input.data[key].txMetadata.contractReference.chainId);
+          const proof = await getTransactionProofData(value as `0x${string}`, Number(transition.conditions[0].input.data[key].txMetadata.contractReference.chainId));
           if (!proof) throw new Error(`Failed to get transaction proof for txHash ${value}`);
           return [key, {
             value,
