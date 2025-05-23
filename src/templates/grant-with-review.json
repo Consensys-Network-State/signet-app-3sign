@@ -4,9 +4,9 @@
     "templateId": "did:template:mou-v1",
     "version": "1.0.0",
     "createdAt": "2024-03-20T12:00:00Z",
-    "name": "Simple Grant",
+    "name": "Grant with Review",
     "author": "Agreements Protocol",
-    "description": "Template for simple fixed amount grant between two parties"
+    "description": "Template for simple fixed amount grant between two parties with a review process."
   },
   "variables": {
     "grantorEthAddress": {
