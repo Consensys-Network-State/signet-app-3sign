@@ -371,7 +371,7 @@ const CreateAgreementModal: React.FC<CreateAgreementModalProps> = ({ open, onClo
         </div>
 
         {importError && (
-          <Alert variant="error" className="m-4">
+          <Alert variant="destructive" className="m-4">
             <p>{importError}</p>
           </Alert>
         )}
