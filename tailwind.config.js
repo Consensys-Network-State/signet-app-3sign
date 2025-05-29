@@ -7,8 +7,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
     './node_modules/@consensys/ui/**/*.{js,jsx,ts,tsx}',
-    './node_modules/@consensys/ui-web3/**/*.{js,jsx,ts,tsx}',
-    '!node_modules/**/*.{js,ts,jsx,tsx}',
+    './node_modules/@consensys/ui-web3/**/*.{js,jsx,ts,tsx}'
   ],
   presets: [cui(themeConfig)],
   theme: {
