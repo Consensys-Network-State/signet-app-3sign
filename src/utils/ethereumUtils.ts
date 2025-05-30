@@ -1,20 +1,14 @@
-import Web3 from "web3";
 import { Trie } from "@ethereumjs/trie";
-
 import { RLP } from "@ethereumjs/rlp";
-import { FeeMarketEIP1559Transaction, AccessListEIP2930Transaction, LegacyTransaction } from '@ethereumjs/tx';
-import { Common } from '@ethereumjs/common';
+import { createTx } from '@ethereumjs/tx';
+import { Mainnet, createCustomCommon } from '@ethereumjs/common';
+import { trustedSetup } from '@paulmillr/trusted-setups/fast-kzg.js';
+import { KZG as microEthKZG } from 'micro-eth-signer/kzg.js'
+import { ethers } from "ethers";
 
 const INFURA_API_KEY = import.meta.env.VITE_INFURA_API_KEY;
 
 const LOGGING_ENABLED = false;
-
-const chainIdToRPC: Record<number, string> = {
-    1: `https://mainnet.infura.io/v3/${INFURA_API_KEY}`,
-    11155111: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
-    59144: `https://linea-mainnet.infura.io/v3/${INFURA_API_KEY}`,
-    59141: `https://linea-sepolia.infura.io/v3/${INFURA_API_KEY}`,
-}
 
 /**
  * Encodes a transaction receipt according to Ethereum rules
@@ -72,15 +66,28 @@ function encodeReceipt(receipt: any) {
         // EIP-1559 receipt - prefix with 0x02
         const encodedReceipt = RLP.encode(receiptData);
         return Buffer.concat([Buffer.from([2]), encodedReceipt]);
+    } else if (type === 3) {
+        // EIP-4844 receipt - prefix with 0x03
+        const encodedReceipt = RLP.encode(receiptData);
+        return Buffer.concat([Buffer.from([3]), encodedReceipt]);
     } else {
         throw new Error(`Unknown receipt type: ${type}`);
     }
 }
 
-async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
+function stripLeadingZeros(hex: string) {
+    // Only strip if there are leading zeros after 0x
+    if (/^0x0+/.test(hex)) {
+        return "0x" + hex.replace(/^0x0+/, "");
+    }
+    return hex;
+}
+
+async function getTransactionProof(txHash: string, chainId: number) {
+    console.log(typeof chainId);
     // 1. Get Transaction Receipt
-    const web3 = new Web3(chainIdToRPC[chainId]);
-    const txRaw = await web3.eth.getTransaction(txHash);
+    const provider = new ethers.InfuraProvider(chainId, INFURA_API_KEY);
+    const txRaw = await provider.getTransaction(txHash);    
 
     if (!txRaw) {
         console.error("Transaction not found");
@@ -92,14 +99,15 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
     }
 
     // 2. Get Block containing the transaction
-    const block = await web3.eth.getBlock(txRaw.blockHash, true);
+    const block = await provider.send('eth_getBlockByNumber', [stripLeadingZeros(ethers.toBeHex(txRaw.blockNumber!)), true]);
+
     if (!block) {
         console.error("Block not found");
         return;
     }
-    
+
     if (LOGGING_ENABLED) {
-        console.log(`Found transaction at index ${txRaw.transactionIndex} in block ${block.number}`);
+        console.log(`Found transaction at index ${txRaw.index} in block ${block.number}`);
         console.log("Block transactions root:", block.transactionsRoot);
     }
 
@@ -107,112 +115,76 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
     const trie = new Trie();
     
     // Create a Common object for the chain
-    const cId = await web3.eth.getChainId();
-    const common = Common.custom({ chainId: cId });
+    const cId = await provider.getNetwork().then(network => network.chainId);
+    const kzg = new microEthKZG(trustedSetup)
+
+    const common = createCustomCommon({ chainId: Number(cId) }, Mainnet, { customCrypto: { kzg } })
+
+    const txs = block.transactions;
 
     // 4. Insert Transactions into the Trie
-    for (let i = 0; i < block.transactions.length; i++) {
-        const tx = block.transactions[i];
+    for (let i = 0; i < txs.length; i++) {
+        const tx = txs[i];
         const key = RLP.encode(i);
-        
-        // Skip if tx is a string (hash only)
-        if (typeof tx === 'string') {
-            continue;
-        }
-        
-        // Normalize transaction type
-        let txType = 0;
-        if (tx.type !== undefined) {
-            if (typeof tx.type === 'string') {
-                // For hex string types like '0x2'
-                const typeStr = tx.type as string;
-                if (typeStr.startsWith('0x')) {
-                    txType = parseInt(typeStr.slice(2), 16);
-                } else {
-                    txType = parseInt(typeStr, 10);
-                }
-            } else {
-                // For numeric types
-                txType = Number(tx.type);
-            }
-        }
-        
-        let serializedTx;
         
         try {
             // Prepare transaction data
             const txData = {
+                // Legacy fields
                 nonce: tx.nonce,
                 gasLimit: tx.gas,
-                to: tx.to ? tx.to.toString() : undefined, // Convert empty to to undefined
+                to: tx.to,
                 value: tx.value,
                 data: tx.input || tx.data || '0x',
                 v: tx.v,
                 r: tx.r,
                 s: tx.s,
-                chainId: tx.chainId || chainId
-            };
-            
-            // Create the appropriate transaction object based on type
-            if (txType === 2) {
-                // EIP-1559 transaction
-                const eip1559TxData = {
-                    ...txData,
-                    maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
-                    maxFeePerGas: tx.maxFeePerGas,
-                    accessList: tx.accessList ? tx.accessList : []
-                };
+                type: tx.type,
 
-                // Cast the transaction data to the expected type
-                const eip1559Tx = FeeMarketEIP1559Transaction.fromTxData(eip1559TxData as any, { common });
-                serializedTx = eip1559Tx.serialize();
-            } else if (txType === 1) {
-                // EIP-2930 transaction
-                const eip2930TxData = {
-                    ...txData,
-                    gasPrice: tx.gasPrice,
-                    accessList: tx.accessList ? tx.accessList : []
-                };
+                // EIP-2930 fields
+                accessList: tx.accessList || [],
+                chainId: tx.chainId || chainId,
+
+                // EIP-1559 fields
+                gasPrice: tx.gasPrice,
+                maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
+                maxFeePerGas: tx.maxFeePerGas,
+
+                // EIP-4844 fields
+                blobVersionedHashes: tx.blobVersionedHashes || [],
+                maxFeePerBlobGas: tx.maxFeePerBlobGas,
                 
-                // Cast the transaction data to the expected type
-                const eip2930Tx = AccessListEIP2930Transaction.fromTxData(eip2930TxData as any, { common });
-                serializedTx = eip2930Tx.serialize();
-            } else {
-                // Legacy transaction
-                const legacyTxData = {
-                    ...txData,
-                    gasPrice: tx.gasPrice
-                };
+                // EIP-7702 fields
+                authorizationList: tx.authorizationList || [],
+            };
 
-                // Cast the transaction data to the expected type
-                const legacyTx = LegacyTransaction.fromTxData(legacyTxData as any, { common });
-                serializedTx = legacyTx.serialize();
+            // Use createTransaction for all types
+            const txObj = createTx(txData, { common });
+            const serializedTx = txObj.serialize();
+
+            if (tx.hash !== ethers.keccak256(serializedTx)) {
+                throw new Error("❌ Transaction hash mismatch");
             }
-            
+
             // Add to trie
             await trie.put(key, serializedTx);
             
             // Log for debugging
-            if (typeof txRaw.transactionIndex === 'string' ? 
-                i === parseInt(txRaw.transactionIndex) : 
-                i === Number(txRaw.transactionIndex)) {
+            if (i === txRaw.index) {
                 if (LOGGING_ENABLED) {
-                    console.log(`Added target transaction ${typeof tx === 'string' ? tx : tx.hash} at index ${i}`);
+                    console.log(`Added target transaction ${tx.hash} at index ${i}`);
                 }
             }
         } catch (error) {
             console.error(`Error serializing transaction at index ${i}:`, error);
             
-            if (LOGGING_ENABLED) console.log('Transaction data:', JSON.stringify(tx, null, 2));
+            if (LOGGING_ENABLED) console.log('Transaction data:', tx);
             throw error; // Re-throw to stop execution and see the error
         }
     }
 
     // 5. Generate Proof
-    const txIdx = typeof txRaw.transactionIndex === 'string' ? 
-        parseInt(txRaw.transactionIndex) : 
-        Number(txRaw.transactionIndex);
-    const txIndex = RLP.encode(txIdx);
+    const txIndex = RLP.encode(txRaw.index);
     const proof = await trie.createProof(txIndex);
     const value = await trie.get(txIndex);
 
@@ -234,36 +206,21 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
         }
     } else {
         console.error("❌ Mismatch in Computed Transactions Root");
-            
-        // Additional debugging information
-        if (LOGGING_ENABLED) {
-            console.log(`Difference in length: ${computedRoot.length} vs ${block.transactionsRoot.slice(2).length}`);
-        }
-        // Check if the first few transactions are serialized correctly
-        for (let i = 0; i < Math.min(3, block.transactions.length); i++) {
-            const tx = block.transactions[i];
-            if (typeof tx !== 'string') {
-                console.log(`Transaction ${i} hash: ${tx.hash}`);
-                
-                // Try to get the raw transaction
-                try {
-                    const rawTx = await web3.eth.getTransaction(tx.hash);
-                    if (LOGGING_ENABLED) console.log(`Raw transaction ${i}:`, rawTx);
-                } catch (e) {
-                    if (LOGGING_ENABLED) console.log(`Could not get raw transaction ${i}`);
-                }
-            }
-        }
     }
 
-    const txReceipt = await web3.eth.getTransactionReceipt(txHash);
+    const txReceipt = await provider.getTransactionReceipt(txHash);
+
+    if (!txReceipt) {
+        console.error("❌ Transaction receipt not found");
+        return;
+    }
 
     if (txRaw.blockHash !== txReceipt.blockHash) {
         console.error("❌ Block hash mismatch");
         return;
     }
 
-    if (Number(txRaw.transactionIndex) !== Number(txReceipt.transactionIndex)) {
+    if (txRaw.index !== txReceipt.index) {
         console.error("❌ Transaction index mismatch");
         return;
     }
@@ -272,14 +229,9 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
     const receiptTrie = new Trie();
 
     // 4. Get all transaction receipts for the block
-    const receipts = await Promise.all(
-        block.transactions.map(tx => {
-            if (typeof tx === 'string') {
-                return web3.eth.getTransactionReceipt(tx);
-            } else {
-                return web3.eth.getTransactionReceipt(tx.hash);
-            }
-        })
+    const receipts = await provider.send(
+        "eth_getBlockReceipts",
+        [stripLeadingZeros(ethers.toBeHex(txRaw.blockNumber!))]
     );
     
     // 5. Insert receipts into the trie
@@ -318,18 +270,15 @@ async function getTransactionProof(txHash: `0x${string}`, chainId: number) {
         block,
         txProof: proof,
         txEncodedValue: value,
-        receiptProof: receiptProof,
+        receiptProof,
         receiptEncodedValue: receiptValue
     };
 }
 
-async function verifyTransactionProof(txHash: `0x${string}`, transactionIndex: number | string | bigint, block: any, proof: any, value: any) {
+async function verifyTransactionProof(txHash: string, transactionIndex: number, block: any, proof: any, value: any) {
     
     // 1. The key is the RLP encoded transaction index
-    const txIdx = typeof transactionIndex === 'string' ? 
-        parseInt(transactionIndex) : 
-        Number(transactionIndex);
-    const key = RLP.encode(txIdx);
+    const key = RLP.encode(transactionIndex);
 
     // 2. Convert the block's transactionsRoot to Buffer
     const expectedRoot = typeof block.transactionsRoot === 'string' && block.transactionsRoot.startsWith('0x')
@@ -351,8 +300,8 @@ async function verifyTransactionProof(txHash: `0x${string}`, transactionIndex: n
         
         if (!valueMatches) {
             console.error("❌ Proof verification failed - value mismatch");
-            console.log("Expected:", value?.toString?.() || "null");
-            console.log("Got:", verifiedValue?.toString?.() || "null");
+            console.log("Expected:", value.toString());
+            console.log("Got:", verifiedValue.toString());
             return false;
         }
         
@@ -361,15 +310,15 @@ async function verifyTransactionProof(txHash: `0x${string}`, transactionIndex: n
             console.log(`Transaction ${txHash} is confirmed to be in block`);
         }
         return true;
-    } catch (error) {
-        console.error("❌ Proof verification error:", (error as Error).message);
+    } catch (error: any) {
+        console.error("❌ Proof verification error:", error.message);
         return false;
     }
 }
 
 
 function serializeWithBigInt(obj: any) {
-    return JSON.stringify(obj, (_, value: any) => {
+    return JSON.stringify(obj, (_, value) => {
         // Convert BigInt to string with numeric format
         if (typeof value === 'bigint') {
             return value.toString();
@@ -379,19 +328,20 @@ function serializeWithBigInt(obj: any) {
 }
 
 // Example usage
-export async function getTransactionProofData(txHash: `0x${string}`, chainId: number) {
+export async function getTransactionProofData(txHash: string, chainId: number) {
     try {
+        console.log("Getting transaction proof data for", txHash);
         const proofData = await getTransactionProof(txHash, chainId);
-
+        console.log("Proof data:", proofData);
         if (!proofData) {
             throw new Error("Proof data not found");
         }
 
         const isValid = await verifyTransactionProof(
-            proofData.txHash, 
-            proofData.txReceipt.transactionIndex, 
-            proofData.block, 
-            proofData.txProof, 
+            proofData.txHash,
+            proofData.txReceipt.index,
+            proofData.block,
+            proofData.txProof,
             proofData.txEncodedValue
         );
 
@@ -402,14 +352,14 @@ export async function getTransactionProofData(txHash: `0x${string}`, chainId: nu
         return serializeWithBigInt({
             TxHash: proofData.txHash,
             TxRoot: proofData.block.transactionsRoot,
-            TxIndex: proofData.txReceipt.transactionIndex.toString(),
+            TxIndex: proofData.txReceipt.index.toString(),
             TxRaw: proofData.txRaw,
             TxReceipt: proofData.txReceipt,
-            TxProof: proofData.txProof?.map((n: any) => Array.from(n)) || [],
-            TxEncodedValue: proofData.txEncodedValue ? Array.from(proofData.txEncodedValue) : [],
+            TxProof: proofData.txProof.map((n: any) => Array.from(n)),
+            TxEncodedValue: Array.from(proofData.txEncodedValue!),
             ReceiptRoot: proofData.block.receiptsRoot,
-            ReceiptProof: proofData.receiptProof?.map((n: any) => Array.from(n)) || [],
-            ReceiptEncodedValue: proofData.receiptEncodedValue ? Array.from(proofData.receiptEncodedValue) : []
+            ReceiptProof: proofData.receiptProof.map((n: any) => Array.from(n)),
+            ReceiptEncodedValue: Array.from(proofData.receiptEncodedValue!)
         });
 
     } catch (error) {
