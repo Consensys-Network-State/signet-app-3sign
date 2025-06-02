@@ -4,12 +4,6 @@ import themeConfig from "./theme.config";
 import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      // Polyfill Buffer
-      buffer: 'buffer/',
-    },
-  },
   plugins: [
     cui(themeConfig),
     svgr(),
