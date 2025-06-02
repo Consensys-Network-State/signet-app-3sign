@@ -45,6 +45,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.1",
     "react-markdown": "^10.1.0",
+    "react-native-safe-area-context": "^5.4.1",
     "react-native-ui-datepicker": "^2.0.4",
     "react-router": "^7.0.1",
     "react-router-dom": "^7.5.0",
