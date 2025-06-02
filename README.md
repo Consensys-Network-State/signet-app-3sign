@@ -1,50 +1,82 @@
-# React + TypeScript + Vite
+# Signet 3Sign
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Signet 3Sign is a modern document signing platform that leverages blockchain technology for secure and verifiable document management. Built with React and Vite, it provides a seamless web experience for document management and signing.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Document Management**
+  - Create and manage agreements
+  - Draft system for documents in progress
+  - Published agreements ready for signing
+  - Status tracking (draft vs signed)
 
-## Expanding the ESLint configuration
+- **Web3 Integration**
+  - Wallet-based authentication
+  - Blockchain-verified signatures
+  - Address-based user identification
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Tech Stack
 
-- Configure the top-level `parserOptions` property like this:
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Wagmi for Web3 integration
+- @consensys/ui components
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Prerequisites
+
+- Node.js
+- pnpm
+- Backend service running (see Backend section)
+
+## Getting Started
+
+1. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+
+2. Start the development server:
+   ```bash
+   pnpm dev
+   ```
+
+3. Build for production:
+   ```bash
+   pnpm build
+   ```
+
+## Backend
+
+This application requires the Signet Execution Prototype backend to be running. You can find it here:
+https://github.com/Consensys-Network-State/signet-execution-prototype
+
+To start the backend:
+```bash
+git clone https://github.com/Consensys-Network-State/signet-execution-prototype.git
+cd signet-execution-prototype
+pnpm install
+pnpm start
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## Development
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+The project uses Vite for development. Key features of the development setup:
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+- Hot Module Replacement (HMR)
+- TypeScript support
+- ESLint configuration
+- Tailwind CSS for styling
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+Apache-2.0 license

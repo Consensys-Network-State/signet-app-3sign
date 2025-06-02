@@ -32,7 +32,6 @@
     "@veramo/did-resolver": "^6.0.0",
     "@veramo/key-manager": "^6.0.0",
     "axios": "^1.7.9",
-    "buffer": "^6.0.3",
     "dayjs": "^1.11.13",
     "did-resolver": "^4.1.0",
     "ethereum-blockies-base64": "^1.0.2",
@@ -45,6 +44,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.1",
     "react-markdown": "^10.1.0",
+    "react-native-safe-area-context": "^5.4.1",
     "react-native-ui-datepicker": "^2.0.4",
     "react-router": "^7.0.1",
     "react-router-dom": "^7.5.0",
@@ -59,10 +59,10 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
-    "@consensys/ui": "workspace:*",
-    "@consensys/ui-config": "workspace:*",
-    "@consensys/ui-theme": "workspace:*",
-    "@consensys/ui-web3": "workspace:*",
+    "@consensys/ui": "0.0.3",
+    "@consensys/ui-config": "0.0.5",
+    "@consensys/ui-theme": "0.0.1",
+    "@consensys/ui-web3": "0.0.3",
     "@eslint/js": "^9.15.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
@@ -77,5 +77,6 @@
     "typescript-eslint": "^8.15.0",
     "vite": "^5.4.10",
     "vite-plugin-svgr": "^4.3.0"
-  }
+  },
+  "packageManager": "pnpm@9.14.3+sha512.c0f53ee99477ed969b82b289ad011a5d16bf1623c957e7f29eabe8d0c00b574c29b8c7f54f6c67ee710c73f285c8154d07ce44b46fe2c0eeb476a90441bac371"
 }
