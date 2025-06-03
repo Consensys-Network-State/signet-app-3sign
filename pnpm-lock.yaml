@@ -148,17 +148,17 @@ importers:
         version: 5.0.5(@types/react@18.3.23)(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1))
     devDependencies:
       '@consensys/ds3':
-        specifier: 0.0.1
-        version: 0.0.1(@babel/core@7.27.4)(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-web@0.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1))
+        specifier: 0.0.2
+        version: 0.0.2(@babel/core@7.27.4)(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-web@0.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1))
       '@consensys/ds3-config':
-        specifier: 0.0.1
-        version: 0.0.1(@types/node@22.15.29)(lightningcss@1.30.1)(react-native-reanimated@3.18.0(@babel/core@7.27.4)(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-svg@15.12.0(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(terser@5.40.0)
+        specifier: 0.0.2
+        version: 0.0.2(@types/node@22.15.29)(lightningcss@1.30.1)(react-native-reanimated@3.18.0(@babel/core@7.27.4)(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-svg@15.12.0(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(terser@5.40.0)
       '@consensys/ds3-theme':
-        specifier: 0.0.1
-        version: 0.0.1
+        specifier: 0.0.2
+        version: 0.0.2
       '@consensys/ds3-web3':
-        specifier: 0.0.1
-        version: 0.0.1(@babel/core@7.27.4)(@tanstack/query-core@5.79.0)(@tanstack/react-query@5.79.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(bufferutil@4.0.9)(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-svg@15.12.0(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-web@0.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(typescript@5.6.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.25.48)
+        specifier: 0.0.2
+        version: 0.0.2(@babel/core@7.27.4)(@tanstack/query-core@5.79.0)(@tanstack/react-query@5.79.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(bufferutil@4.0.9)(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-svg@15.12.0(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-web@0.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(typescript@5.6.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.25.48)
       '@eslint/js':
         specifier: ^9.15.0
         version: 9.28.0
@@ -759,22 +759,22 @@ packages:
   '@coinbase/wallet-sdk@4.3.0':
     resolution: {integrity: sha512-T3+SNmiCw4HzDm4we9wCHCxlP0pqCiwKe4sOwPH3YAK2KSKjxPRydKu6UQJrdONFVLG7ujXvbd/6ZqmvJb8rkw==}
 
-  '@consensys/ds3-config@0.0.1':
-    resolution: {integrity: sha512-nTXT0D3by8qWqbfr/ankV10QQWSvdrgygArSwL3fOwwEPBg005gITZeD5JXv9i0k0PIwohC6sabVKaLTxfl9SQ==}
+  '@consensys/ds3-config@0.0.2':
+    resolution: {integrity: sha512-b14Ca4Lrs+cjM6bAl37vURCVyKbrxT7VhMtqjEu0QqjrjyXOtuvFY5HcDvV6Z/SQPa1gAz26spAvw+Lh77z3dA==}
     engines: {node: '>=16.0.0'}
 
-  '@consensys/ds3-theme@0.0.1':
-    resolution: {integrity: sha512-6N3domN3kUzpX5IBf08VlaM+u2JHeS8nsu192+72SGFpgSkI8d2Ecp/qErX4rdW83TFWW9eS1lCn1dpNZ7mKSQ==}
+  '@consensys/ds3-theme@0.0.2':
+    resolution: {integrity: sha512-UdXrHqVE3jk/ETSswpa1DAscuUHW9FyZK4Wd1BwzWybx9zR3gUs3PaXIQJePWcc5PMsFxvTSkx6Y3G/KNqCXJw==}
     engines: {node: '>=16.0.0'}
 
-  '@consensys/ds3-web3@0.0.1':
-    resolution: {integrity: sha512-h2AraBXWVHlhE9BObT6DGm1w88lCQCeTQWUPnGxlcTrrKziwZKTsqJDIeLWkxWVsZciV3d0SW67UkcaVSL2WNg==}
+  '@consensys/ds3-web3@0.0.2':
+    resolution: {integrity: sha512-BkFbUFxv3LD5JmrSy9gVY2Y3fItFkaDPbhYXAWCx3v3FCsm3iXc2dLB6hJvM6zW7xTxIqmSzyTKKOnnbzPFQAQ==}
     peerDependencies:
       react: ^18.0.0
       react-dom: ^18.0.0
 
-  '@consensys/ds3@0.0.1':
-    resolution: {integrity: sha512-vn9D841H6oL1MAw0gXhzfIvGWBaCK18JU4s6LoHDTcvhDIunk6reVc3LdYB2kWwKxg4dcDrTz3N52HVoQtDmaw==}
+  '@consensys/ds3@0.0.2':
+    resolution: {integrity: sha512-3ViDZOlgwgdl0A6OxUrIrbrYxBz+Aex3BvHvDMbE0Xm6Gh4d76TeSrzJ5qoNpuSiHb+qgu32w3j+/lDV/Snwlg==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -3248,6 +3248,9 @@ packages:
     resolution: {integrity: sha512-aVNobHnJqLiUelTaHat9DZ1qM2w0C0Eym4LPI/3JxOnSokGVdsl1T1kN7TFvsEAD8G47A6VKQ0TVHqbBnYMJlQ==}
     engines: {node: '>=12.0.0'}
 
+  bezier-easing@2.1.0:
+    resolution: {integrity: sha512-gbIqZ/eslnUFC1tjEvtz0sgx+xTK20wDnYMIA27VA04R7w6xxXQPZDbibjA9DTWZRA2CXtwHykkVzlCaAJAZig==}
+
   big-integer@1.6.52:
     resolution: {integrity: sha512-QxD8cf2eVqJOOz63z6JIN9BzvVs/dlySa5HGSBH5xtR8dPteIRQnBxxKqkNTiT6jbDTF6jAfrd4oMcND9RGbQg==}
     engines: {node: '>=0.6'}
@@ -3472,6 +3475,9 @@ packages:
 
   color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
+
+  colorjs.io@0.5.2:
+    resolution: {integrity: sha512-twmVoizEW7ylZSN32OgKdXRmo1qg+wT5/6C3xu5b9QsWzSFAhHLn2xd8ro0diCsKfCj1RdaTP/nrcW+vAoQPIw==}
 
   combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
@@ -8381,10 +8387,10 @@ snapshots:
       eventemitter3: 5.0.1
       preact: 10.26.8
 
-  '@consensys/ds3-config@0.0.1(@types/node@22.15.29)(lightningcss@1.30.1)(react-native-reanimated@3.18.0(@babel/core@7.27.4)(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-svg@15.12.0(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(terser@5.40.0)':
+  '@consensys/ds3-config@0.0.2(@types/node@22.15.29)(lightningcss@1.30.1)(react-native-reanimated@3.18.0(@babel/core@7.27.4)(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-svg@15.12.0(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(terser@5.40.0)':
     dependencies:
       '@babel/core': 7.27.4
-      '@consensys/ds3-theme': 0.0.1
+      '@consensys/ds3-theme': 0.0.2
       '@expo/config': 10.0.11
       '@expo/metro-config': 0.19.12
       '@vitejs/plugin-react': 4.5.0(vite@5.4.19(@types/node@22.15.29)(lightningcss@1.30.1)(terser@5.40.0))
@@ -8412,18 +8418,20 @@ snapshots:
       - terser
       - ts-node
 
-  '@consensys/ds3-theme@0.0.1':
+  '@consensys/ds3-theme@0.0.2':
     dependencies:
       '@radix-ui/colors': 3.0.0
+      bezier-easing: 2.1.0
+      colorjs.io: 0.5.2
       lodash: 4.17.21
       tailwindcss: 3.4.17
       tailwindcss-animate: 1.0.7(tailwindcss@3.4.17)
     transitivePeerDependencies:
       - ts-node
 
-  '@consensys/ds3-web3@0.0.1(@babel/core@7.27.4)(@tanstack/query-core@5.79.0)(@tanstack/react-query@5.79.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(bufferutil@4.0.9)(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-svg@15.12.0(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-web@0.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(typescript@5.6.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.25.48)':
+  '@consensys/ds3-web3@0.0.2(@babel/core@7.27.4)(@tanstack/query-core@5.79.0)(@tanstack/react-query@5.79.0(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(bufferutil@4.0.9)(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-svg@15.12.0(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-web@0.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(typescript@5.6.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@5.0.10)(zod@3.25.48)':
     dependencies:
-      '@consensys/ds3': 0.0.1(@babel/core@7.27.4)(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-web@0.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1))
+      '@consensys/ds3': 0.0.2(@babel/core@7.27.4)(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-web@0.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1))
       class-variance-authority: 0.7.1
       ethereum-blockies-base64: 1.0.2
       lucide-react-native: 0.300.0(prop-types@15.8.1)(react-native-svg@15.12.0(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
@@ -8470,9 +8478,9 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@consensys/ds3@0.0.1(@babel/core@7.27.4)(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-web@0.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1))':
+  '@consensys/ds3@0.0.2(@babel/core@7.27.4)(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react-native-safe-area-context@5.4.1(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1))(react-native-web@0.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1))':
     dependencies:
-      '@consensys/ds3-theme': 0.0.1
+      '@consensys/ds3-theme': 0.0.2
       '@react-native-async-storage/async-storage': 2.1.2(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))
       '@rn-primitives/avatar': 1.2.0(react-native-web@0.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
       '@rn-primitives/checkbox': 1.2.0(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react-native-web@0.20.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-native@0.79.2(@babel/core@7.27.4)(@types/react@18.3.23)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
@@ -12492,6 +12500,8 @@ snapshots:
       open: 8.4.2
     optional: true
 
+  bezier-easing@2.1.0: {}
+
   big-integer@1.6.52: {}
 
   big.js@6.2.2: {}
@@ -12727,6 +12737,8 @@ snapshots:
   color-name@1.1.3: {}
 
   color-name@1.1.4: {}
+
+  colorjs.io@0.5.2: {}
 
   combined-stream@1.0.8:
     dependencies:
