@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose, Button } from "@consensys/ui";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose, Button } from "@consensys/ds3";
 
 interface ConfirmActionDialogProps {
   open: boolean;

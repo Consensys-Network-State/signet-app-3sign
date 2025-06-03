@@ -1,4 +1,4 @@
-import { H1, H3, ModeToggle, Theme } from "@consensys/ui";
+import { H1, H3, ModeToggle, Theme } from "@consensys/ds3";
 import { Platform } from 'react-native';
 import * as React from "react";
 

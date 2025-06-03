@@ -1,4 +1,4 @@
-import { UserConfig } from '@consensys/ui-theme';
+import { UserConfig } from '@consensys/ds3-theme';
 
 export default {
   themes: {

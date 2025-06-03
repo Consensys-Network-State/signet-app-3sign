@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Icon, ModeToggle, Button, Input, H4, WebChangeEvent } from "@consensys/ui";
-import { Account } from "@consensys/ui-web3";
+import { Icon, ModeToggle, Button, Input, H4, WebChangeEvent } from "@consensys/ds3";
+import { Account } from "@consensys/ds3-web3";
 import { Info, ChevronLeft } from 'lucide-react-native';
 import { useNavigate, useLocation, useParams } from 'react-router';
 import { useDocumentStore } from '../store/documentStore';

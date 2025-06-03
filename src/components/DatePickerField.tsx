@@ -1,6 +1,6 @@
 import * as React from 'react';
 import DatePicker from "./DatePicker";
-import { Field, useField } from "@consensys/ui";
+import { Field, useField } from "@consensys/ds3";
 import { AlertCircle, Calendar } from 'lucide-react-native';
 import { RootProps as SelectProps } from '@rn-primitives/select';
 import { Dayjs } from 'dayjs';

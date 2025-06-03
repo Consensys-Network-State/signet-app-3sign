@@ -9,10 +9,10 @@ import {
   SelectContent,
   Icon,
   useThemeContext,
-} from "@consensys/ui";
+} from "@consensys/ds3";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootProps as SelectProps } from '@rn-primitives/select';
-import { COLOR_MODES } from "@consensys/ui-theme";
+import { COLOR_MODES } from "@consensys/ds3-theme";
 import { ChevronRight, ChevronLeft } from 'lucide-react-native';
 
 // TODO: There's a weird issue where you get the error: React is not defined when using the DateTimePicker Component

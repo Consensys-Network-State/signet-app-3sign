@@ -22,7 +22,7 @@ Signet 3Sign is a modern document signing platform that leverages blockchain tec
 - Vite
 - Tailwind CSS
 - Wagmi for Web3 integration
-- @consensys/ui components
+- @consensys/ds3 components
 
 ## Prerequisites
 

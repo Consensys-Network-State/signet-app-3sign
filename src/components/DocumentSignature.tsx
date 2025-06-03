@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Button } from "@consensys/ui";
+import { Button } from "@consensys/ds3";
 import { Edit2 as EditIcon } from 'lucide-react-native';
 
 interface DocumentSignatureProps {

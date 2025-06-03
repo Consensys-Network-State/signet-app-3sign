@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { ThemeProvider } from "@consensys/ui";
+import { ThemeProvider } from "@consensys/ds3";
 import { BrowserRouter } from "react-router";
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -36,7 +36,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary fallback={<AppFallback />}>
       <SafeAreaProvider>
-        <ThemeProvider config={import.meta.env.CUI}>
+        <ThemeProvider config={import.meta.env.DS3}>
           <WagmiProvider config={config}>
             <QueryClientProvider client={queryClient}>
               <BrowserRouter>

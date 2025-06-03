@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useAccount } from "wagmi";
-import { MetaMaskLogin } from "@consensys/ui-web3";
+import { MetaMaskLogin } from "@consensys/ds3-web3";
 import AuthenticationLayout from "../layouts/AuthenticationLayout.tsx";
 
 const Login: React.FC = () => {

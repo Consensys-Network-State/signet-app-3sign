@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite'
-import cui from '@consensys/ui-config/vite';
+import ds3 from '@consensys/ds3-config/vite';
 import themeConfig from "./theme.config";
 import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
   plugins: [
-    cui(themeConfig),
+    ds3(themeConfig),
     svgr(),
   ],
   build: {
